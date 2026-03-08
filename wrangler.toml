@@ -18,3 +18,7 @@ compatibility_flags = ["nodejs_compat"]
 
 [site]
 bucket = ".vercel/output/static"
+
+[[hyperdrive]]
+binding = "HYPERDRIVE"
+id = "362597e281f6486ea464b64c1e318b05"
