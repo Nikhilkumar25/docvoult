@@ -16,7 +16,7 @@
     "@prisma/client": "^5.22.0",
     "@vercel/blob": "^2.3.1",
     "bcryptjs": "^3.0.3",
-    "next": "^14.2.5",
+    "next": "14.2.4",
     "next-auth": "^4.24.13",
     "pg": "^8.20.0",
     "prisma": "^5.22.0",
@@ -26,12 +26,11 @@
     "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "^1.13.16",
     "@cloudflare/workers-types": "^4.20260307.1",
     "@opennextjs/cloudflare": "^1.17.1",
     "@types/pg": "^8.18.0",
     "eslint": "^8",
-    "eslint-config-next": "^14.2.5",
+    "eslint-config-next": "14.2.4",
     "wrangler": "^4.71.0"
   }
 }
