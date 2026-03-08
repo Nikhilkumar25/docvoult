@@ -35,6 +35,7 @@ export default function ViewerClient({ initialData }) {
     const [askerEmail, setAskerEmail] = useState('');
     const [viewId, setViewId] = useState(initialData.viewId || null);
     const [rotate, setRotate] = useState(0);
+    const [isMobile, setIsMobile] = useState(false);
 
     const canvasRef = useRef(null);
     const pageStartTime = useRef(Date.now());
@@ -177,10 +178,15 @@ export default function ViewerClient({ initialData }) {
         }
     };
 
-    // Resizing
+    // Resizing and Mobile Detection
     useEffect(() => {
-        const handleResize = () => setPageWidth(window.innerWidth);
-        handleResize();
+        const handleResize = () => {
+            const width = window.innerWidth;
+            setIsMobile(width <= 768);
+            // On mobile, force 100vw. On desktop, keep 800px max or scale.
+            setPageWidth(width <= 768 ? width : 800);
+        };
+        handleResize(); // Safe, runs on client
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
@@ -265,6 +271,91 @@ export default function ViewerClient({ initialData }) {
         );
     }
 
+    // --- ENTIRE SEPARATE MOBILE LAYOUT ---
+    if (isMobile) {
+        return (
+            <div className={`viewer-container mobile-view ${state === 'viewing' ? 'active' : ''}`}>
+                <div className="mobile-toolbar">
+                    <div className="viewer-title">{documentData?.document?.title}</div>
+                    <span className="page-indicator">{pageNumber} / {numPages || '?'}</span>
+                </div>
+
+                <div className="viewer-content">
+                    <div ref={canvasRef} className="viewer-canvas scroll-mode">
+                        <PDFRenderer
+                            file={`/api/view/${slug}/file?viewId=${viewId || ''}`}
+                            pageNumber={pageNumber}
+                            pageWidth={pageWidth}
+                            zoom={1.0} // Mobile handles zoom natively or via width
+                            layoutMode="scroll" // Force scroll on mobile for natural feel
+                            onDocumentLoadSuccess={onDocumentLoadSuccess}
+                            numPages={numPages}
+                            pageRefs={pageRefs}
+                            email={email}
+                            requireWatermark={linkInfo?.requireWatermark}
+                            rotate={rotate}
+                        />
+                    </div>
+                </div>
+
+                {/* Mobile Bottom Bar */}
+                <div className="mobile-bottom-bar">
+                    <button className={`mobile-action-btn ${isQuestionsOpen ? 'active' : ''}`} onClick={() => setIsQuestionsOpen(!isQuestionsOpen)}>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                        <span>Q&A</span>
+                        {questions.length > 0 && <span className="badge">{questions.length}</span>}
+                    </button>
+                    {documentData?.allowDownload && (
+                        <a href={documentData.document.fileUrl} download className="mobile-action-btn">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            <span>Save</span>
+                        </a>
+                    )}
+                </div>
+
+                {/* Mobile Questions Drawer */}
+                {isQuestionsOpen && (
+                    <div className="mobile-drawer-overlay" onClick={() => setIsQuestionsOpen(false)}>
+                        <div className="mobile-drawer" onClick={e => e.stopPropagation()}>
+                            <div className="drawer-header">
+                                <h3>Questions</h3>
+                                <button className="close-btn" onClick={() => setIsQuestionsOpen(false)}>✕</button>
+                            </div>
+                            <div className="drawer-content comments-list">
+                                {questions.length === 0 ? (
+                                    <div className="empty-state">No questions yet. Ask one below!</div>
+                                ) : (
+                                    questions.map(q => (
+                                        <div key={q.id} className="comment-item">
+                                            <div className="comment-meta">
+                                                <span className="comment-user">{q.userName}</span>
+                                                {q.pageNumber && <span className="comment-page">P{q.pageNumber}</span>}
+                                            </div>
+                                            <div className="comment-text">{q.text}</div>
+                                            {q.response && (
+                                                <div className="creator-response">
+                                                    <div className="response-header">Response:</div>
+                                                    <div className="response-text">{q.response}</div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))
+                                )}
+                            </div>
+                            <form className="drawer-footer comment-form" onSubmit={handleQuestionSubmit}>
+                                <div style={{ display: 'flex', gap: '8px', zIndex: 1000, background: 'var(--bg-card)' }}>
+                                    <input type="text" className="input" placeholder="Ask something..." value={newQuestion} onChange={(e) => setNewQuestion(e.target.value)} />
+                                    <button type="submit" className="btn btn-primary btn-sm">Ask</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    // --- DESKTOP LAYOUT ---
     return (
         <div className="viewer-container">
             <div className="viewer-toolbar desktop-only">

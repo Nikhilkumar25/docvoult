@@ -100,13 +100,21 @@ export default function DocumentDetailPage({ params }) {
 
     useEffect(() => {
         fetchDocument();
+
+        // Real-time polling every 5 seconds
+        const interval = setInterval(() => {
+            fetchDocument(false); // pass false to avoid showing loading spinner again
+        }, 5000);
+
+        return () => clearInterval(interval);
     }, [id]);
 
-    const fetchDocument = async () => {
+    const fetchDocument = async (showLoader = true) => {
+        if (showLoader) setLoading(true);
         try {
             const res = await fetch(`/api/documents/${id}`);
             if (!res.ok) {
-                router.push('/dashboard');
+                if (showLoader) router.push('/dashboard');
                 return;
             }
             const data = await res.json();
@@ -114,7 +122,7 @@ export default function DocumentDetailPage({ params }) {
         } catch (err) {
             console.error('Error:', err);
         } finally {
-            setLoading(false);
+            if (showLoader) setLoading(false);
         }
     };
 
