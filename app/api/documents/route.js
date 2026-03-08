@@ -81,7 +81,7 @@ export async function POST(request) {
 
         // Upload to Vercel Blob
         const blob = await put(`documents/${session.user.id}/${Date.now()}-${file.name}`, file, {
-            access: 'public',
+            access: 'private',
             contentType: 'application/pdf',
         });
 
