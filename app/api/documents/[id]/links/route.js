@@ -69,7 +69,23 @@ export async function POST(request, { params }) {
             return NextResponse.json({ error: 'Document not found' }, { status: 404 });
         }
 
-        const slug = uuidv4().replace(/-/g, '').substring(0, 12);
+        let slug = body.customSlug?.trim();
+
+        if (slug) {
+            // Remove invalid URI characters and slashes
+            slug = encodeURIComponent(slug).replace(/%../g, '').replace(/[^a-zA-Z0-9-]/g, '-');
+
+            // Collision check
+            const existingLink = await prisma.link.findUnique({
+                where: { slug }
+            });
+            if (existingLink) {
+                return NextResponse.json({ error: 'This custom link is already taken. Please choose another.' }, { status: 400 });
+            }
+        } else {
+            // Fallback to random slug
+            slug = uuidv4().replace(/-/g, '').substring(0, 12);
+        }
 
         const link = await prisma.link.create({
             data: {

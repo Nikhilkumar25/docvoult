@@ -1,8 +1,13 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useRef, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
+
+import { pdfjs } from 'react-pdf';
+if (typeof window !== 'undefined') {
+    pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+}
 
 function formatDate(date) {
     return new Date(date).toLocaleDateString('en-US', {
@@ -45,6 +50,7 @@ export default function DocumentDetailPage({ params }) {
 
     // Link creation form
     const [linkForm, setLinkForm] = useState({
+        customSlug: '',
         requireEmail: false,
         passcode: '',
         expiresAt: '',
@@ -52,6 +58,67 @@ export default function DocumentDetailPage({ params }) {
         requireWatermark: false,
     });
     const [creatingLink, setCreatingLink] = useState(false);
+    const [linkError, setLinkError] = useState('');
+
+    // Update File form
+    const fileInputRef = useRef(null);
+    const [updatingFile, setUpdatingFile] = useState(false);
+    const [updateProgress, setUpdateProgress] = useState(0);
+
+    const handleFileUpdate = async (selectedFile) => {
+        if (!selectedFile) return;
+        if (!selectedFile.name.toLowerCase().endsWith('.pdf')) {
+            alert('Only PDF files are supported');
+            return;
+        }
+
+        setUpdatingFile(true);
+        setUpdateProgress(10); // Start progress
+
+        try {
+            // Calculate page count before uploading
+            let newPageCount = document.pageCount;
+            try {
+                setUpdateProgress(20);
+                const data = await selectedFile.arrayBuffer();
+                const loadingTask = pdfjs.getDocument({ data });
+                const pdf = await loadingTask.promise;
+                newPageCount = pdf.numPages;
+            } catch (err) {
+                console.error('Error calculating new page count:', err);
+                // Keep the old page count if parsing fails
+            }
+
+            setUpdateProgress(40);
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            formData.append('pageCount', newPageCount.toString());
+
+            setUpdateProgress(60);
+            const res = await fetch(`/api/documents/${id}/file`, {
+                method: 'PATCH',
+                body: formData,
+            });
+
+            setUpdateProgress(90);
+
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || 'Failed to update document file');
+            }
+
+            setUpdateProgress(100);
+            alert('Document updated successfully! New file is live.');
+            fetchDocument();
+        } catch (err) {
+            console.error('Error updating document:', err);
+            alert(err.message || 'Error updating document. Please try again.');
+        } finally {
+            setUpdatingFile(false);
+            setUpdateProgress(0);
+            if (fileInputRef.current) fileInputRef.current.value = ''; // Reset input
+        }
+    };
 
     const handleReplySubmit = async (e) => {
         e.preventDefault();
@@ -129,6 +196,7 @@ export default function DocumentDetailPage({ params }) {
     const handleCreateLink = async (e) => {
         e.preventDefault();
         setCreatingLink(true);
+        setLinkError('');
         try {
             const res = await fetch(`/api/documents/${id}/links`, {
                 method: 'POST',
@@ -139,13 +207,18 @@ export default function DocumentDetailPage({ params }) {
                     passcode: linkForm.passcode || null,
                 }),
             });
+            const data = await res.json();
+
             if (res.ok) {
                 setShowLinkModal(false);
-                setLinkForm({ requireEmail: false, passcode: '', expiresAt: '', allowDownload: false, requireWatermark: false });
+                setLinkForm({ customSlug: '', requireEmail: false, passcode: '', expiresAt: '', allowDownload: false, requireWatermark: false });
                 fetchDocument();
+            } else {
+                setLinkError(data.error || 'Failed to create link');
             }
         } catch (err) {
             console.error('Error creating link:', err);
+            setLinkError('Network error occurred.');
         } finally {
             setCreatingLink(false);
         }
@@ -187,11 +260,30 @@ export default function DocumentDetailPage({ params }) {
                         <span>Uploaded {formatDate(document.createdAt)}</span>
                     </div>
                 </div>
-                <div className="header-actions">
-                    <button className="btn btn-secondary" onClick={() => router.push('/dashboard')}>
+                <div className="header-actions" style={{ position: 'relative' }}>
+                    <button className="btn btn-secondary" onClick={() => router.push('/dashboard')} disabled={updatingFile}>
                         ← Back
                     </button>
-                    <button className="btn btn-primary" onClick={() => setShowLinkModal(true)}>
+                    {(document.userId === session?.user?.id || document.workspace?.ownerId === session?.user?.id) && (
+                        <>
+                            <button
+                                className="btn btn-secondary"
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={updatingFile}
+                            >
+                                {updatingFile ? `🚀 Uploading...` : `📄 Update PDF`}
+                            </button>
+                            <input
+                                ref={fileInputRef}
+                                id="update-pdf-input"
+                                type="file"
+                                accept=".pdf"
+                                onChange={(e) => handleFileUpdate(e.target.files[0])}
+                                style={{ display: 'none' }}
+                            />
+                        </>
+                    )}
+                    <button className="btn btn-primary" onClick={() => setShowLinkModal(true)} disabled={updatingFile}>
                         🔗 Create Link
                     </button>
                 </div>
@@ -489,6 +581,33 @@ export default function DocumentDetailPage({ params }) {
                         </div>
                         <form onSubmit={handleCreateLink}>
                             <div className="modal-body">
+                                {linkError && (
+                                    <div className="alert alert-danger" style={{ marginBottom: '1rem' }}>
+                                        {linkError}
+                                    </div>
+                                )}
+
+                                <div className="input-group">
+                                    <label htmlFor="customSlug">Custom Link URL (Optional)</label>
+                                    <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '0 12px' }}>
+                                        <span style={{ color: 'var(--text-tertiary)', fontSize: '0.9rem', userSelect: 'none' }}>
+                                            {typeof window !== 'undefined' ? window.location.host : 'docvault.com'}/view/
+                                        </span>
+                                        <input
+                                            id="customSlug"
+                                            type="text"
+                                            className="input"
+                                            placeholder="brand-deck-2024"
+                                            style={{ border: 'none', background: 'transparent', flex: 1, paddingLeft: '4px' }}
+                                            value={linkForm.customSlug}
+                                            onChange={(e) => setLinkForm(prev => ({ ...prev, customSlug: e.target.value.replace(/[^a-zA-Z0-9-]/g, '-') }))}
+                                        />
+                                    </div>
+                                    <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', marginTop: '4px' }}>
+                                        Leave empty to generate a random secure link.
+                                    </p>
+                                </div>
+
                                 <div className="checkbox-group">
                                     <input
                                         type="checkbox"
