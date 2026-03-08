@@ -43,6 +43,12 @@ function BetterPage({ pageNumber, ...props }) {
     );
 }
 
+const options = {
+    cMapUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/cmaps/',
+    cMapPacked: true,
+    standardFontDataUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/standard_fonts/',
+};
+
 export default function PDFRenderer({
     file,
     pageNumber,
@@ -57,12 +63,6 @@ export default function PDFRenderer({
     requireWatermark,
     rotate
 }) {
-    const options = {
-        cMapUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/cmaps/',
-        cMapPacked: true,
-        standardFontDataUrl: 'https://unpkg.com/pdfjs-dist@3.11.174/standard_fonts/',
-    };
-
     return (
         <Document
             file={file}
