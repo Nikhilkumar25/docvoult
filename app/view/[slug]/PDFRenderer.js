@@ -16,7 +16,7 @@ function BetterPage({ pageNumber, ...props }) {
     });
 
     return (
-        <div ref={ref} className="watermarked-page-container" data-page={pageNumber}>
+        <div ref={ref} className="watermarked-page-container" data-page={pageNumber} style={{ '--watermark-scale': props.scale || 1 }}>
             {inView ? (
                 <Page pageNumber={pageNumber} {...props} />
             ) : (
@@ -84,7 +84,7 @@ export default function PDFRenderer({
             }
         >
             {layoutMode === 'paged' ? (
-                <div className="watermarked-page-container">
+                <div className="watermarked-page-container" style={{ '--watermark-scale': zoom }}>
                     <Page
                         pageNumber={pageNumber}
                         width={pageWidth * zoom}
