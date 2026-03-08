@@ -1,5 +1,4 @@
 name = "docvault"
-main = ".vercel/output/static/_worker.js"
 compatibility_date = "2024-05-02"
 compatibility_flags = ["nodejs_compat"]
 
@@ -10,14 +9,6 @@ compatibility_flags = ["nodejs_compat"]
 # BLOB_READ_WRITE_TOKEN = "..."
 # NEXTAUTH_SECRET = "..."
 # NEXTAUTH_URL = "..."
-
-# [[kv_namespaces]]
-# Optional: If you want to use KV for sessions or caching
-# binding = "DOCVAULT_KV"
-# id = "..."
-
-[site]
-bucket = ".vercel/output/static"
 
 [[hyperdrive]]
 binding = "HYPERDRIVE"
