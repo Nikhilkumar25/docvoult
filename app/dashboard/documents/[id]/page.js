@@ -450,6 +450,7 @@ export default function DocumentDetailPage({ params }) {
                             <thead>
                                 <tr>
                                     <th>Viewer</th>
+                                    <th>Link</th>
                                     <th>Pages Viewed</th>
                                     <th>Time Spent</th>
                                     <th>Viewed At</th>
@@ -465,6 +466,11 @@ export default function DocumentDetailPage({ params }) {
                                                 </div>
                                                 {view.viewerEmail || 'Anonymous'}
                                             </div>
+                                        </td>
+                                        <td>
+                                            <code style={{ fontSize: '0.8rem', background: 'var(--bg-tertiary)', padding: '2px 6px', borderRadius: '4px' }}>
+                                                /view/{view.link?.slug || '—'}
+                                            </code>
                                         </td>
                                         <td>
                                             {view.completedPages} / {document.pageCount}
