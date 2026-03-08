@@ -34,10 +34,43 @@ export async function GET(request, { params }) {
             return NextResponse.json({ error: 'This link has expired' }, { status: 410 });
         }
 
+        const { searchParams } = new URL(request.url);
+        const viewId = searchParams.get('viewId');
+
+        if (viewId) {
+            const view = await prisma.view.findUnique({
+                where: { id: viewId },
+                include: { link: true }
+            });
+
+            if (view && view.link.slug === slug && view.link.isActive) {
+                // Check expiry
+                if (view.link.expiresAt && new Date(view.link.expiresAt) < new Date()) {
+                    return NextResponse.json({ error: 'This link has expired' }, { status: 410 });
+                }
+
+                return NextResponse.json({
+                    viewId: view.id,
+                    viewerEmail: view.viewerEmail,
+                    viewerName: view.viewerName,
+                    document: {
+                        title: link.document.title,
+                        pageCount: link.document.pageCount,
+                        fileUrl: link.document.fileUrl,
+                        fileName: link.document.fileName,
+                    },
+                    allowDownload: link.allowDownload,
+                    requireWatermark: link.requireWatermark,
+                    isRestored: true
+                });
+            }
+        }
+
         return NextResponse.json({
             requireEmail: link.requireEmail,
             hasPasscode: !!link.passcode,
             allowDownload: link.allowDownload,
+            requireWatermark: link.requireWatermark,
             document: {
                 title: link.document.title,
                 pageCount: link.document.pageCount,
@@ -112,6 +145,7 @@ export async function POST(request, { params }) {
                 fileName: link.document.fileName,
             },
             allowDownload: link.allowDownload,
+            requireWatermark: link.requireWatermark,
         });
     } catch (error) {
         console.error('Error accessing document:', error);

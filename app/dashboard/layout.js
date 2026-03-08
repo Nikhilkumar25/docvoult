@@ -12,15 +12,26 @@ function DashboardShell({ children }) {
     const pathname = usePathname();
 
     useEffect(() => {
+        // Fallback for stuck loading status
+        const timer = setTimeout(() => {
+            if (status === 'loading') {
+                console.warn('Dashboard loading timed out, redirecting...');
+                router.push('/');
+            }
+        }, 5000);
+
         if (status === 'unauthenticated') {
             router.push('/login');
         }
+
+        return () => clearTimeout(timer);
     }, [status, router]);
 
     if (status === 'loading') {
         return (
-            <div className="loading-spinner" style={{ minHeight: '100vh' }}>
+            <div className="loading-spinner" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 <div className="spinner" />
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>Securing your session...</p>
             </div>
         );
     }
@@ -28,6 +39,7 @@ function DashboardShell({ children }) {
     if (!session) return null;
 
     const navItems = [
+        { href: '/dashboard/analytics', label: 'Dashboard', icon: '📊' },
         { href: '/dashboard', label: 'Documents', icon: '📄' },
         { href: '/dashboard/upload', label: 'Upload', icon: '📤' },
     ];

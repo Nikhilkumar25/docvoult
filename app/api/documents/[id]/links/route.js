@@ -65,6 +65,7 @@ export async function POST(request, { params }) {
                 passcode: body.passcode || null,
                 expiresAt: body.expiresAt ? new Date(body.expiresAt) : null,
                 allowDownload: body.allowDownload || false,
+                requireWatermark: body.requireWatermark || false,
                 isActive: true,
             },
         });

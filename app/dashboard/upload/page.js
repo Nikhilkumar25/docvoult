@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useRef, useCallback, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 function formatFileSize(bytes) {
     if (bytes === 0) return '0 B';
@@ -11,17 +11,24 @@ function formatFileSize(bytes) {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 }
 
-export default function UploadPage() {
+import { pdfjs } from 'react-pdf';
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+
+function UploadFormContent() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const folderId = searchParams.get('folderId');
+
     const fileInputRef = useRef(null);
     const [file, setFile] = useState(null);
     const [title, setTitle] = useState('');
+    const [pageCount, setPageCount] = useState(1);
     const [uploading, setUploading] = useState(false);
     const [progress, setProgress] = useState(0);
     const [error, setError] = useState('');
     const [dragging, setDragging] = useState(false);
 
-    const handleFile = (selectedFile) => {
+    const handleFile = async (selectedFile) => {
         if (!selectedFile) return;
         if (!selectedFile.name.toLowerCase().endsWith('.pdf')) {
             setError('Only PDF files are supported');
@@ -31,6 +38,17 @@ export default function UploadPage() {
         setFile(selectedFile);
         if (!title) {
             setTitle(selectedFile.name.replace(/\.pdf$/i, ''));
+        }
+
+        // Calculate page count
+        try {
+            const data = await selectedFile.arrayBuffer();
+            const loadingTask = pdfjs.getDocument({ data });
+            const pdf = await loadingTask.promise;
+            setPageCount(pdf.numPages);
+        } catch (err) {
+            console.error('Error calculating page count:', err);
+            setPageCount(1);
         }
     };
 
@@ -59,14 +77,15 @@ export default function UploadPage() {
         setError('');
 
         try {
-            // Count pages using a simple approach - we'll send this info along
-            // For simplicity, we'll default to 1 and let the user know
             setProgress(30);
 
             const formData = new FormData();
             formData.append('file', file);
             formData.append('title', title);
-            formData.append('pageCount', '1'); // Will be updated when PDF is loaded in viewer
+            formData.append('pageCount', pageCount.toString());
+            if (folderId) {
+                formData.append('folderId', folderId);
+            }
 
             setProgress(60);
 
@@ -182,9 +201,24 @@ export default function UploadPage() {
                                 📤 Upload Document
                             </button>
                         )}
+                        <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'var(--text-tertiary)', fontSize: 'var(--text-xs)' }}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                            </svg>
+                            Secure & Encrypted Document Storage
+                        </div>
                     </form>
                 )}
             </div>
         </>
+    );
+}
+
+export default function UploadPage() {
+    return (
+        <Suspense fallback={<div>Loading upload area...</div>}>
+            <UploadFormContent />
+        </Suspense>
     );
 }

@@ -12,8 +12,14 @@ export async function GET(request) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
+        const { searchParams } = new URL(request.url);
+        const folderId = searchParams.get('folderId');
+
         const documents = await prisma.document.findMany({
-            where: { userId: session.user.id },
+            where: {
+                userId: session.user.id,
+                folderId: folderId || null,
+            },
             include: {
                 _count: {
                     select: { views: true, links: true },
@@ -60,6 +66,7 @@ export async function POST(request) {
         const file = formData.get('file');
         const title = formData.get('title') || file.name.replace(/\.pdf$/i, '');
         const pageCount = parseInt(formData.get('pageCount')) || 1;
+        const folderId = formData.get('folderId');
 
         if (!file) {
             return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
@@ -86,6 +93,7 @@ export async function POST(request) {
                 fileSize: file.size,
                 pageCount,
                 userId: session.user.id,
+                folderId: folderId || null,
             },
         });
 

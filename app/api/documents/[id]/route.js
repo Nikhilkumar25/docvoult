@@ -32,6 +32,9 @@ export async function GET(request, { params }) {
                         },
                     },
                 },
+                comments: {
+                    orderBy: { createdAt: 'desc' },
+                },
                 _count: { select: { views: true } },
             },
         });
@@ -50,20 +53,29 @@ export async function GET(request, { params }) {
 
         // Page-level analytics
         const pageStats = {};
+
+        // Initialize with known page count
         for (let i = 1; i <= document.pageCount; i++) {
             pageStats[i] = { views: 0, totalDuration: 0 };
         }
+
         document.views.forEach((view) => {
             view.pageViews.forEach((pv) => {
-                if (pageStats[pv.pageNumber]) {
-                    pageStats[pv.pageNumber].views += 1;
-                    pageStats[pv.pageNumber].totalDuration += pv.duration;
+                // If we encounter a page number higher than current pageCount, initialize it
+                if (!pageStats[pv.pageNumber]) {
+                    pageStats[pv.pageNumber] = { views: 0, totalDuration: 0 };
                 }
+                pageStats[pv.pageNumber].views += 1;
+                pageStats[pv.pageNumber].totalDuration += pv.duration;
             });
         });
 
+        // Ensure pageCount reflects reality if analytics found more pages
+        const actualPageCount = Math.max(document.pageCount, ...Object.keys(pageStats).map(Number), 0);
+
         return NextResponse.json({
             ...document,
+            pageCount: actualPageCount,
             analytics: {
                 totalViews,
                 uniqueViewers,
@@ -76,6 +88,39 @@ export async function GET(request, { params }) {
         console.error('Error fetching document:', error);
         return NextResponse.json(
             { error: 'Failed to fetch document' },
+            { status: 500 }
+        );
+    }
+}
+export async function PATCH(request, { params }) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const { id } = await params;
+        const json = await request.json();
+        const { folderId } = json;
+
+        const document = await prisma.document.findFirst({
+            where: { id, userId: session.user.id },
+        });
+
+        if (!document) {
+            return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+        }
+
+        const updated = await prisma.document.update({
+            where: { id },
+            data: { folderId: folderId || null },
+        });
+
+        return NextResponse.json(updated);
+    } catch (error) {
+        console.error('Error updating document:', error);
+        return NextResponse.json(
+            { error: 'Failed to update document' },
             { status: 500 }
         );
     }

@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -14,37 +15,60 @@ model User {
   name      String
   createdAt DateTime   @default(now())
   documents Document[]
+  folders   Folder[]
+}
+
+model Folder {
+  id        String     @id @default(cuid())
+  name      String
+  userId    String
+  parentId  String?
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent    Folder?    @relation("FolderToFolder", fields: [parentId], references: [id], onDelete: Cascade)
+  children  Folder[]   @relation("FolderToFolder")
+  documents Document[]
+
+  @@index([userId])
+  @@index([parentId])
 }
 
 model Document {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   title     String
   fileName  String
   fileUrl   String
   fileSize  Int
-  pageCount Int      @default(1)
+  pageCount Int       @default(1)
   userId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folderId  String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  folder    Folder?   @relation(fields: [folderId], references: [id], onDelete: SetNull)
   links     Link[]
   views     View[]
+  comments  Comment[]
 
   @@index([userId])
+  @@index([folderId])
 }
 
 model Link {
-  id           String    @id @default(cuid())
-  slug         String    @unique
-  documentId   String
-  requireEmail Boolean   @default(false)
-  passcode     String?
-  expiresAt    DateTime?
-  allowDownload Boolean  @default(false)
-  isActive     Boolean   @default(true)
-  createdAt    DateTime  @default(now())
-  document     Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  views        View[]
+  id               String    @id @default(cuid())
+  slug             String    @unique
+  documentId       String
+  requireEmail     Boolean   @default(false)
+  passcode         String?
+  expiresAt        DateTime?
+  allowDownload    Boolean   @default(false)
+  requireWatermark Boolean   @default(false)
+  isActive         Boolean   @default(true)
+  createdAt        DateTime  @default(now())
+  document         Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  views            View[]
 
   @@index([documentId])
   @@index([slug])
@@ -63,6 +87,7 @@ model View {
   link           Link       @relation(fields: [linkId], references: [id], onDelete: Cascade)
   document       Document   @relation(fields: [documentId], references: [id], onDelete: Cascade)
   pageViews      PageView[]
+  comments       Comment[]
 
   @@index([linkId])
   @@index([documentId])
@@ -76,5 +101,24 @@ model PageView {
   enteredAt  DateTime @default(now())
   view       View     @relation(fields: [viewId], references: [id], onDelete: Cascade)
 
+  @@index([viewId])
+}
+
+model Comment {
+  id         String   @id @default(cuid())
+  text       String
+  documentId String
+  viewId     String?
+  userName   String?
+  askerEmail String?
+  pageNumber Int?
+  response   String?
+  responseAt DateTime?
+  createdAt  DateTime @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  view     View?    @relation(fields: [viewId], references: [id], onDelete: SetNull)
+
+  @@index([documentId])
   @@index([viewId])
 }
