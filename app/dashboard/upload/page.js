@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { useWorkspace } from '@/context/WorkspaceContext';
 
 function formatFileSize(bytes) {
     if (bytes === 0) return '0 B';
@@ -18,6 +19,7 @@ function UploadFormContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const folderId = searchParams.get('folderId');
+    const { activeWorkspace } = useWorkspace();
 
     const fileInputRef = useRef(null);
     const [file, setFile] = useState(null);
@@ -85,6 +87,9 @@ function UploadFormContent() {
             formData.append('pageCount', pageCount.toString());
             if (folderId) {
                 formData.append('folderId', folderId);
+            }
+            if (activeWorkspace) {
+                formData.append('workspaceId', activeWorkspace);
             }
 
             setProgress(60);

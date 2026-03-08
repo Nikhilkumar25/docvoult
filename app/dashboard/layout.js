@@ -2,9 +2,61 @@
 
 import { useSession, signOut } from 'next-auth/react';
 import { useRouter, usePathname } from 'next/navigation';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Providers from '@/components/Providers';
+import { WorkspaceProvider, useWorkspace } from '@/context/WorkspaceContext';
+
+function WorkspaceSwitcher() {
+    const { workspaces, activeWorkspace, switchWorkspace } = useWorkspace();
+    const [open, setOpen] = useState(false);
+
+    const activeData = workspaces.find(w => w.id === activeWorkspace);
+    const label = activeData ? activeData.name : 'Personal';
+
+    return (
+        <div className="workspace-switcher">
+            <button
+                className="workspace-switcher-btn"
+                onClick={() => setOpen(!open)}
+            >
+                <span className="workspace-icon">{activeData ? '👥' : '👤'}</span>
+                <span className="workspace-label">{label}</span>
+                <span className="workspace-chevron">{open ? '▲' : '▼'}</span>
+            </button>
+            {open && (
+                <div className="workspace-dropdown">
+                    <button
+                        className={`workspace-option ${!activeWorkspace ? 'active' : ''}`}
+                        onClick={() => { switchWorkspace(null); setOpen(false); }}
+                    >
+                        <span>👤</span> Personal
+                    </button>
+                    {workspaces.map(w => (
+                        <button
+                            key={w.id}
+                            className={`workspace-option ${activeWorkspace === w.id ? 'active' : ''}`}
+                            onClick={() => { switchWorkspace(w.id); setOpen(false); }}
+                        >
+                            <span>👥</span>
+                            <div>
+                                <div>{w.name}</div>
+                                <div className="workspace-option-role">{w.role === 'owner' ? 'Owner' : 'Member'}</div>
+                            </div>
+                        </button>
+                    ))}
+                    <Link
+                        href="/dashboard/workspaces"
+                        className="workspace-option workspace-manage"
+                        onClick={() => setOpen(false)}
+                    >
+                        ⚙️ Manage Workspaces
+                    </Link>
+                </div>
+            )}
+        </div>
+    );
+}
 
 function DashboardShell({ children }) {
     const { data: session, status } = useSession();
@@ -12,7 +64,6 @@ function DashboardShell({ children }) {
     const pathname = usePathname();
 
     useEffect(() => {
-        // Fallback for stuck loading status
         const timer = setTimeout(() => {
             if (status === 'loading') {
                 console.warn('Dashboard loading timed out, redirecting...');
@@ -49,44 +100,48 @@ function DashboardShell({ children }) {
         : '?';
 
     return (
-        <div className="dashboard-layout">
-            <aside className="sidebar">
-                <Link href="/dashboard" className="sidebar-logo">
-                    <div className="logo-icon">📄</div>
-                    DocVault
-                </Link>
+        <WorkspaceProvider>
+            <div className="dashboard-layout">
+                <aside className="sidebar">
+                    <Link href="/dashboard" className="sidebar-logo">
+                        <div className="logo-icon">📄</div>
+                        DocVault
+                    </Link>
 
-                <nav className="sidebar-nav">
-                    {navItems.map((item) => (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            className={`sidebar-link ${pathname === item.href ? 'active' : ''}`}
+                    <WorkspaceSwitcher />
+
+                    <nav className="sidebar-nav">
+                        {navItems.map((item) => (
+                            <Link
+                                key={item.href}
+                                href={item.href}
+                                className={`sidebar-link ${pathname === item.href ? 'active' : ''}`}
+                            >
+                                <span>{item.icon}</span>
+                                {item.label}
+                            </Link>
+                        ))}
+                    </nav>
+
+                    <div className="sidebar-user">
+                        <div className="user-avatar">{userInitials}</div>
+                        <div className="user-info">
+                            <div className="user-name">{session.user?.name}</div>
+                            <div className="user-email">{session.user?.email}</div>
+                        </div>
+                        <button
+                            onClick={() => signOut({ callbackUrl: '/' })}
+                            className="btn btn-ghost btn-sm"
+                            title="Sign out"
                         >
-                            <span>{item.icon}</span>
-                            {item.label}
-                        </Link>
-                    ))}
-                </nav>
-
-                <div className="sidebar-user">
-                    <div className="user-avatar">{userInitials}</div>
-                    <div className="user-info">
-                        <div className="user-name">{session.user?.name}</div>
-                        <div className="user-email">{session.user?.email}</div>
+                            ↗
+                        </button>
                     </div>
-                    <button
-                        onClick={() => signOut({ callbackUrl: '/' })}
-                        className="btn btn-ghost btn-sm"
-                        title="Sign out"
-                    >
-                        ↗
-                    </button>
-                </div>
-            </aside>
+                </aside>
 
-            <main className="dashboard-main">{children}</main>
-        </div>
+                <main className="dashboard-main">{children}</main>
+            </div>
+        </WorkspaceProvider>
     );
 }
 

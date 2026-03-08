@@ -13,12 +13,28 @@ export async function GET(request) {
 
         const { searchParams } = new URL(request.url);
         const parentId = searchParams.get('parentId');
+        const workspaceId = searchParams.get('workspaceId');
+
+        let whereClause;
+        if (workspaceId) {
+            whereClause = {
+                workspaceId,
+                parentId: parentId || null,
+                OR: [
+                    { workspace: { ownerId: session.user.id } },
+                    { workspace: { members: { some: { userId: session.user.id } } } }
+                ]
+            };
+        } else {
+            whereClause = {
+                userId: session.user.id,
+                workspaceId: null,
+                parentId: parentId || null,
+            };
+        }
 
         const folders = await prisma.folder.findMany({
-            where: {
-                userId: session.user.id,
-                parentId: parentId || null,
-            },
+            where: whereClause,
             orderBy: { createdAt: 'desc' },
             include: {
                 _count: {
@@ -30,10 +46,7 @@ export async function GET(request) {
         return NextResponse.json(folders);
     } catch (error) {
         console.error('Error fetching folders:', error);
-        return NextResponse.json(
-            { error: 'Failed to fetch folders' },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: 'Failed to fetch folders' }, { status: 500 });
     }
 }
 
@@ -45,10 +58,26 @@ export async function POST(request) {
         }
 
         const json = await request.json();
-        const { name, parentId } = json;
+        const { name, parentId, workspaceId } = json;
 
         if (!name?.trim()) {
             return NextResponse.json({ error: 'Folder name is required' }, { status: 400 });
+        }
+
+        // Verify workspace membership if creating in a workspace
+        if (workspaceId) {
+            const workspace = await prisma.workspace.findFirst({
+                where: {
+                    id: workspaceId,
+                    OR: [
+                        { ownerId: session.user.id },
+                        { members: { some: { userId: session.user.id } } }
+                    ]
+                }
+            });
+            if (!workspace) {
+                return NextResponse.json({ error: 'You do not have access to this workspace.' }, { status: 403 });
+            }
         }
 
         const folder = await prisma.folder.create({
@@ -56,15 +85,13 @@ export async function POST(request) {
                 name: name.trim(),
                 userId: session.user.id,
                 parentId: parentId || null,
+                workspaceId: workspaceId || null,
             },
         });
 
         return NextResponse.json(folder, { status: 201 });
     } catch (error) {
         console.error('Error creating folder:', error);
-        return NextResponse.json(
-            { error: 'Failed to create folder' },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: 'Failed to create folder' }, { status: 500 });
     }
 }

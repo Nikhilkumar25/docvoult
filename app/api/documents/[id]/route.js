@@ -15,8 +15,15 @@ export async function GET(request, { params }) {
         const { id } = await params;
 
         const document = await prisma.document.findFirst({
-            where: { id, userId: session.user.id },
+            where: {
+                id,
+                OR: [
+                    { userId: session.user.id },
+                    { workspace: { members: { some: { userId: session.user.id } } } }
+                ]
+            },
             include: {
+                workspace: { include: { owner: true } },
                 links: {
                     orderBy: { createdAt: 'desc' },
                     include: {
@@ -43,7 +50,7 @@ export async function GET(request, { params }) {
             return NextResponse.json({ error: 'Document not found' }, { status: 404 });
         }
 
-        // Compute analytics summary
+        // Logic continues as before...
         const totalViews = document._count.views;
         const uniqueViewers = new Set(
             document.views.filter((v) => v.viewerEmail).map((v) => v.viewerEmail)
@@ -51,17 +58,13 @@ export async function GET(request, { params }) {
         const totalDuration = document.views.reduce((sum, v) => sum + v.duration, 0);
         const avgDuration = totalViews > 0 ? Math.round(totalDuration / totalViews) : 0;
 
-        // Page-level analytics
         const pageStats = {};
-
-        // Initialize with known page count
         for (let i = 1; i <= document.pageCount; i++) {
             pageStats[i] = { views: 0, totalDuration: 0 };
         }
 
         document.views.forEach((view) => {
             view.pageViews.forEach((pv) => {
-                // If we encounter a page number higher than current pageCount, initialize it
                 if (!pageStats[pv.pageNumber]) {
                     pageStats[pv.pageNumber] = { views: 0, totalDuration: 0 };
                 }
@@ -70,7 +73,6 @@ export async function GET(request, { params }) {
             });
         });
 
-        // Ensure pageCount reflects reality if analytics found more pages
         const actualPageCount = Math.max(document.pageCount, ...Object.keys(pageStats).map(Number), 0);
 
         return NextResponse.json({
@@ -86,12 +88,10 @@ export async function GET(request, { params }) {
         });
     } catch (error) {
         console.error('Error fetching document:', error);
-        return NextResponse.json(
-            { error: 'Failed to fetch document' },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: 'Failed to fetch document' }, { status: 500 });
     }
 }
+
 export async function PATCH(request, { params }) {
     try {
         const session = await getServerSession(authOptions);
@@ -101,10 +101,16 @@ export async function PATCH(request, { params }) {
 
         const { id } = await params;
         const json = await request.json();
-        const { folderId } = json;
+        const { folderId, workspaceId } = json;
 
         const document = await prisma.document.findFirst({
-            where: { id, userId: session.user.id },
+            where: {
+                id,
+                OR: [
+                    { userId: session.user.id },
+                    { workspace: { members: { some: { userId: session.user.id } } } }
+                ]
+            },
         });
 
         if (!document) {
@@ -113,16 +119,16 @@ export async function PATCH(request, { params }) {
 
         const updated = await prisma.document.update({
             where: { id },
-            data: { folderId: folderId || null },
+            data: {
+                folderId: folderId === undefined ? document.folderId : folderId,
+                workspaceId: workspaceId === undefined ? document.workspaceId : workspaceId
+            },
         });
 
         return NextResponse.json(updated);
     } catch (error) {
         console.error('Error updating document:', error);
-        return NextResponse.json(
-            { error: 'Failed to update document' },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: 'Failed to update document' }, { status: 500 });
     }
 }
 
@@ -136,11 +142,27 @@ export async function DELETE(request, { params }) {
         const { id } = await params;
 
         const document = await prisma.document.findFirst({
-            where: { id, userId: session.user.id },
+            where: {
+                id,
+                OR: [
+                    { userId: session.user.id },
+                    { workspace: { members: { some: { userId: session.user.id } } } }
+                ]
+            },
+            include: { workspace: true }
         });
 
         if (!document) {
             return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+        }
+
+        // DELETION GUARD: Members cannot delete creator's files
+        // If it's a workspace document and the user is NOT the owner of the document
+        if (document.workspaceId && document.userId !== session.user.id) {
+            // Check if the user is at least the workspace creator (they can delete everything in their workspace)
+            if (document.workspace?.ownerId !== session.user.id) {
+                return NextResponse.json({ error: 'Members cannot delete files created by the workspace creator.' }, { status: 403 });
+            }
         }
 
         // Delete from blob storage
@@ -150,15 +172,11 @@ export async function DELETE(request, { params }) {
             console.error('Error deleting blob:', e);
         }
 
-        // Delete from database (cascades to links, views, pageviews)
         await prisma.document.delete({ where: { id } });
 
         return NextResponse.json({ message: 'Document deleted' });
     } catch (error) {
         console.error('Error deleting document:', error);
-        return NextResponse.json(
-            { error: 'Failed to delete document' },
-            { status: 500 }
-        );
+        return NextResponse.json({ error: 'Failed to delete document' }, { status: 500 });
     }
 }

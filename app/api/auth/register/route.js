@@ -35,6 +35,12 @@ export async function POST(request) {
             },
         });
 
+        // Link any existing workspace memberships
+        await prisma.workspaceMember.updateMany({
+            where: { userEmail: email },
+            data: { userId: user.id }
+        });
+
         return NextResponse.json(
             { message: 'Account created successfully', userId: user.id },
             { status: 201 }

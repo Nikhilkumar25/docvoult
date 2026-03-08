@@ -9,50 +9,88 @@ datasource db {
 }
 
 model User {
-  id        String     @id @default(cuid())
-  email     String     @unique
-  password  String
+  id               String            @id @default(cuid())
+  email            String            @unique
+  password         String
+  name             String
+  createdAt        DateTime          @default(now())
+  documents        Document[]
+  folders          Folder[]
+  ownedWorkspaces  Workspace[]       @relation("WorkspaceOwner")
+  workspaceMembers WorkspaceMember[] @relation("UserMemberships")
+}
+
+model Workspace {
+  id        String   @id @default(cuid())
   name      String
-  createdAt DateTime   @default(now())
+  ownerId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  owner     User              @relation("WorkspaceOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  members   WorkspaceMember[]
   documents Document[]
   folders   Folder[]
+
+  @@index([ownerId])
+}
+
+model WorkspaceMember {
+  id          String   @id @default(cuid())
+  workspaceId String
+  userEmail   String
+  userId      String?
+  createdAt   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User?     @relation("UserMemberships", fields: [userId], references: [id], onDelete: SetNull)
+
+  @@unique([workspaceId, userEmail])
+  @@index([workspaceId])
+  @@index([userEmail])
 }
 
 model Folder {
-  id        String     @id @default(cuid())
-  name      String
-  userId    String
-  parentId  String?
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  id          String   @id @default(cuid())
+  name        String
+  userId      String
+  workspaceId String?
+  parentId    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
   parent    Folder?    @relation("FolderToFolder", fields: [parentId], references: [id], onDelete: Cascade)
   children  Folder[]   @relation("FolderToFolder")
   documents Document[]
 
   @@index([userId])
+  @@index([workspaceId])
   @@index([parentId])
 }
 
 model Document {
-  id        String    @id @default(cuid())
-  title     String
-  fileName  String
-  fileUrl   String
-  fileSize  Int
-  pageCount Int       @default(1)
-  userId    String
-  folderId  String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  folder    Folder?   @relation(fields: [folderId], references: [id], onDelete: SetNull)
-  links     Link[]
-  views     View[]
-  comments  Comment[]
+  id          String    @id @default(cuid())
+  title       String
+  fileName    String
+  fileUrl     String
+  fileSize    Int
+  pageCount   Int       @default(1)
+  userId      String
+  workspaceId String?
+  folderId    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace? @relation(fields: [workspaceId], references: [id], onDelete: SetNull)
+  folder      Folder?   @relation(fields: [folderId], references: [id], onDelete: SetNull)
+  links       Link[]
+  views       View[]
+  comments    Comment[]
 
   @@index([userId])
+  @@index([workspaceId])
   @@index([folderId])
 }
 

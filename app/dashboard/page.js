@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import FolderCard from '@/components/FolderCard';
+import { useWorkspace } from '@/context/WorkspaceContext';
 
 function formatFileSize(bytes) {
     if (bytes === 0) return '0 B';
@@ -42,6 +43,7 @@ export default function DashboardPage() {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [newFolderName, setNewFolderName] = useState('');
     const router = useRouter();
+    const { activeWorkspace, getActiveWorkspaceData } = useWorkspace();
 
     useEffect(() => {
         fetchContent();
@@ -50,13 +52,14 @@ export default function DashboardPage() {
         } else {
             setCurrentFolder(null);
         }
-    }, [currentFolderId]);
+    }, [currentFolderId, activeWorkspace]);
 
     const fetchContent = async () => {
         setLoading(true);
         try {
-            const folderQuery = currentFolderId ? `?parentId=${currentFolderId}` : '';
-            const docQuery = currentFolderId ? `?folderId=${currentFolderId}` : '';
+            const wsParam = activeWorkspace ? `&workspaceId=${activeWorkspace}` : '';
+            const folderQuery = currentFolderId ? `?parentId=${currentFolderId}${wsParam}` : `?x=1${wsParam}`;
+            const docQuery = currentFolderId ? `?folderId=${currentFolderId}${wsParam}` : `?x=1${wsParam}`;
 
             const [foldersRes, docsRes] = await Promise.all([
                 fetch(`/api/folders${folderQuery}`),
@@ -94,6 +97,7 @@ export default function DashboardPage() {
                 body: JSON.stringify({
                     name: newFolderName,
                     parentId: currentFolderId || null,
+                    workspaceId: activeWorkspace || null,
                 })
             });
 
@@ -146,7 +150,11 @@ export default function DashboardPage() {
                                 </button>
                                 {currentFolder.name}
                             </span>
-                        ) : 'Your Documents'}
+                        ) : (
+                            <span>
+                                {getActiveWorkspaceData()?.name || 'Your Documents'}
+                            </span>
+                        )}
                     </h1>
                 </div>
                 <div className="header-actions">
