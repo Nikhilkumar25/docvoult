@@ -43,7 +43,7 @@ export async function POST(req, { params }) {
         console.log('--------------------------------------------------');
         console.log('📧 MOCK EMAIL NOTIFICATION');
         console.log(`To: ${comment.askerEmail || comment.userName}`);
-        console.log(`Subject: New response to your question on ${document.title || 'DocVault Document'}`);
+        console.log(`Subject: New response to your question on ${document.title || 'DocsVault Document'}`);
         console.log(`Question: ${comment.text}`);
         console.log(`Response: ${text}`);
         console.log('--------------------------------------------------');

@@ -10,7 +10,7 @@ export default function Home() {
       <nav className="landing-nav">
         <div className="landing-logo">
           <div className="logo-icon">📄</div>
-          DocVault
+          DocsVault
         </div>
         <div className="landing-nav-links">
           <Link href="/login" className="btn btn-ghost">Sign In</Link>

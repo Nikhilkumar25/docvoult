@@ -42,7 +42,7 @@ export default function LoginPage() {
                 <div className="auth-header">
                     <Link href="/" className="auth-logo">
                         <div className="logo-icon">📄</div>
-                        DocVault
+                        DocsVault
                     </Link>
                     <h1>Welcome back</h1>
                     <p className="auth-subtitle">Sign in to access your documents</p>

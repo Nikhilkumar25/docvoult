@@ -105,7 +105,7 @@ function DashboardShell({ children }) {
                 <aside className="sidebar">
                     <Link href="/dashboard" className="sidebar-logo">
                         <div className="logo-icon">📄</div>
-                        DocVault
+                        DocsVault
                     </Link>
 
                     <WorkspaceSwitcher />

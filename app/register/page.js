@@ -57,7 +57,7 @@ export default function RegisterPage() {
                 <div className="auth-header">
                     <Link href="/" className="auth-logo">
                         <div className="logo-icon">📄</div>
-                        DocVault
+                        DocsVault
                     </Link>
                     <h1>Create your account</h1>
                     <p className="auth-subtitle">Start sharing documents with analytics</p>

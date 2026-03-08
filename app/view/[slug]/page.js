@@ -12,8 +12,8 @@ export async function generateMetadata({ params }) {
     if (!link) return { title: 'Document Not Found' };
 
     return {
-        title: `Viewing: ${link.document.title} | DocVault`,
-        description: 'Securely view this document on DocVault.',
+        title: `Viewing: ${link.document.title} | DocsVault`,
+        description: 'Securely view this document on DocsVault.',
     };
 }
 

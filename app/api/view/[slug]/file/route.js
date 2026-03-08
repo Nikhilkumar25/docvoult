@@ -50,12 +50,14 @@ export async function GET(req, { params }) {
             return new Response('Failed to load document source', { status: 502 });
         }
 
-        // 4. Return the stream with correct headers
+        // 4. Return the stream with correct headers for aggressive caching
         const headers = new Headers();
         headers.set('Content-Type', 'application/pdf');
         headers.set('Content-Disposition', `inline; filename="${link.document.fileName}"`);
-        // Add caching headers to help with latency
-        headers.set('Cache-Control', 'public, max-age=3600, stale-while-revalidate=86400');
+        // Cache aggressively: 1 day in browser, 7 days stale-while-revalidate
+        headers.set('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800, immutable');
+        // ETag based on document ID + updatedAt for cache busting on file update
+        headers.set('ETag', `"${link.document.id}"`);
 
         return new Response(fileResponse.body, {
             status: 200,

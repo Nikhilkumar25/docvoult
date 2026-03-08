@@ -1,7 +1,7 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'DocVault — Secure Document Sharing & Analytics',
+  title: 'DocsVault — Secure Document Sharing & Analytics',
   description: 'Share documents securely with tracking. Know who views your files, which pages they read, and how long they spend. The modern DocSend alternative.',
   keywords: 'document sharing, analytics, PDF tracking, secure links, DocSend alternative',
 };
