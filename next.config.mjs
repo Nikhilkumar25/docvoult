@@ -1,7 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Required: Use turbopack config (Next.js 16 default)
-  turbopack: {},
   webpack: (config) => {
     // Fix for react-pdf canvas (only applies in webpack mode)
     config.resolve.alias.canvas = false;
