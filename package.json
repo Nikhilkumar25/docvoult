@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "postinstall": "prisma generate"
   },
   "dependencies": {
@@ -26,8 +28,10 @@
   "devDependencies": {
     "@cloudflare/next-on-pages": "^1.13.16",
     "@cloudflare/workers-types": "^4.20260307.1",
+    "@opennextjs/cloudflare": "^1.17.1",
     "@types/pg": "^8.18.0",
     "eslint": "^9",
-    "eslint-config-next": "16.1.6"
+    "eslint-config-next": "16.1.6",
+    "wrangler": "^4.71.0"
   }
 }
