@@ -7,14 +7,36 @@ import 'react-pdf/dist/Page/TextLayer.css';
 // Set PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
-export default function PDFRenderer({ file, pageNumber, pageWidth, zoom, layoutMode, onDocumentLoadSuccess, numPages, pageRefs, email, requireWatermark, rotate }) {
+export default function PDFRenderer({
+    file,
+    pageNumber,
+    pageWidth,
+    zoom,
+    layoutMode,
+    onDocumentLoadSuccess,
+    onDocumentLoadError,
+    numPages,
+    pageRefs,
+    email,
+    requireWatermark,
+    rotate
+}) {
     return (
         <Document
             file={file}
             onLoadSuccess={onDocumentLoadSuccess}
+            onLoadError={onDocumentLoadError}
             loading={
                 <div className="loading-spinner">
                     <div className="spinner" />
+                    <p style={{ marginTop: '1rem', color: 'var(--text-secondary)' }}>Loading Document...</p>
+                </div>
+            }
+            error={
+                <div className="error-message p-md">
+                    <div className="alert alert-danger">
+                        Failed to load PDF. The document might be unavailable or private.
+                    </div>
                 </div>
             }
         >

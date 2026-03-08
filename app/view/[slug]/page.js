@@ -540,12 +540,13 @@ export default function ViewPage({ params }) {
                     style={{ position: 'relative' }}
                 >
                     <PDFRenderer
-                        file={documentData?.document?.fileUrl}
+                        file={`/api/view/${slug}/file?viewId=${viewId || ''}`}
                         pageNumber={pageNumber}
                         pageWidth={pageWidth}
                         zoom={zoom}
                         layoutMode={layoutMode}
                         onDocumentLoadSuccess={onDocumentLoadSuccess}
+                        onDocumentLoadError={(err) => console.error('PDF Load Error:', err)}
                         numPages={numPages}
                         pageRefs={pageRefs}
                         email={linkInfo?.requireEmail ? email : linkInfo?.viewerEmail}
