@@ -10,7 +10,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pd
 
 function BetterPage({ pageNumber, ...props }) {
     const { ref, inView } = useInView({
-        triggerOnce: false,
+        triggerOnce: true,
         threshold: 0,
         rootMargin: '1000px 0px', // Load pages 1000px before they enter view
     });
