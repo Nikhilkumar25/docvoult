@@ -6,13 +6,14 @@ import prisma from '@/lib/db';
 
 export async function GET(request, { params }) {
     try {
+        const { id } = await params;
         const session = await getServerSession(authOptions);
         if (!session) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const folder = await prisma.folder.findUnique({
-            where: { id: params.id },
+            where: { id },
             include: {
                 parent: true,
             },
@@ -34,13 +35,14 @@ export async function GET(request, { params }) {
 
 export async function PATCH(request, { params }) {
     try {
+        const { id } = await params;
         const session = await getServerSession(authOptions);
         if (!session) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const folder = await prisma.folder.findUnique({
-            where: { id: params.id },
+            where: { id },
         });
 
         if (!folder || folder.userId !== session.user.id) {
@@ -55,7 +57,7 @@ export async function PATCH(request, { params }) {
         }
 
         const updated = await prisma.folder.update({
-            where: { id: params.id },
+            where: { id },
             data: { name: name.trim() },
         });
 
@@ -71,13 +73,14 @@ export async function PATCH(request, { params }) {
 
 export async function DELETE(request, { params }) {
     try {
+        const { id } = await params;
         const session = await getServerSession(authOptions);
         if (!session) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
         const folder = await prisma.folder.findUnique({
-            where: { id: params.id },
+            where: { id },
         });
 
         if (!folder || folder.userId !== session.user.id) {
@@ -87,7 +90,7 @@ export async function DELETE(request, { params }) {
         // Deleting the folder will cascade delete children folders (due to Prisma schema)
         // Documents in this folder will have their folderId set to null (due to onDelete: SetNull)
         await prisma.folder.delete({
-            where: { id: params.id },
+            where: { id },
         });
 
         return NextResponse.json({ success: true });

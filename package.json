@@ -12,25 +12,32 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^7.4.2",
-    "@prisma/client": "^5.22.0",
+    "@prisma/adapter-pg": "6.1.0",
+    "@prisma/client": "6.1.0",
     "@vercel/blob": "^2.3.1",
-    "bcryptjs": "^3.0.3",
-    "next": "14.2.4",
-    "next-auth": "^4.24.13",
-    "pg": "^8.20.0",
-    "prisma": "5.22.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
+    "bcrypt-ts": "^8.0.1",
+    "buffer": "^6.0.3",
+    "crypto-browserify": "^3.12.1",
+    "graceful-fs": "^4.2.11",
+    "next": "^15.0.0",
+    "next-auth": "4.24.13",
+    "pg": "^8.11.3",
+    "prisma": "6.1.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-intersection-observer": "^10.0.3",
     "react-pdf": "^8.0.0",
+    "stream-browserify": "^3.0.0",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
-    "@cloudflare/workers-types": "^4.20260307.1",
+    "@cloudflare/workers-types": "^4.20240405.0",
     "@opennextjs/cloudflare": "^1.17.1",
-    "@types/pg": "^8.18.0",
+    "@types/pg": "^8.11.4",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "eslint": "^8",
-    "eslint-config-next": "14.2.4",
-    "wrangler": "^4.71.0"
+    "eslint-config-next": "^15.0.0",
+    "wrangler": "^3.57.1"
   }
 }

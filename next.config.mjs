@@ -1,26 +1,23 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   webpack: (config) => {
-    // Fix for react-pdf canvas (only applies in webpack mode)
-    config.resolve.alias.canvas = false;
-    config.resolve.alias.encoding = false;
     config.resolve.alias['pdfjs-dist'] = 'pdfjs-dist/legacy/build/pdf.js';
+    // Fix for canvas module not found during build
+    config.resolve.alias.canvas = false;
     return config;
   },
-  // Allow external images from Vercel Blob
+  serverExternalPackages: ['@prisma/client'],
   images: {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: '*.public.blob.vercel-storage.com',
+        hostname: 'utfs.io',
+      },
+      {
+        protocol: 'https',
+        hostname: 'img.clerk.com',
       },
     ],
-  },
-  // Ensure API routes handle large files
-  experimental: {
-    serverActions: {
-      bodySizeLimit: '50mb',
-    },
   },
 };
 

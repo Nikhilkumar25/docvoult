@@ -32,8 +32,7 @@ function formatFileSize(bytes) {
 }
 
 export default function DocumentDetailPage({ params }) {
-    const resolvedParams = use(params);
-    const { id } = resolvedParams;
+    const { id } = use(params);
     const router = useRouter();
     const { data: session } = useSession();
     const [document, setDocument] = useState(null);
