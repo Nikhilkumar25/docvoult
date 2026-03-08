@@ -15,7 +15,14 @@ export async function GET(request, { params }) {
         const { id } = await params;
 
         const document = await prisma.document.findFirst({
-            where: { id, userId: session.user.id },
+            where: {
+                id,
+                OR: [
+                    { userId: session.user.id },
+                    { workspace: { ownerId: session.user.id } },
+                    { workspace: { members: { some: { userId: session.user.id } } } }
+                ]
+            },
         });
 
         if (!document) {
@@ -48,7 +55,14 @@ export async function POST(request, { params }) {
         const body = await request.json();
 
         const document = await prisma.document.findFirst({
-            where: { id, userId: session.user.id },
+            where: {
+                id,
+                OR: [
+                    { userId: session.user.id },
+                    { workspace: { ownerId: session.user.id } },
+                    { workspace: { members: { some: { userId: session.user.id } } } }
+                ]
+            },
         });
 
         if (!document) {

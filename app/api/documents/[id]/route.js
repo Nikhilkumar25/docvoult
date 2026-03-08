@@ -19,6 +19,7 @@ export async function GET(request, { params }) {
                 id,
                 OR: [
                     { userId: session.user.id },
+                    { workspace: { ownerId: session.user.id } },
                     { workspace: { members: { some: { userId: session.user.id } } } }
                 ]
             },
@@ -108,6 +109,7 @@ export async function PATCH(request, { params }) {
                 id,
                 OR: [
                     { userId: session.user.id },
+                    { workspace: { ownerId: session.user.id } },
                     { workspace: { members: { some: { userId: session.user.id } } } }
                 ]
             },
@@ -146,6 +148,7 @@ export async function DELETE(request, { params }) {
                 id,
                 OR: [
                     { userId: session.user.id },
+                    { workspace: { ownerId: session.user.id } },
                     { workspace: { members: { some: { userId: session.user.id } } } }
                 ]
             },
