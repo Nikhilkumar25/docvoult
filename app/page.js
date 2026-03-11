@@ -54,7 +54,7 @@ export default function Home() {
                             </div>
                             
                             {/* Floating Element */}
-                            <div className="absolute top-10 -right-2 bg-white p-4 rounded-2xl shadow-2xl border border-slate-100 hidden md:block">
+                            <div className="absolute top-8 -left-8 bg-white p-4 rounded-2xl shadow-2xl border border-slate-100 hidden xl:block">
                                 <div className="flex items-center gap-3">
                                     <div className="size-10 bg-green-500/10 text-green-500 rounded-lg flex items-center justify-center">
                                         <span className="material-symbols-outlined">verified</span>
@@ -79,46 +79,46 @@ export default function Home() {
                         <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 font-display">Don't Just Read. <span className="text-slate-400">Interact.</span></h2>
                         <p className="text-slate-600 text-lg md:text-xl font-medium">Interact with your documents like never before using our integrated AI chat. Obtain instant insights, trends, and summaries in milliseconds.</p>
                     </div>
-                    <div className="relative flex flex-col lg:flex-row gap-12 lg:gap-8 items-center justify-center">
+                    <div className="flex flex-col lg:flex-row gap-12 items-center justify-between">
                         {/* Document Mockup */}
-                        <div className="w-full lg:w-1/2 bg-background-light p-8 md:p-12 rounded-[2.5rem] border border-slate-100 shadow-lg">
+                        <div className="w-full lg:flex-1 max-w-2xl bg-background-light p-8 md:p-12 rounded-[2.5rem] border border-slate-100 shadow-lg">
                             <div className="flex items-center gap-4 mb-8">
                                 <div className="size-12 bg-red-500/10 rounded-xl flex items-center justify-center text-red-500">
                                     <span className="material-symbols-outlined text-3xl">description</span>
                                 </div>
                                 <div>
-                                    <span className="font-black text-slate-800 text-xl block">Annual_Growth_Report.pdf</span>
-                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Processed by AI</span>
+                                    <span className="font-black text-slate-800 text-xl block leading-tight">Annual_Growth_Report.pdf</span>
+                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1 block">Processed by AI</span>
                                 </div>
                             </div>
-                            <div className="space-y-5">
+                            <div className="space-y-6">
                                 <div className="h-4 bg-slate-200 rounded-full w-3/4"></div>
                                 <div className="h-4 bg-slate-200 rounded-full w-full"></div>
                                 <div className="h-4 bg-slate-200 rounded-full w-5/6"></div>
                                 <div className="h-4 bg-slate-200 rounded-full w-2/3"></div>
-                                <div className="h-48 bg-slate-100 rounded-2xl w-full flex items-center justify-center text-slate-300 mt-8 border-2 border-dashed border-slate-200">
+                                <div className="h-48 bg-slate-100 rounded-2xl w-full flex items-center justify-center text-slate-300 mt-10 border-2 border-dashed border-slate-200">
                                     <span className="material-symbols-outlined text-6xl">monitoring</span>
                                 </div>
                             </div>
                         </div>
                         {/* Floating AI Chat */}
-                        <div className="w-full lg:w-[420px] lg:absolute lg:right-0 lg:top-1/2 lg:-translate-y-1/2 glass p-6 md:p-8 rounded-[2rem] shadow-2xl border-primary/20 z-20">
-                            <div className="flex items-center gap-3 mb-6 pb-6 border-b border-slate-100">
+                        <div className="w-full lg:w-[420px] shrink-0 glass p-6 md:p-8 rounded-[2rem] shadow-2xl border border-white/50 z-20">
+                            <div className="flex items-center gap-3 mb-8 pb-6 border-b border-slate-100">
                                 <div className="size-12 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/30">
                                     <span className="material-symbols-outlined text-white">smart_toy</span>
                                 </div>
-                                <span className="font-black text-lg text-slate-900 tracking-tight">DocsVault Assistant</span>
+                                <span className="font-black xl:text-lg text-slate-900 tracking-tight">DocsVault Assistant</span>
                             </div>
-                            <div className="space-y-4">
-                                <div className="bg-slate-50 p-4 rounded-2xl rounded-tl-none text-sm text-slate-700 border border-slate-100 shadow-sm ml-4">
+                            <div className="space-y-6">
+                                <div className="bg-slate-50 p-5 rounded-2xl rounded-tl-none text-sm font-medium text-slate-700 border border-slate-200 shadow-sm ml-4">
                                     &quot;What are the core growth projections?&quot;
                                 </div>
-                                <div className="bg-primary/5 p-5 rounded-2xl rounded-tr-none text-sm text-slate-800 border-l-4 border-primary shadow-sm mr-4">
-                                    <p className="font-black mb-3 text-primary text-xs uppercase tracking-wider">Extracted Insights</p>
-                                    <ul className="space-y-2 font-semibold">
-                                        <li className="flex items-center gap-2"><span className="size-1.5 bg-green-500 rounded-full block"></span> Q3 Revenue: <span className="text-green-600">+24% YoY</span></li>
-                                        <li className="flex items-center gap-2"><span className="size-1.5 bg-green-500 rounded-full block"></span> New Markets: <span className="text-green-600">12% expansion</span></li>
-                                        <li className="flex items-center gap-2"><span className="size-1.5 bg-green-500 rounded-full block"></span> Retention Rate: <span className="text-green-600">98.2%</span></li>
+                                <div className="bg-orange-50 p-6 rounded-2xl rounded-tr-none text-sm text-slate-800 border-l-4 border-primary shadow-sm mr-4">
+                                    <p className="font-black mb-4 text-primary text-xs uppercase tracking-wider">Extracted Insights</p>
+                                    <ul className="space-y-3 font-semibold">
+                                        <li className="flex items-center gap-3"><span className="size-2 bg-green-500 rounded-full block"></span> Q3 Revenue: <span className="text-green-600 ml-auto">+24% YoY</span></li>
+                                        <li className="flex items-center gap-3"><span className="size-2 bg-green-500 rounded-full block"></span> New Markets: <span className="text-green-600 ml-auto">12% expansion</span></li>
+                                        <li className="flex items-center gap-3"><span className="size-2 bg-green-500 rounded-full block"></span> Retention Rate: <span className="text-green-600 ml-auto">98.2%</span></li>
                                     </ul>
                                 </div>
                             </div>
