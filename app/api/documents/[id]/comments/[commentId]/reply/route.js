@@ -35,6 +35,7 @@ export async function POST(req, { params }) {
             data: {
                 response: text,
                 responseAt: new Date(),
+                aiAnswered: false,
             },
         });
 

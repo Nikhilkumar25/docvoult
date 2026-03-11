@@ -10,19 +10,18 @@ export default function FolderCard({ folder, onClick, onDelete }) {
 
     return (
         <div
-            className="card hover-effect"
+            className="group relative flex items-center justify-between p-6 bg-white border border-gray-100 rounded-2xl cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:border-primary/30 hover:shadow-premium-hover shadow-sm"
             onClick={() => onClick(folder.id)}
-            style={{ cursor: 'pointer', padding: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', background: 'var(--bg-card)' }}
         >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius-sm)', background: 'var(--bg-tertiary)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ color: 'var(--accent-primary)' }}>
+            <div className="flex items-center gap-4 min-w-0 pr-4">
+                <div className="w-12 h-12 flex-shrink-0 rounded-xl bg-orange-50 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-300">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
                     </svg>
                 </div>
-                <div>
-                    <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--text-primary)' }}>{folder.name}</h3>
-                    <p style={{ margin: '4px 0 0 0', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                <div className="min-w-0 truncate">
+                    <h3 className="m-0 text-base font-semibold text-gray-900 leading-tight truncate">{folder.name}</h3>
+                    <p className="m-0 mt-1 text-sm text-gray-500 truncate">
                         {folder._count?.documents || 0} documents
                     </p>
                 </div>
@@ -30,11 +29,10 @@ export default function FolderCard({ folder, onClick, onDelete }) {
 
             <button
                 onClick={handleDelete}
-                className="icon-button"
-                style={{ color: 'var(--danger)' }}
+                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100 flex-shrink-0"
                 title="Delete Folder"
             >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M3 6h18" strokeLinecap="round" strokeLinejoin="round" />
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" strokeLinecap="round" strokeLinejoin="round" />
                 </svg>

@@ -3,10 +3,21 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import DocVaultLogo from '@/components/DocVaultLogo';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import Providers from '@/components/Providers';
 
-export default function Home() {
+function HomeContent() {
     const animatedWords = ["Documents", "Pitch Decks", "Contracts"];
     const [wordIndex, setWordIndex] = useState(0);
+    const { status } = useSession();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (status === 'authenticated') {
+            router.push('/dashboard');
+        }
+    }, [status, router]);
 
     useEffect(() => {
         const interval = setInterval(() => {
@@ -261,5 +272,13 @@ export default function Home() {
                 </div>
             </footer>
         </div>
+    );
+}
+
+export default function Home() {
+    return (
+        <Providers>
+            <HomeContent />
+        </Providers>
     );
 }

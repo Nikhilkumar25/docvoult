@@ -30,6 +30,15 @@ export async function GET() {
                     select: { duration: true },
                 },
                 comments: {
+                    select: {
+                        id: true,
+                        text: true,
+                        userName: true,
+                        createdAt: true,
+                        documentId: true,
+                        response: true,
+                        aiAnswered: true,
+                    },
                     orderBy: { createdAt: 'desc' },
                 },
             },
@@ -49,7 +58,7 @@ export async function GET() {
             const docLinks = doc._count.links;
             const docQuestions = doc._count.comments;
             const docDuration = doc.views.reduce((sum, v) => sum + v.duration, 0);
-            const docUnanswered = doc.comments.filter(c => !c.response).length;
+            const docUnanswered = doc.comments.filter(c => !c.response || c.aiAnswered).length;
 
             totalViews += docViews;
             totalLinks += docLinks;

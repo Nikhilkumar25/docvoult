@@ -153,6 +153,7 @@ model Comment {
   askerEmail String?
   response   String?
   responseAt DateTime?
+  aiAnswered Boolean   @default(false)
   document   Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
   view       View?     @relation(fields: [viewId], references: [id])
 

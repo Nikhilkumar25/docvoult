@@ -663,13 +663,16 @@ export default function DocumentDetailPage({ params }) {
                                             </div>
                                         )}
 
-                                        {!comment.response ? (
+                                        {(!comment.response || comment.aiAnswered) ? (
                                             <button
                                                 className="btn btn-ghost btn-xs"
-                                                onClick={() => setReplyingTo(comment)}
+                                                onClick={() => {
+                                                    setReplyingTo(comment);
+                                                    setReplyText(comment.aiAnswered ? (comment.response || '') : '');
+                                                }}
                                                 style={{ color: 'var(--accent-primary)', padding: '4px 8px', fontSize: '0.75rem', fontWeight: 600 }}
                                             >
-                                                Reply & Email
+                                                {comment.aiAnswered ? 'Review AI Answer' : 'Reply & Email'}
                                             </button>
                                         ) : (
                                             <div style={{ fontSize: '0.8rem', color: 'var(--success)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -689,8 +692,8 @@ export default function DocumentDetailPage({ params }) {
                                             borderRadius: 'var(--radius-sm)',
                                             borderLeft: '3px solid var(--accent-primary)'
                                         }}>
-                                            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                                Your Response:
+                                            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: comment.aiAnswered ? 'var(--accent-primary)' : 'var(--text-primary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                                {comment.aiAnswered ? '✨ Answered by AI:' : 'Your Response:'}
                                             </div>
                                             <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
                                                 {comment.response}

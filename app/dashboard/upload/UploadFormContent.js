@@ -123,26 +123,29 @@ export default function UploadFormContent() {
     };
 
     return (
-        <>
-            <div className="dashboard-header">
-                <h1>Upload Document</h1>
-                <button className="btn btn-secondary" onClick={() => router.back()}>
+        <div className="max-w-4xl mx-auto">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                <h1 className="text-2xl font-bold text-gray-900">Upload Document</h1>
+                <button 
+                    className="px-4 py-2.5 bg-white border border-gray-200 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors shadow-sm flex items-center gap-2" 
+                    onClick={() => router.back()}
+                >
                     ← Back
                 </button>
             </div>
 
-            <div className="upload-area">
+            <div className="max-w-2xl mx-auto">
                 {!file ? (
                     <div
-                        className={`upload-dropzone ${dragging ? 'dragging' : ''}`}
+                        className={`border-2 border-dashed rounded-3xl p-16 text-center cursor-pointer transition-all duration-300 flex flex-col items-center justify-center min-h-[320px] ${dragging ? 'border-primary bg-primary/5 scale-[1.02]' : 'border-gray-200 bg-white hover:border-primary/50 hover:bg-gray-50 shadow-sm hover:shadow-md'}`}
                         onClick={() => fileInputRef.current?.click()}
                         onDrop={handleDrop}
                         onDragOver={handleDragOver}
                         onDragLeave={handleDragLeave}
                     >
-                        <div className="upload-icon">📤</div>
-                        <h3>Drop your PDF here</h3>
-                        <p>or click to browse files</p>
+                        <div className="text-5xl mb-6 opacity-80 group-hover:scale-110 transition-transform">📤</div>
+                        <h3 className="text-xl font-semibold text-gray-900 mb-2">Drop your PDF here</h3>
+                        <p className="text-base text-gray-500">or click to browse files</p>
                         <input
                             ref={fileInputRef}
                             type="file"
@@ -152,17 +155,17 @@ export default function UploadFormContent() {
                         />
                     </div>
                 ) : (
-                    <form className="upload-form" onSubmit={handleUpload}>
-                        <div className="upload-file-info">
-                            <div className="file-icon">📄</div>
-                            <div className="file-details">
-                                <div className="file-name">{file.name}</div>
-                                <div className="file-size">{formatFileSize(file.size)}</div>
+                    <form className="bg-white border border-gray-100 rounded-3xl p-6 md:p-8 shadow-sm" onSubmit={handleUpload}>
+                        <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl mb-6 border border-gray-100">
+                            <div className="text-3xl bg-white p-2 rounded-xl shadow-sm">📄</div>
+                            <div className="flex-1 min-w-0">
+                                <div className="text-sm font-semibold text-gray-900 truncate">{file.name}</div>
+                                <div className="text-xs text-gray-500 mt-1 font-medium">{formatFileSize(file.size)}</div>
                             </div>
                             {!uploading && (
                                 <button
                                     type="button"
-                                    className="btn btn-ghost btn-sm"
+                                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                                     onClick={() => {
                                         setFile(null);
                                         setTitle('');
@@ -173,12 +176,12 @@ export default function UploadFormContent() {
                             )}
                         </div>
 
-                        <div className="input-group">
-                            <label htmlFor="title">Document Title</label>
+                        <div className="mb-6">
+                            <label htmlFor="title" className="block text-sm font-semibold text-gray-700 mb-2">Document Title</label>
                             <input
                                 id="title"
                                 type="text"
-                                className="input"
+                                className="w-full px-4 py-3.5 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-gray-900 font-medium"
                                 placeholder="Enter document title"
                                 value={title}
                                 onChange={(e) => setTitle(e.target.value)}
@@ -187,37 +190,41 @@ export default function UploadFormContent() {
                             />
                         </div>
 
-                        {error && <div className="auth-error">{error}</div>}
+                        {error && <div className="p-4 bg-red-50 text-red-600 rounded-xl text-sm mb-6 border border-red-100 font-medium flex items-center gap-2"><span>⚠️</span> {error}</div>}
 
                         {uploading && (
-                            <div className="upload-progress">
-                                <div className="progress-bar">
+                            <div className="mb-6">
+                                <div className="h-2.5 bg-gray-100 rounded-full overflow-hidden">
                                     <div
-                                        className="progress-fill"
+                                        className="h-full bg-primary transition-all duration-300 relative overflow-hidden"
                                         style={{ width: `${progress}%` }}
-                                    />
+                                    >
+                                        <div className="absolute inset-0 bg-white/20 animate-pulse"></div>
+                                    </div>
                                 </div>
-                                <p style={{ textAlign: 'center', marginTop: 8, color: 'var(--text-tertiary)', fontSize: 'var(--text-sm)' }}>
-                                    {progress < 100 ? 'Uploading...' : 'Upload complete! Redirecting...'}
+                                <p className="text-center mt-3 text-sm font-medium text-gray-500">
+                                    {progress < 100 ? 'Uploading securely...' : 'Upload complete! Redirecting...'}
                                 </p>
                             </div>
                         )}
 
                         {!uploading && (
-                            <button type="submit" className="btn btn-primary btn-lg">
+                            <button type="submit" className="w-full flex items-center justify-center gap-2 px-6 py-4 bg-primary text-white font-semibold rounded-xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all text-lg mb-2">
                                 📤 Upload Document
                             </button>
                         )}
-                        <div style={{ marginTop: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'var(--text-tertiary)', fontSize: 'var(--text-xs)' }}>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                            </svg>
-                            Secure & Encrypted Document Storage
+                        <div className="mt-4 flex flex-col items-center justify-center gap-2 text-gray-400 text-xs font-medium">
+                            <div className="flex items-center gap-1.5">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                                </svg>
+                                Secure & Encrypted Document Storage
+                            </div>
                         </div>
                     </form>
                 )}
             </div>
-        </>
+        </div>
     );
 }
