@@ -50,7 +50,7 @@ export default function DashboardPage() {
     const { data: folders = [], isLoading: foldersLoading, mutate: mutateFolders } = useData(folderUrl);
     const { data: documents = [], isLoading: docsLoading, mutate: mutateDocs } = useData(docUrl);
     
-    const loading = (foldersLoading || docsLoading) && (!folders.length && !documents.length);
+    const loading = (foldersLoading || docsLoading) && (!folders?.length && !documents?.length);
 
     useEffect(() => {
         if (currentFolderId) {
@@ -171,7 +171,7 @@ export default function DashboardPage() {
                         </div>
                     ))}
                 </div>
-            ) : folders.length === 0 && documents.length === 0 ? (
+            ) : (folders?.length === 0 && documents?.length === 0) ? (
                 <div className="documents-grid" style={{ gridColumn: '1 / -1' }}>
                     <div className="empty-state">
                         <div className="empty-icon">📂</div>
@@ -189,7 +189,7 @@ export default function DashboardPage() {
                 </div>
             ) : (
                 <>
-                    {folders.length > 0 && (
+                    {folders?.length > 0 && (
                         <div style={{ marginBottom: '2rem' }}>
                             <h2 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: 'var(--text-secondary)' }}>Folders</h2>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
@@ -205,7 +205,7 @@ export default function DashboardPage() {
                         </div>
                     )}
 
-                    {documents.length > 0 && (
+                    {documents?.length > 0 && (
                         <div>
                             <h2 style={{ fontSize: '1.1rem', marginBottom: '1rem', color: 'var(--text-secondary)' }}>Files</h2>
                             <div className="documents-grid">
