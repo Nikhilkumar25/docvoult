@@ -1,8 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useData } from '@/lib/hooks/useData';
 
 function formatDuration(seconds) {
     if (seconds < 60) return `${seconds}s`;
@@ -22,29 +21,10 @@ function formatDate(date) {
 }
 
 export default function AnalyticsDashboard() {
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const { data, isLoading } = useData('/api/analytics');
 
-    useEffect(() => {
-        fetchAnalytics();
-    }, []);
-
-    const fetchAnalytics = async () => {
-        try {
-            const res = await fetch('/api/analytics');
-            if (res.ok) {
-                const json = await res.json();
-                setData(json);
-            }
-        } catch (err) {
-            console.error('Error fetching analytics:', err);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    if (loading) {
+    if (isLoading && !data) {
         return (
             <div className="loading-spinner">
                 <div className="spinner" />
@@ -52,7 +32,7 @@ export default function AnalyticsDashboard() {
         );
     }
 
-    if (!data) return <div>Error loading analytics</div>;
+    if (!data) return <div className="analytics-page">Error loading analytics</div>;
 
     const { summary, topDocuments, recentQuestions } = data;
 

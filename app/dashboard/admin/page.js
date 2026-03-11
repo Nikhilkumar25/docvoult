@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useData } from '@/lib/hooks/useData';
 
 function formatFileSize(bytes) {
     if (!bytes || bytes === 0) return '0 B';
@@ -49,35 +50,18 @@ const ACTIVITY_COLORS = {
 export default function AdminDashboard() {
     const { data: session } = useSession();
     const router = useRouter();
-    const [data, setData] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
+
+    const { data: stats, isLoading, error, mutate } = useData('/api/admin/stats', {
+        enabled: !!session?.user?.isAdmin
+    });
 
     useEffect(() => {
         if (session && !session.user?.isAdmin) {
             router.push('/dashboard');
-            return;
         }
-        fetchStats();
     }, [session]);
 
-    const fetchStats = async () => {
-        try {
-            const res = await fetch('/api/admin/stats');
-            if (res.status === 403) {
-                router.push('/dashboard');
-                return;
-            }
-            if (!res.ok) throw new Error('Failed to load');
-            setData(await res.json());
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    if (loading) {
+    if (!session || (isLoading && !stats)) {
         return (
             <div className="loading-spinner" style={{ minHeight: '60vh' }}>
                 <div className="spinner" />

@@ -1,10 +1,9 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import FolderCard from '@/components/FolderCard';
 import { useWorkspace } from '@/context/WorkspaceContext';
+import { useData } from '@/lib/hooks/useData';
 
 function formatFileSize(bytes) {
     if (bytes === 0) return '0 B';
@@ -35,45 +34,29 @@ function timeAgo(date) {
 }
 
 export default function DashboardPage() {
-    const [documents, setDocuments] = useState([]);
-    const [folders, setFolders] = useState([]);
     const [currentFolderId, setCurrentFolderId] = useState(null);
     const [currentFolder, setCurrentFolder] = useState(null);
-    const [loading, setLoading] = useState(true);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [newFolderName, setNewFolderName] = useState('');
     const router = useRouter();
     const { activeWorkspace, getActiveWorkspaceData } = useWorkspace();
 
+    const wsParam = activeWorkspace ? `&workspaceId=${activeWorkspace}` : '';
+    const folderUrl = currentFolderId ? `/api/folders?parentId=${currentFolderId}${wsParam}` : `/api/folders?x=1${wsParam}`;
+    const docUrl = currentFolderId ? `/api/documents?folderId=${currentFolderId}${wsParam}` : `/api/documents?x=1${wsParam}`;
+
+    const { data: folders = [], isLoading: foldersLoading, mutate: mutateFolders } = useData(folderUrl);
+    const { data: documents = [], isLoading: docsLoading, mutate: mutateDocs } = useData(docUrl);
+    
+    const loading = (foldersLoading || docsLoading) && (!folders.length && !documents.length);
+
     useEffect(() => {
-        fetchContent();
         if (currentFolderId) {
             fetchCurrentFolder();
         } else {
             setCurrentFolder(null);
         }
     }, [currentFolderId, activeWorkspace]);
-
-    const fetchContent = async () => {
-        setLoading(true);
-        try {
-            const wsParam = activeWorkspace ? `&workspaceId=${activeWorkspace}` : '';
-            const folderQuery = currentFolderId ? `?parentId=${currentFolderId}${wsParam}` : `?x=1${wsParam}`;
-            const docQuery = currentFolderId ? `?folderId=${currentFolderId}${wsParam}` : `?x=1${wsParam}`;
-
-            const [foldersRes, docsRes] = await Promise.all([
-                fetch(`/api/folders${folderQuery}`),
-                fetch(`/api/documents${docQuery}`)
-            ]);
-
-            if (foldersRes.ok) setFolders(await foldersRes.json());
-            if (docsRes.ok) setDocuments(await docsRes.json());
-        } catch (err) {
-            console.error('Error fetching content:', err);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const fetchCurrentFolder = async () => {
         try {
@@ -84,6 +67,11 @@ export default function DashboardPage() {
         } catch (err) {
             console.error('Error fetching current folder:', err);
         }
+    };
+
+    const fetchContent = () => {
+        mutateFolders();
+        mutateDocs();
     };
 
     const handleCreateFolder = async (e) => {
