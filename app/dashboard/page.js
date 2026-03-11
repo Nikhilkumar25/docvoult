@@ -117,7 +117,7 @@ export default function DashboardPage() {
         try {
             const res = await fetch(`/api/documents/${docId}`, { method: 'DELETE' });
             if (res.ok) {
-                setDocuments((prev) => prev.filter((d) => d.id !== docId));
+                mutateDocs();
             }
         } catch (err) {
             console.error('Error deleting document:', err);

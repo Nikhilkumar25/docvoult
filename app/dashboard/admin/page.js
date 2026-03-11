@@ -78,9 +78,9 @@ export default function AdminDashboard() {
         );
     }
 
-    if (!data) return null;
+    if (!stats) return null;
 
-    const { kpis, linkFeatures, ai, signupsByMonth, topUsers, activityFeed } = data;
+    const { kpis, linkFeatures, ai, signupsByMonth, topUsers, activityFeed } = stats;
 
     const maxSignups = Math.max(...Object.values(signupsByMonth), 1);
 
@@ -110,7 +110,7 @@ export default function AdminDashboard() {
                     <h1>🛡️ Platform Admin</h1>
                     <p>Monitor DocsVault performance, users, and feature adoption.</p>
                 </div>
-                <button className="btn btn-secondary btn-sm" onClick={fetchStats}>
+                <button className="btn btn-secondary btn-sm" onClick={() => mutate()}>
                     🔄 Refresh
                 </button>
             </div>
