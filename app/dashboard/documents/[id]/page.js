@@ -741,7 +741,7 @@ export default function DocumentDetailPage({ params }) {
                 <div className="section-panel-body">
                     {!document.knowledgeBase ? (
                         <div className="empty-state">
-                            <p>Train an AI on this document to give viewers instant answers. Costs ~$0.01 per document.</p>
+                            <p>Train an AI on this document to give viewers instant answers.</p>
                             <button className="btn btn-primary" onClick={generateKB} disabled={isGeneratingKB} style={{ marginTop: 12 }}>
                                 {isGeneratingKB ? 'Extracting Text & Generating...' : 'Start AI Training'}
                             </button>

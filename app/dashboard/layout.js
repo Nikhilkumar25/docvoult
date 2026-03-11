@@ -95,6 +95,11 @@ function DashboardShell({ children }) {
         { href: '/dashboard/upload', label: 'Upload', icon: '📤' },
     ];
 
+    const isAdmin = session.user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+    if (isAdmin) {
+        navItems.push({ href: '/dashboard/admin', label: 'Admin', icon: '🛡️' });
+    }
+
     const userInitials = session.user?.name
         ? session.user.name.split(' ').map((n) => n[0]).join('').toUpperCase()
         : '?';
