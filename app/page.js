@@ -16,7 +16,7 @@ export default function Home() {
     }, []);
 
     return (
-        <div className="bg-background-light text-slate-900 font-display min-h-screen">
+        <div className="bg-background-light text-slate-900 font-display min-h-screen overflow-x-hidden">
             {/* Navigation */}
             <nav className="fixed top-0 left-0 right-0 z-50 glass">
                 <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
@@ -50,9 +50,9 @@ export default function Home() {
                             </Link>
                         </div>
                     </div>
-                    <div className="flex-1 relative w-full aspect-square max-w-lg mx-auto lg:scale-110">
+                    <div className="flex-1 relative w-full aspect-square max-w-lg mx-auto">
                         <div className="absolute inset-0 bg-gradient-to-tr from-primary via-orange-400 to-violet-500 rounded-[3rem] rotate-3 opacity-20 blur-3xl"></div>
-                        <div className="relative w-full h-full bg-gradient-to-br from-primary via-amber-400 to-violet-600 rounded-[2.5rem] shadow-2xl flex items-center justify-center p-8 overflow-hidden transition-transform duration-700 hover:scale-[1.02]">
+                        <div className="relative w-full h-full bg-gradient-to-br from-primary via-amber-400 to-violet-600 rounded-[2.5rem] shadow-2xl flex items-center justify-center p-8 transition-transform duration-700 hover:scale-[1.02]">
                             <div className="w-full h-full border border-white/20 rounded-3xl flex flex-col gap-6 p-6 glass shadow-xl">
                                 <div className="h-4 w-1/3 bg-white/50 rounded-full"></div>
                                 <div className="h-4 w-full bg-white/30 rounded-full"></div>
@@ -65,7 +65,7 @@ export default function Home() {
                             </div>
                             
                             {/* Floating Element */}
-                            <div className="absolute top-8 -left-8 bg-white p-4 rounded-2xl shadow-2xl border border-slate-100 hidden xl:block">
+                            <div className="absolute -top-4 -right-4 bg-white p-4 rounded-2xl shadow-2xl border border-slate-100 hidden md:block z-10">
                                 <div className="flex items-center gap-3">
                                     <div className="size-10 bg-green-500/10 text-green-500 rounded-lg flex items-center justify-center">
                                         <span className="material-symbols-outlined">verified</span>
@@ -82,8 +82,8 @@ export default function Home() {
             </section>
 
             {/* AI Knowledge Base Section */}
-            <section className="py-24 px-6 bg-white relative">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-[100px] -mr-40"></div>
+            <section className="py-24 px-6 bg-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-[100px]"></div>
                 <div className="max-w-7xl mx-auto relative z-10">
                     <div className="mb-16 text-center lg:text-left max-w-2xl mx-auto lg:mx-0">
                         <span className="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-black tracking-widest uppercase mb-6 inline-block">Intelligent Analytics</span>
