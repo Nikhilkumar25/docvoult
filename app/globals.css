@@ -1,7 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* ===================================
    DocsVault — Premium Design System
    =================================== */
-
 /* ---------- CSS Variables ---------- */
 :root {
   /* Colors — Cream / Orange Light Theme */
@@ -131,6 +134,13 @@ img {
   .desktop-only {
     display: none !important;
   }
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 /* ========================================
