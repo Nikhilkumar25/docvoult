@@ -9,9 +9,8 @@ export default function Home() {
             {/* Navigation */}
             <nav className="fixed top-0 left-0 right-0 z-50 glass">
                 <div className="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
-                    <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                    <Link href="/" className="flex items-center hover:opacity-80 transition-opacity">
                         <DocVaultLogo size={32} />
-                        <span className="text-xl font-bold tracking-tight">DocsVault</span>
                     </Link>
                     <div className="flex items-center gap-6">
                         <Link href="/login" className="text-sm font-bold text-slate-600 hover:text-slate-900 transition-colors hidden sm:block">Login</Link>
@@ -247,9 +246,8 @@ export default function Home() {
             <footer className="py-16 px-6 bg-white border-t border-slate-100">
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
                     <div className="flex flex-col md:flex-row items-center gap-4">
-                        <Link href="/" className="flex items-center gap-2">
+                        <Link href="/" className="flex items-center">
                             <DocVaultLogo size={40} />
-                            <span className="text-2xl font-black tracking-tighter text-slate-900 uppercase">DocsVault</span>
                         </Link>
                         <span className="hidden md:block w-px h-6 bg-slate-200 mx-2"></span>
                         <p className="text-slate-400 text-sm font-medium">© 2026 DocsVault Inc. All rights reserved.</p>
