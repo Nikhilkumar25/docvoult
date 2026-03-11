@@ -221,6 +221,12 @@ img {
   100% { background-position: 0% 50%; }
 }
 
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.8; }
+}
+
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
@@ -233,8 +239,9 @@ img {
 }
 
 .glass-card:hover {
-  border-color: rgba(249, 115, 22, 0.4);
-  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--accent-primary);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: var(--shadow-lg);
 }
 
 .text-glow {
