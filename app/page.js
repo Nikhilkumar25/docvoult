@@ -2,6 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 import Link from 'next/link';
+import DocVaultLogo from '@/components/DocVaultLogo';
 
 export default function Home() {
   return (
@@ -10,10 +11,9 @@ export default function Home() {
 
       {/* Premium Navigation */}
       <nav className="landing-nav" style={{ justifyContent: 'space-between', padding: '1rem 4rem' }}>
-        <div className="landing-logo">
-          <div className="logo-icon">📄</div>
-          DocsVault
-        </div>
+        <Link href="/">
+          <DocVaultLogo size={40} />
+        </Link>
         <div className="landing-nav-links">
           <Link href="/compare" className="btn btn-ghost">Compare</Link>
           <Link href="/donate" className="btn btn-ghost">Support</Link>
@@ -218,131 +218,230 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 3. Process Flow Section */}
-      <section className="section-padding" style={{ borderTop: '1px solid var(--border)' }}>
-        <div className="container" style={{ textAlign: 'center' }}>
-          <h2 style={{ fontSize: 'var(--text-5xl)', fontWeight: '800', marginBottom: 'var(--space-md)', color: 'var(--text-primary)' }}>
-            Seamless <span className="gradient-text">Workflow</span>
-          </h2>
-          <p style={{ color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto var(--space-3xl)' }}>
-            From upload to analytics, DocsVault streamlines your document distribution in three simple steps.
-          </p>
+      {/* 3. Process Flow Section (Slide 5 Full Implementation) */}
+      <section className="section-padding" style={{ borderTop: '1px solid var(--border)', background: 'var(--bg-primary)' }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: 'var(--space-3xl)' }}>
+            <span className="inline-block px-4 py-1.5 mb-6 text-sm font-bold tracking-wider uppercase text-primary bg-primary/10 rounded-full">Process</span>
+            <h2 style={{ fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: '900', marginBottom: 'var(--space-md)', color: 'var(--text-primary)', letterSpacing: '-0.02em', lineHeight: '1.2' }}>
+              Simple, <span style={{ color: 'var(--accent-primary)' }}>Secure</span> Workflow
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '1.25rem', maxWidth: '750px', margin: '0 auto', lineHeight: '1.6' }}>
+              Experience the power of AI-driven document management. From secure upload to intelligent insights in minutes.
+            </p>
+          </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--space-2xl)' }}>
-            {[
-              { id: '01', title: 'Upload', desc: 'Share your PDF and the system automatically indexes it for semantic AI search.', icon: '📤' },
-              { id: '02', title: 'Analyze', desc: 'The AI processes the content and is ready to answer any viewer questions.', icon: '🧠' },
-              { id: '03', title: 'Track', desc: 'See who viewed your documents and what they asked in real-time.', icon: '📊' }
-            ].map((step, i) => (
-              <div key={i} className="animate-fadeInUp" style={{ animationDelay: `${0.1 * (i+1)}s` }}>
-                <div className="step-card" style={{ textAlign: 'left', minHeight: '360px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
-                    <span style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--accent-primary)', opacity: 0.1 }}>{step.id}</span>
-                    <div style={{ fontSize: '2rem' }}>{step.icon}</div>
-                  </div>
-                  <h3 style={{ marginBottom: 'var(--space-sm)' }}>{step.title}</h3>
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: '1.6', marginBottom: '1.5rem' }}>{step.desc}</p>
-                  
-                    <div style={{ marginTop: 'auto' }}>
-                        {i === 0 && (
-                            <div style={{ height: '120px', background: 'var(--bg-primary)', borderRadius: '12px', border: '1px dashed var(--border)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                                <div style={{ fontSize: '24px' }}>📄</div>
-                                <span style={{ fontSize: '10px', fontWeight: '700', color: 'var(--text-tertiary)' }}>DROP PDF HERE</span>
-                            </div>
-                        )}
-                        {i === 1 && (
-                            <div style={{ display: 'grid', gap: '8px', background: 'var(--bg-primary)', padding: '12px', borderRadius: '12px' }}>
-                                <div style={{ height: '8px', width: '90%', background: 'var(--accent-primary)', opacity: 0.2, borderRadius: '4px' }} />
-                                <div style={{ height: '8px', width: '70%', background: 'var(--accent-primary)', opacity: 0.1, borderRadius: '4px' }} />
-                                <div style={{ height: '8px', width: '40%', background: 'var(--accent-primary)', opacity: 0.15, borderRadius: '4px' }} />
-                                <div className="text-glow" style={{ fontSize: '8px', fontWeight: '800', color: 'var(--accent-primary)', marginTop: '4px' }}>AI INDEXING...</div>
-                            </div>
-                        )}
-                        {i === 2 && (
-                            <div style={{ height: '120px', background: 'var(--bg-primary)', borderRadius: '12px', border: '1px solid var(--border)', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <div style={{ width: '40%', height: '6px', background: 'var(--text-tertiary)', opacity: 0.2, borderRadius: '3px' }} />
-                                    <div style={{ width: '20px', height: '10px', background: 'var(--success-bg)', borderRadius: '5px' }} />
-                                </div>
-                                <div style={{ flex: 1, display: 'flex', alignItems: 'flex-end', gap: '4px' }}>
-                                    <div style={{ flex: 1, height: '40%', background: 'var(--accent-primary)', opacity: 0.2, borderRadius: '2px' }} />
-                                    <div style={{ flex: 1, height: '100%', background: 'var(--accent-primary)', opacity: 0.6, borderRadius: '2px' }} />
-                                    <div style={{ flex: 1, height: '60%', background: 'var(--accent-primary)', opacity: 0.4, borderRadius: '2px' }} />
-                                </div>
-                            </div>
-                        )}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '40px' }}>
+            {/* Step 01: Upload */}
+            <div className="animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+              <div className="step-card" style={{ border: '1px solid var(--border)', padding: '2.5rem', borderRadius: '1.5rem', background: 'white' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+                  <span style={{ fontSize: '4rem', fontStyle: 'italic', fontWeight: '900', color: 'var(--accent-primary)', opacity: 0.1 }}>01</span>
+                  <div style={{ height: '1px', flex: 1, background: 'var(--border)' }}></div>
+                </div>
+                <h3 style={{ fontSize: '1.75rem', fontWeight: '800', marginBottom: '1.25rem', color: 'var(--text-primary)' }}>Upload</h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '16px', lineHeight: '1.7', marginBottom: '2.5rem' }}>
+                  Drag and drop your PDFs into our secure zone to begin the process. We support batch processing for up to 50 files.
+                </p>
+                
+                <div className="mockup-dropzone" style={{ marginTop: 'auto', minHeight: '200px', background: 'var(--bg-secondary)', border: '2px dashed var(--border-accent)', borderRadius: '1rem', padding: '2rem', textAlign: 'center' }}>
+                  <span className="material-symbols-outlined" style={{ fontSize: '3.5rem', color: 'var(--accent-primary)', marginBottom: '1rem' }}>picture_as_pdf</span>
+                  <p style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>Drop your files here</p>
+                  <p style={{ fontSize: '12px', color: 'var(--text-tertiary)', marginTop: '4px' }}>PDF, DOCX up to 10MB</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 02: Configure */}
+            <div className="animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+              <div className="step-card" style={{ border: '1px solid var(--border)', padding: '2.5rem', borderRadius: '1.5rem', background: 'white' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+                  <span style={{ fontSize: '4rem', fontStyle: 'italic', fontWeight: '900', color: 'var(--accent-primary)', opacity: 0.1 }}>02</span>
+                  <div style={{ height: '1px', flex: 1, background: 'var(--border)' }}></div>
+                </div>
+                <h3 style={{ fontSize: '1.75rem', fontWeight: '800', marginBottom: '1.25rem', color: 'var(--text-primary)' }}>Configure</h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '16px', lineHeight: '1.7', marginBottom: '2.5rem' }}>
+                  Set custom security layers like Email Gates, Passcodes, and Expiry dates to keep your data safe.
+                </p>
+
+                <div className="glass-card" style={{ marginTop: 'auto', padding: '1.5rem', borderRadius: '1.25rem', border: '1px solid var(--border)', background: 'var(--bg-secondary)' }}>
+                  <div style={{ display: 'grid', gap: '14px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'white', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>alternate_email</span>
+                        <span style={{ fontSize: '14px', fontWeight: '600' }}>Email Gate</span>
+                      </div>
+                      <div style={{ width: '36px', height: '18px', background: 'var(--accent-primary)', borderRadius: '9px', position: 'relative' }}>
+                        <div style={{ position: 'absolute', right: '3px', top: '3px', width: '12px', height: '12px', background: 'white', borderRadius: '50%' }}></div>
+                      </div>
                     </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'white', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>lock</span>
+                        <span style={{ fontSize: '14px', fontWeight: '600' }}>Passcode</span>
+                      </div>
+                      <div style={{ width: '36px', height: '18px', background: 'var(--border)', borderRadius: '9px', position: 'relative' }}>
+                        <div style={{ position: 'absolute', left: '3px', top: '3px', width: '12px', height: '12px', background: 'white', borderRadius: '50%' }}></div>
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'white', borderRadius: '10px', border: '1px solid var(--border)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span className="material-symbols-outlined text-primary" style={{ fontSize: '20px' }}>timer</span>
+                        <span style={{ fontSize: '14px', fontWeight: '600' }}>Link Expiry</span>
+                      </div>
+                      <span style={{ fontSize: '11px', fontWeight: '900', color: 'var(--accent-primary)', background: 'rgba(249, 115, 22, 0.1)', padding: '3px 10px', borderRadius: '5px' }}>7 DAYS</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 03: Analyze */}
+            <div className="animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
+              <div className="step-card" style={{ border: '1px solid var(--border)', padding: '2.5rem', borderRadius: '1.5rem', background: 'white' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+                  <span style={{ fontSize: '4rem', fontStyle: 'italic', fontWeight: '900', color: 'var(--accent-primary)', opacity: 0.1 }}>03</span>
+                  <div style={{ height: '1px', flex: 1, background: 'var(--border)' }}></div>
+                </div>
+                <h3 style={{ fontSize: '1.75rem', fontWeight: '800', marginBottom: '1.25rem', color: 'var(--text-primary)' }}>Analyze</h3>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '16px', lineHeight: '1.7', marginBottom: '2.5rem' }}>
+                  Leverage AI to chat with your documents and visualize data through smart, interactive dashboards.
+                </p>
+
+                <div className="glass-card" style={{ marginTop: 'auto', background: 'var(--bg-secondary)', padding: '1.5rem', border: '1px solid var(--border)', borderRadius: '1.25rem' }}>
+                   <div style={{ display: 'flex', gap: '12px', marginBottom: '1.25rem' }}>
+                      <div style={{ flex: 1, height: '44px', background: 'white', border: '1px solid var(--border)', borderRadius: '6px', display: 'flex', alignItems: 'flex-end', gap: '3px', padding: '6px' }}>
+                         <div style={{ flex: 1, height: '40%', background: 'var(--accent-primary)', opacity: 0.3 }}></div>
+                         <div style={{ flex: 1, height: '75%', background: 'var(--accent-primary)', opacity: 0.5 }}></div>
+                         <div style={{ flex: 1, height: '100%', background: 'var(--accent-primary)', opacity: 0.8 }}></div>
+                         <div style={{ flex: 1, height: '55%', background: 'var(--accent-primary)', opacity: 0.4 }}></div>
+                      </div>
+                      <div style={{ width: '28px', height: '28px', background: 'var(--accent-gradient)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(249,115,22,0.3)' }}>
+                         <span className="material-symbols-outlined" style={{ fontSize: '16px', color: 'white' }}>auto_awesome</span>
+                      </div>
+                   </div>
+                   <div style={{ background: 'white', padding: '10px 14px', borderRadius: '8px', border: '1px solid var(--border)' }}>
+                      <p style={{ fontSize: '11px', color: 'var(--text-primary)', fontStyle: 'italic', margin: 0, fontWeight: '500' }}>
+                        &quot;Summarize the legal clauses in Section 4.2...&quot;
+                      </p>
+                   </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. Secure Features Section (Slide 6 Full Implementation) */}
+      <section className="section-padding" style={{ background: 'var(--bg-secondary)', borderTop: '1px solid var(--border)' }}>
+        <div className="container">
+          <div style={{ maxWidth: '850px', marginBottom: 'var(--space-3xl)' }}>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 mb-8 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest">
+              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>verified_user</span>
+              Enterprise Security
+            </div>
+            <h2 style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', fontWeight: '900', marginBottom: 'var(--space-md)', color: 'var(--text-primary)', letterSpacing: '-0.04em', lineHeight: '1.05' }}>
+              Secure Sharing <span style={{ color: 'var(--accent-primary)' }}>Redefined</span>
+            </h2>
+            <p style={{ color: 'var(--text-secondary)', fontSize: '1.4rem', lineHeight: '1.7', fontWeight: '400' }}>
+              Take full control of your document security with our enterprise-grade sharing features, designed for maximum protection and ease of use.
+            </p>
+          </div>
+
+          <div className="features-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '32px', marginBottom: 'var(--space-4xl)' }}>
+            {[
+              { 
+                icon: 'alternate_email', 
+                title: 'Email Gates', 
+                desc: 'Restrict access to specific email domains or verified addresses to ensure your files never fall into the wrong hands.' 
+              },
+              { 
+                icon: 'password', 
+                title: 'Passcode Protection', 
+                desc: 'Add an extra layer of security by requiring a unique passcode for recipients to view or download sensitive documents.' 
+              },
+              { 
+                icon: 'timer_off', 
+                title: 'Auto Expiry', 
+                desc: 'Set your links to automatically expire after a certain time or number of views to maintain strict data lifecycle control.' 
+              }
+            ].map((feat, i) => (
+              <div key={i} className="feature-card" style={{ background: 'white', border: '1px solid var(--border)', padding: '3rem 2.5rem' }}>
+                <div style={{ 
+                  width: '72px', height: '72px', borderRadius: '1.25rem', background: 'var(--bg-secondary)', 
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--accent-primary)', marginBottom: '2rem',
+                  boxShadow: '0 10px 20px -5px rgba(249, 115, 22, 0.15)'
+                }}>
+                   <span className="material-symbols-outlined" style={{ fontSize: '2.5rem' }}>{feat.icon}</span>
+                </div>
+                <h3 style={{ fontSize: '1.75rem', fontWeight: '800', marginBottom: '1rem', color: 'var(--text-primary)' }}>{feat.title}</h3>
+                <p style={{ fontSize: '16px', color: 'var(--text-secondary)', lineHeight: '1.7', marginBottom: '2rem' }}>{feat.desc}</p>
+                <div className="mt-auto">
+                  <a href="#" style={{ fontSize: '15px', fontWeight: '800', color: 'var(--accent-primary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    Learn more <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>arrow_forward</span>
+                  </a>
                 </div>
               </div>
             ))}
           </div>
-        </div>
-      </section>
 
-      {/* 4. Secure Features Grid */}
-      <section className="section-padding" style={{ background: 'var(--bg-secondary)', borderTop: '1px solid var(--border)' }}>
-        <div className="container" style={{ textAlign: 'center' }}>
-          <h2 style={{ fontSize: 'var(--text-5xl)', fontWeight: '800', marginBottom: 'var(--space-md)', color: 'var(--text-primary)' }}>
-            Enterprise <span className="gradient-text">Security</span>
-          </h2>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-3xl)' }}>Professional grade controls for every shared link.</p>
-          
-          <div className="features-grid" style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(3, 1fr)', 
-            gap: 'var(--space-xl)' 
-          }}>
-            {[
-              { icon: '📧', title: 'Email Gate', desc: 'Capture leads by requiring an email address before they view your document.', bg: 'var(--accent-glow)' },
-              { icon: '🔑', title: 'Passcode Protect', desc: 'Sensitive documents deserve an extra layer of protection. Control who gets in.', bg: 'var(--success-bg)' },
-              { icon: '⏳', title: 'Expiry Dates', desc: 'Ensure your links are only active for as long as you want. Full temporal control.', bg: 'var(--danger-bg)' }
-            ].map((feat, i) => (
-              <div key={i} className="feature-card glass-card" style={{ textAlign: 'left' }}>
-                <div style={{ 
-                  width: '56px', height: '56px', borderRadius: '16px', background: feat.bg, 
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', marginBottom: 'var(--space-lg)'
-                }}>{feat.icon}</div>
-                <h3 style={{ marginBottom: 'var(--space-sm)' }}>{feat.title}</h3>
-                <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>{feat.desc}</p>
-              </div>
-            ))}
-          </div>
-
-          <div className="animate-fadeInUp" style={{ 
-            marginTop: '8rem', 
-            padding: 'var(--space-3xl)', 
-            borderRadius: '48px', 
-            background: 'var(--accent-gradient)', 
-            color: 'white',
-            boxShadow: '0 20px 40px rgba(249, 115, 22, 0.2)'
-          }}>
-            <h2 style={{ color: 'white', fontSize: 'clamp(2rem, 4vw, 3.5rem)', fontWeight: '900', marginBottom: 'var(--space-lg)' }}>
-              Ready to Upgrade Your <br /> Document Experience?
-            </h2>
-            <p style={{ opacity: 0.9, marginBottom: '2.5rem', fontSize: 'var(--text-lg)', maxWidth: '600px', margin: '0 auto 2.5rem' }}>
-              Join forward-thinking teams using AI to simplify distribution and maximize engagement.
+          {/* Social Proof Trust Bar */}
+          <div style={{ borderTop: '1px solid var(--border)', paddingTop: 'var(--space-4xl)', textAlign: 'center' }}>
+            <p style={{ fontSize: '13px', fontWeight: '900', color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: 'var(--space-3xl)', opacity: 0.6 }}>
+              Trusted by leading organizations
             </p>
-            <Link href="/register" className="btn btn-secondary btn-lg" style={{ 
-              background: 'white', color: 'var(--accent-primary)', border: 'none', 
-              padding: '1.25rem 3rem', fontWeight: '800', boxShadow: '0 10px 20px rgba(0,0,0,0.1)'
-            }}>
-              Get Started for Free →
-            </Link>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '4rem', alignItems: 'center' }}>
+              {['FORTUNE 500', 'TECHCORP', 'GLOBAL BANK', 'SECURELY', 'INFRASTRUX'].map((name) => (
+                <div key={name} className="trust-bar-item" style={{ fontSize: '1.75rem', fontWeight: '900', letterSpacing: '-0.02em' }}>{name}</div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="section-padding" style={{ background: 'var(--bg-primary)', borderTop: '1px solid var(--border)', textAlign: 'center' }}>
+      {/* 5. CTA Section Updated */}
+      <section style={{ padding: '10rem 0', background: 'white' }}>
+         <div className="container">
+            <div style={{ 
+               background: '#090909', 
+               borderRadius: '4rem', 
+               padding: '8rem 2rem', 
+               textAlign: 'center',
+               color: 'white',
+               position: 'relative',
+               overflow: 'hidden',
+               boxShadow: '0 50px 100px -20px rgba(0,0,0,0.4)'
+            }}>
+               <div style={{ position: 'absolute', top: 0, right: 0, width: '500px', height: '500px', background: 'var(--accent-primary)', opacity: 0.15, filter: 'blur(150px)', borderRadius: '50%' }}></div>
+               <div style={{ position: 'absolute', bottom: 0, left: 0, width: '300px', height: '300px', background: 'var(--accent-primary)', opacity: 0.05, filter: 'blur(100px)', borderRadius: '50%' }}></div>
+               <div style={{ position: 'relative', zIndex: 1 }}>
+                  <h2 style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', fontWeight: '900', marginBottom: '2.5rem', letterSpacing: '-0.04em', color: 'white', lineHeight: '1.05' }}>Ready to secure your documents?</h2>
+                  <p style={{ fontSize: '1.4rem', color: 'rgba(255,255,255,0.7)', maxWidth: '700px', margin: '0 auto 4rem', lineHeight: '1.7' }}>
+                     Join 10,000+ professionals who trust DocsVault with their sensitive information and intelligent insights.
+                  </p>
+                  <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', flexWrap: 'wrap' }}>
+                     <Link href="/register" className="btn btn-primary" style={{ padding: '1.5rem 4rem', fontSize: '1.25rem', fontWeight: '900', borderRadius: '1.5rem' }}>Start Free Trial</Link>
+                     <a href="#" className="btn btn-secondary" style={{ 
+                        padding: '1.5rem 4rem', fontSize: '1.25rem', fontWeight: '900', borderRadius: '1.5rem',
+                        background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: 'white' 
+                     }}>Book a Demo</a>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </section>
+
+      {/* Footer Updated */}
+      <footer className="section-padding" style={{ background: 'var(--bg-primary)', borderTop: '1px solid var(--border)', textAlign: 'center', padding: '6rem 0' }}>
         <div className="container">
-          <div className="landing-logo" style={{ justifyContent: 'center', marginBottom: 'var(--space-md)' }}>
-            <div className="logo-icon">📄</div> DocsVault
-          </div>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>© 2026 DocsVault. Next-generation document distribution.</p>
-          <div style={{ display: 'flex', gap: 'var(--space-xl)', justifyContent: 'center', marginTop: 'var(--space-xl)' }}>
-            <Link href="/compare" style={{ fontSize: '13px', color: 'var(--text-tertiary)', fontWeight: '600' }}>Compare</Link>
-            <Link href="/donate" style={{ fontSize: '13px', color: 'var(--text-tertiary)', fontWeight: '600' }}>Donate</Link>
-            <Link href="https://github.com/Nikhilkumar25/docvoult" style={{ fontSize: '13px', color: 'var(--text-tertiary)', fontWeight: '600' }}>GitHub</Link>
+          <Link href="/" style={{ display: 'inline-block', marginBottom: '2.5rem' }}>
+            <DocVaultLogo size={48} />
+          </Link>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '16px', marginBottom: '3rem', maxWidth: '400px', margin: '0 auto 3rem' }}>© 2026 DocsVault Inc. Next-generation document distribution and intelligence.</p>
+          <div style={{ display: 'flex', gap: '3rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link href="/compare" style={{ fontSize: '14px', color: 'var(--text-tertiary)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Compare</Link>
+            <Link href="/donate" style={{ fontSize: '14px', color: 'var(--text-tertiary)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.1em' }}>Donate</Link>
+            <Link href="https://github.com/Nikhilkumar25/docvoult" style={{ fontSize: '14px', color: 'var(--text-tertiary)', fontWeight: '800', textTransform: 'uppercase', letterSpacing: '0.1em' }}>GitHub</Link>
           </div>
         </div>
       </footer>

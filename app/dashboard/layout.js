@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Providers from '@/components/Providers';
 import { WorkspaceProvider, useWorkspace } from '@/context/WorkspaceContext';
+import DocVaultLogo from '@/components/DocVaultLogo';
 
 function WorkspaceSwitcher() {
     const { workspaces, activeWorkspace, switchWorkspace } = useWorkspace();
@@ -109,8 +110,7 @@ function DashboardShell({ children }) {
             <div className="dashboard-layout">
                 <aside className="sidebar">
                     <Link href="/dashboard" className="sidebar-logo">
-                        <div className="logo-icon">📄</div>
-                        DocsVault
+                        <DocVaultLogo size={28} />
                     </Link>
 
                     <WorkspaceSwitcher />
