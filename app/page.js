@@ -234,7 +234,7 @@ export default function Home() {
                             <h3 className="text-4xl md:text-5xl font-black text-white mb-8">Ready to secure your documents?</h3>
                             <p className="text-white/90 text-xl mb-12 max-w-2xl mx-auto font-medium">Join thousands of companies using DocsVault for AI-powered sharing and intelligent document distribution.</p>
                             <Link href="/register" className="inline-block bg-white text-primary px-12 py-5 rounded-2xl text-xl font-black shadow-2xl hover:scale-105 active:scale-95 transition-transform">
-                                Start Free Trial
+                                Start Sharing for Free
                             </Link>
                         </div>
                         <div className="absolute top-0 right-0 w-96 h-96 bg-white/20 rounded-full blur-3xl -mr-40 -mt-20"></div>
