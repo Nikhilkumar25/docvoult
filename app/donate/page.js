@@ -1,30 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 
 export default function DonatePage() {
-    const [currency, setCurrency] = useState('USD');
-    const [price, setPrice] = useState('9.99');
-    const [symbol, setSymbol] = useState('$');
+    const razorpayRef = useRef(null);
 
     useEffect(() => {
-        // Simple heuristic for currency detection based on locale
-        const locale = navigator.language || 'en-US';
-        if (locale.includes('IN') || Intl.DateTimeFormat().resolvedOptions().timeZone === 'Asia/Kolkata') {
-            setCurrency('INR');
-            setPrice('499');
-            setSymbol('₹');
-        } else {
-            setCurrency('USD');
-            setPrice('9.99');
-            setSymbol('$');
+        // Dynamically load the Razorpay payment button script
+        if (razorpayRef.current && !razorpayRef.current.querySelector('script')) {
+            const script = document.createElement('script');
+            script.src = 'https://checkout.razorpay.com/v1/payment-button.js';
+            script.setAttribute('data-payment_button_id', 'pl_SPxB9jq5Rhqw38');
+            script.async = true;
+            razorpayRef.current.appendChild(script);
         }
     }, []);
-
-    const donationOptions = currency === 'INR' 
-        ? ['99', '499', '999', '2499'] 
-        : ['5', '10', '25', '50'];
 
     return (
         <div className="landing" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '2rem' }}>
@@ -51,38 +42,28 @@ export default function DonatePage() {
                     We are committed to building the best document sharing experience. Your support helps us keep the servers running and the features flowing.
                 </p>
 
-                <div className="glass-card" style={{ padding: '3rem', borderRadius: '32px', textAlign: 'left' }}>
-                    <h3 style={{ marginBottom: '1.5rem', color: 'var(--text-primary)' }}>Choose your contribution</h3>
-                    
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '2.5rem' }}>
-                        {donationOptions.map((opt) => (
-                            <button 
-                                key={opt} 
-                                className={`btn ${price === opt ? 'btn-primary' : 'btn-secondary'}`}
-                                onClick={() => setPrice(opt)}
-                                style={{ padding: '1.5rem', fontSize: '1.25rem' }}
-                            >
-                                {symbol}{opt}
-                            </button>
-                        ))}
-                    </div>
+                <div className="glass-card" style={{ padding: '3rem', borderRadius: '32px', textAlign: 'center' }}>
+                    <h3 style={{ marginBottom: '0.75rem', color: 'var(--text-primary)' }}>Make a Contribution</h3>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem', fontSize: '14px' }}>
+                        Every contribution helps us build a better platform for everyone.
+                    </p>
 
-                    <div style={{ padding: '1.5rem', background: 'var(--bg-tertiary)', borderRadius: '16px', border: '1px solid var(--border)', marginBottom: '2.5rem' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                            <span style={{ color: 'var(--text-secondary)' }}>Selected Amount</span>
-                            <span style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--accent-primary)' }}>{symbol}{price}</span>
-                        </div>
-                        <p style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>
-                            Detected region: {currency === 'INR' ? 'India (INR)' : 'International (USD)'}
-                        </p>
-                    </div>
-
-                    {/* Razorpay Placeholder */}
-                    <button className="btn btn-primary btn-lg" style={{ width: '100%' }}>
-                        Proceed to Pay {symbol}{price}
-                    </button>
+                    {/* Razorpay Payment Button */}
+                    <form 
+                        ref={razorpayRef} 
+                        id="razorpay-button-container"
+                        style={{ 
+                            display: 'flex', 
+                            justifyContent: 'center', 
+                            alignItems: 'center',
+                            minHeight: '50px',
+                            marginBottom: '1.5rem'
+                        }}
+                    >
+                        {/* Razorpay script will inject the button here */}
+                    </form>
                     
-                    <p style={{ textAlign: 'center', marginTop: '1.5rem', fontSize: '12px', color: 'var(--text-tertiary)' }}>
+                    <p style={{ textAlign: 'center', fontSize: '12px', color: 'var(--text-tertiary)' }}>
                         Secure payment powered by Razorpay.
                     </p>
                 </div>
