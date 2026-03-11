@@ -1,9 +1,20 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import DocVaultLogo from '@/components/DocVaultLogo';
 
 export default function Home() {
+    const animatedWords = ["Documents", "Pitch Decks", "Contracts"];
+    const [wordIndex, setWordIndex] = useState(0);
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setWordIndex((prev) => (prev + 1) % animatedWords.length);
+        }, 2000);
+        return () => clearInterval(interval);
+    }, []);
+
     return (
         <div className="bg-background-light text-slate-900 font-display min-h-screen">
             {/* Navigation */}
@@ -24,18 +35,18 @@ export default function Home() {
                 <div className="flex flex-col lg:flex-row gap-16 items-center">
                     <div className="flex flex-col gap-8 flex-1 text-center lg:text-left animate-fadeInUp">
                         <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[1.05] tracking-tight text-slate-900">
-                            Share Documents. <br className="hidden lg:block" />
+                            Share <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-primary inline-block min-w-[300px] text-left transition-opacity duration-300">{animatedWords[wordIndex]}</span>. <br className="hidden lg:block" />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-400">Augmented by AI.</span>
                         </h1>
                         <p className="text-xl text-slate-600 leading-relaxed max-w-xl mx-auto lg:mx-0 font-medium">
-                            Experience a secure document sharing platform enhanced with intelligent AI capabilities for instant insights and deep analysis.
+                            Experience a secure document sharing platform enhanced with intelligent AI capabilities. Interactive AI sharing leads to higher pitch deck conversion rates, drastically improved stakeholder communication, and the ability to reach more people effectively.
                         </p>
                         <div className="flex flex-wrap justify-center lg:justify-start gap-4 mt-2">
                             <Link href="/register" className="bg-primary hover:bg-orange-500 text-white px-8 py-4 rounded-2xl text-lg font-black shadow-xl shadow-primary/30 flex items-center gap-2 transition-all hover:-translate-y-1">
                                 Start Sharing <span className="material-symbols-outlined text-xl">arrow_forward</span>
                             </Link>
                             <Link href="/compare" className="border-2 border-slate-200 bg-white text-slate-900 px-8 py-4 rounded-2xl text-lg font-black hover:bg-slate-50 transition-colors">
-                                Compare Plans
+                                Compare
                             </Link>
                         </div>
                     </div>
@@ -217,21 +228,11 @@ export default function Home() {
                         </div>
                     </div>
 
-                    {/* Trusted By */}
-                    <div className="border-t border-white/10 pt-16 pb-8 text-center">
-                        <p className="text-xs font-black uppercase tracking-[0.3em] text-slate-500 mb-12">Trusted by Industry Leaders</p>
-                        <div className="flex flex-wrap items-center justify-center gap-12 md:gap-24 opacity-30 grayscale hover:grayscale-0 transition-all duration-700">
-                            <span className="font-black text-xl lg:text-3xl text-white italic tracking-tighter">FORTUNE 500</span>
-                            <span className="font-black text-xl lg:text-3xl text-white italic tracking-tighter">SECURELY</span>
-                            <span className="font-black text-xl lg:text-3xl text-white italic tracking-tighter">TECHCORP</span>
-                        </div>
-                    </div>
-
                     {/* Final CTA */}
                     <div className="mt-24 relative overflow-hidden bg-gradient-to-br from-primary to-orange-600 rounded-[3rem] p-12 md:p-20 text-center shadow-2xl shadow-primary/20">
                         <div className="relative z-10">
                             <h3 className="text-4xl md:text-5xl font-black text-white mb-8">Ready to secure your documents?</h3>
-                            <p className="text-white/90 text-xl mb-12 max-w-2xl mx-auto font-medium">Join thousands of companies using DocsVault for AI-powered sharing and intelligent document distribution.</p>
+                            <p className="text-white/90 text-xl mb-12 max-w-2xl mx-auto font-medium">Join professionals using DocsVault for AI-powered sharing and intelligent document distribution.</p>
                             <Link href="/register" className="inline-block bg-white text-primary px-12 py-5 rounded-2xl text-xl font-black shadow-2xl hover:scale-105 active:scale-95 transition-transform">
                                 Start Sharing for Free
                             </Link>
@@ -254,7 +255,7 @@ export default function Home() {
                     </div>
                     <div className="flex gap-8 text-slate-400 text-xs font-black uppercase tracking-widest">
                         <Link href="/compare" className="hover:text-primary transition-colors">Compare</Link>
-                        <Link href="/donate" className="hover:text-primary transition-colors">Support</Link>
+                        <Link href="/donate" className="hover:text-primary transition-colors">Support Us</Link>
                         <Link href="https://github.com/Nikhilkumar25/docvoult" className="hover:text-primary transition-colors">GitHub</Link>
                     </div>
                 </div>

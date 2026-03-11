@@ -101,6 +101,8 @@ function DashboardShell({ children }) {
         navItems.push({ href: '/dashboard/admin', label: 'Admin', icon: '🛡️' });
     }
 
+    navItems.push({ href: '/donate', label: 'Support Us', icon: '💖' });
+
     const userInitials = session.user?.name
         ? session.user.name.split(' ').map((n) => n[0]).join('').toUpperCase()
         : '?';
