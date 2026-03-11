@@ -28,6 +28,8 @@ export async function GET() {
             totalKBEntries,
             totalUnanswered,
             totalComments,
+            totalPageViews,
+            failedKBs,
         ] = await Promise.all([
             prisma.user.count(),
             prisma.document.count(),
@@ -37,6 +39,8 @@ export async function GET() {
             prisma.kBEntry.count(),
             prisma.unansweredQuestion.count(),
             prisma.comment.count(),
+            prisma.pageView.count(),
+            prisma.knowledgeBase.count({ where: { status: { in: ['error', 'failed'] } } }),
         ]);
 
         // ── Link feature breakdown ──
@@ -176,6 +180,7 @@ export async function GET() {
                 totalDocuments,
                 totalLinks,
                 totalViews,
+                totalPageViews,
                 uniqueViewers: uniqueViewers.length,
                 totalKBs,
                 totalFileSize: fileSizeAgg._sum.fileSize || 0,
@@ -192,6 +197,7 @@ export async function GET() {
             ai: {
                 totalKBs,
                 kbReady,
+                failedKBs,
                 totalEntries: totalKBEntries,
                 approvedEntries: kbApprovedEntries,
                 unanswered: totalUnanswered,

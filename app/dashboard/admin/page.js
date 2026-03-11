@@ -105,10 +105,10 @@ export default function AdminDashboard() {
         { label: 'Documents', value: kpis.totalDocuments, icon: '📄', color: '#F97316' },
         { label: 'Links Created', value: kpis.totalLinks, icon: '🔗', color: '#8B5CF6' },
         { label: 'Total Views', value: kpis.totalViews, icon: '👁️', color: '#10B981' },
+        { label: 'Total Page Swipes', value: kpis.totalPageViews, icon: '📜', color: '#3B82F6' },
         { label: 'Unique Viewers', value: kpis.uniqueViewers, icon: '🌍', color: '#06B6D4' },
         { label: 'AI KBs Active', value: kpis.totalKBs, icon: '🤖', color: '#EC4899' },
         { label: 'Storage Used', value: formatFileSize(kpis.totalFileSize), icon: '💾', color: '#F59E0B' },
-        { label: 'Avg. Engagement', value: formatDuration(kpis.avgEngagement), icon: '⏱️', color: '#14B8A6' },
     ];
 
     const linkFeatureBars = [
@@ -176,6 +176,10 @@ export default function AdminDashboard() {
                         <div className="admin-ai-row">
                             <span>KBs Ready / Live</span>
                             <strong>{ai.kbReady}</strong>
+                        </div>
+                        <div className="admin-ai-row">
+                            <span>Failed AI Training</span>
+                            <strong style={{ color: ai.failedKBs > 0 ? 'var(--danger)' : 'var(--text-secondary)' }}>{ai.failedKBs}</strong>
                         </div>
                         <div className="admin-ai-row">
                             <span>Total Q&A Entries</span>
