@@ -4,6 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { put, del } from '@vercel/blob';
 import prisma from '@/lib/db';
+import { getCached } from '@/lib/memory-cache';
 
 export async function GET(request) {
     try {
@@ -36,35 +37,38 @@ export async function GET(request) {
             };
         }
 
-        const documents = await prisma.document.findMany({
-            where: whereClause,
-            include: {
-                user: { select: { name: true, email: true } },
-                _count: {
-                    select: { views: true, links: true },
+        const cacheKey = `dashboard_docs_${session.user.id}_${workspaceId || 'personal'}_${folderId || 'root'}`;
+        const formatted = await getCached(cacheKey, async () => {
+            const documents = await prisma.document.findMany({
+                where: whereClause,
+                include: {
+                    user: { select: { name: true, email: true } },
+                    _count: {
+                        select: { views: true, links: true },
+                    },
+                    views: {
+                        orderBy: { startedAt: 'desc' },
+                        take: 1,
+                        select: { startedAt: true },
+                    },
                 },
-                views: {
-                    orderBy: { startedAt: 'desc' },
-                    take: 1,
-                    select: { startedAt: true },
-                },
-            },
-            orderBy: { createdAt: 'desc' },
-        });
+                orderBy: { createdAt: 'desc' },
+            });
 
-        const formatted = documents.map((doc) => ({
-            id: doc.id,
-            title: doc.title,
-            fileName: doc.fileName,
-            fileSize: doc.fileSize,
-            pageCount: doc.pageCount,
-            createdAt: doc.createdAt,
-            totalViews: doc._count.views,
-            totalLinks: doc._count.links,
-            lastViewedAt: doc.views[0]?.startedAt || null,
-            uploadedBy: doc.user?.name || 'Unknown',
-            isOwner: doc.userId === session.user.id,
-        }));
+            return documents.map((doc) => ({
+                id: doc.id,
+                title: doc.title,
+                fileName: doc.fileName,
+                fileSize: doc.fileSize,
+                pageCount: doc.pageCount,
+                createdAt: doc.createdAt,
+                totalViews: doc._count.views,
+                totalLinks: doc._count.links,
+                lastViewedAt: doc.views[0]?.startedAt || null,
+                uploadedBy: doc.user?.name || 'Unknown',
+                isOwner: doc.userId === session.user.id,
+            }));
+        }, 2500);
 
         return NextResponse.json(formatted);
     } catch (error) {

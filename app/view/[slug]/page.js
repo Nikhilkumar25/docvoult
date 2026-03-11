@@ -60,6 +60,7 @@ export default async function ViewPage({ params, searchParams }) {
             hasPasscode: !!link.passcode,
             allowDownload: link.allowDownload,
             requireWatermark: link.requireWatermark,
+            enableAI: link.enableAI,
             document: {
                 title: link.document.title,
                 pageCount: link.document.pageCount,

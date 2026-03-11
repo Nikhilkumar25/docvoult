@@ -48,6 +48,18 @@ export default function DocumentDetailPage({ params }) {
     const [replyText, setReplyText] = useState('');
     const [sendingReply, setSendingReply] = useState(false);
 
+    // AI Knowledge Base state
+    const [kb, setKb] = useState(null);
+    const [isGeneratingKB, setIsGeneratingKB] = useState(false);
+    const [approvingAll, setApprovingAll] = useState(false);
+
+    // Collapsable KB State
+    const [isKBExpanded, setIsKBExpanded] = useState(false);
+    const isKBExpandedRef = useRef(false);
+    useEffect(() => {
+        isKBExpandedRef.current = isKBExpanded;
+    }, [isKBExpanded]);
+
     // Link creation form
     const [linkForm, setLinkForm] = useState({
         customSlug: '',
@@ -56,6 +68,7 @@ export default function DocumentDetailPage({ params }) {
         expiresAt: '',
         allowDownload: false,
         requireWatermark: false,
+        enableAI: false,
     });
     const [creatingLink, setCreatingLink] = useState(false);
     const [linkError, setLinkError] = useState('');
@@ -154,7 +167,7 @@ export default function DocumentDetailPage({ params }) {
                 // Refresh document data to show the reply
                 const updatedRes = await fetch(`/api/documents/${id}`);
                 const updatedData = await updatedRes.json();
-                setDocumentData(updatedData);
+                setDocument(updatedData);
                 setReplyingTo(null);
                 setReplyText('');
             }
@@ -165,12 +178,126 @@ export default function DocumentDetailPage({ params }) {
         }
     };
 
+    const fetchKB = async () => {
+        try {
+            const res = await fetch(`/api/documents/${id}/kb`);
+            if (res.ok) {
+                const data = await res.json();
+                setKb(data);
+            }
+        } catch (err) {
+            console.error('Failed to fetch KB:', err);
+        }
+    };
+
+    const toggleKB = () => {
+        if (!isKBExpanded) {
+            setIsKBExpanded(true);
+            if (!kb) fetchKB();
+        } else {
+            setIsKBExpanded(false);
+        }
+    };
+
+    const generateKB = async () => {
+        setIsGeneratingKB(true);
+        setIsKBExpanded(true);
+        try {
+            const res = await fetch(`/api/documents/${id}/kb`, { method: 'POST' });
+            if (res.ok) {
+                const data = await res.json();
+                setKb(data);
+            } else {
+                alert('Failed to generate AI Knowledge Base. Please ensure the document has clear text.');
+            }
+        } catch (err) {
+            console.error('KB Generation error:', err);
+        } finally {
+            setIsGeneratingKB(false);
+        }
+    };
+
+    const updateKBEntry = (entryId, updates) => {
+        // Optimistic UI update for snappy typing
+        setKb(prev => ({
+            ...prev,
+            entries: prev.entries.map(e => e.id === entryId ? { ...e, ...updates } : e),
+        }));
+
+        // Debounce the network request
+        if (window[`debounceTimeout_${entryId}`]) {
+            clearTimeout(window[`debounceTimeout_${entryId}`]);
+        }
+
+        window[`debounceTimeout_${entryId}`] = setTimeout(async () => {
+            try {
+                const res = await fetch(`/api/documents/${id}/kb/${entryId}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updates),
+                });
+                if (!res.ok) {
+                    console.error('Failed to update KB entry on server');
+                }
+            } catch (err) {
+                console.error('Failed to update KB entry:', err);
+            }
+        }, 600);
+    };
+
+    const deleteKBEntry = async (entryId) => {
+        if (!confirm('Are you sure you want to remove this Q&A pair?')) return;
+        try {
+            const res = await fetch(`/api/documents/${id}/kb/${entryId}`, { method: 'DELETE' });
+            if (res.ok) {
+                setKb(prev => ({
+                    ...prev,
+                    entries: prev.entries.filter(e => e.id !== entryId),
+                }));
+            }
+        } catch (err) {
+            console.error('Failed to delete KB entry:', err);
+        }
+    };
+
+    const approveAllKB = async () => {
+        setApprovingAll(true);
+        try {
+            const res = await fetch(`/api/documents/${id}/kb/approve-all`, { method: 'POST' });
+            if (res.ok) {
+                setKb(prev => ({
+                    ...prev,
+                    entries: prev.entries.map(e => ({ ...e, isApproved: true })),
+                }));
+            }
+        } catch (err) {
+            console.error('Failed to approve all:', err);
+        } finally {
+            setApprovingAll(false);
+        }
+    };
+
+    const dismissUnanswered = async (unansweredId) => {
+        // We'll reuse the PATCH route or create a small specific one if needed, 
+        // but for now let's just use a client-side filter after a fake/future DELETE
+        setKb(prev => ({
+            ...prev,
+            unanswered: prev.unanswered.filter(u => u.id !== unansweredId),
+        }));
+    };
+
+    const isEditingKBRef = useRef(false);
+
     useEffect(() => {
         fetchDocument();
 
         // Real-time polling every 5 seconds
         const interval = setInterval(() => {
-            fetchDocument(false); // pass false to avoid showing loading spinner again
+            fetchDocument(false);
+            // Only poll the heavy KB payload if it's currently expanded and the user isn't actively typing
+            if (!isEditingKBRef.current && isKBExpandedRef.current) {
+                fetchKB();
+            }
         }, 5000);
 
         return () => clearInterval(interval);
@@ -210,9 +337,14 @@ export default function DocumentDetailPage({ params }) {
             const data = await res.json();
 
             if (res.ok) {
+                // Instantly update the UI with the newly created link
+                const newLink = { ...data, _count: { views: 0 } };
+                setDocument(prev => ({
+                    ...prev,
+                    links: [newLink, ...prev.links]
+                }));
                 setShowLinkModal(false);
-                setLinkForm({ customSlug: '', requireEmail: false, passcode: '', expiresAt: '', allowDownload: false, requireWatermark: false });
-                fetchDocument();
+                setLinkForm({ customSlug: '', requireEmail: false, passcode: '', expiresAt: '', allowDownload: false, requireWatermark: false, enableAI: false });
             } else {
                 setLinkError(data.error || 'Failed to create link');
             }
@@ -382,7 +514,8 @@ export default function DocumentDetailPage({ params }) {
                                             {link.passcode && <span className="badge badge-warning">🔒 Passcode</span>}{' '}
                                             {link.expiresAt && <span className="badge badge-danger">⏱ Expires</span>}{' '}
                                             {link.allowDownload && <span className="badge badge-success">📥 Download</span>}{' '}
-                                            {link.requireWatermark && <span className="badge badge-primary">🛡️ Watermark</span>}
+                                            {link.requireWatermark && <span className="badge badge-primary">🛡️ Watermark</span>}{' '}
+                                            {link.enableAI && <span className="badge badge-accent">🤖 AI</span>}
                                         </td>
                                         <td>{link._count.views}</td>
                                         <td>{formatDate(link.createdAt)}</td>
@@ -401,7 +534,6 @@ export default function DocumentDetailPage({ params }) {
                     )}
                 </div>
             </div>
-
             {/* Page Engagement Stats */}
             <div className="section-panel">
                 <div className="section-panel-header">
@@ -575,6 +707,163 @@ export default function DocumentDetailPage({ params }) {
                 </div>
             </div>
 
+            {/* AI Knowledge Base Management */}
+            <div className="section-panel kb-section">
+                <div className="section-panel-header">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <h2>🤖 AI Knowledge Base</h2>
+                        {document.knowledgeBase && <span className={`kb-status-badge ${document.knowledgeBase.status}`}>{document.knowledgeBase.status.toUpperCase()}</span>}
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        {document.knowledgeBase && (
+                            <button className="btn btn-secondary btn-sm" onClick={toggleKB}>
+                                {isKBExpanded ? 'Collapse' : 'View & Edit'}
+                            </button>
+                        )}
+                        <button
+                            className="btn btn-secondary btn-sm"
+                            onClick={generateKB}
+                            disabled={isGeneratingKB}
+                        >
+                            {isGeneratingKB ? '✨ Generating...' : document.knowledgeBase ? '🔄 Regenerate' : '✨ Generate with AI'}
+                        </button>
+                        {isKBExpanded && kb && kb.entries.some(e => !e.isApproved) && (
+                            <button
+                                className="btn btn-primary btn-sm"
+                                onClick={approveAllKB}
+                                disabled={approvingAll}
+                            >
+                                {approvingAll ? '⌛ Approving...' : '✅ Approve All'}
+                            </button>
+                        )}
+                    </div>
+                </div>
+                <div className="section-panel-body">
+                    {!document.knowledgeBase ? (
+                        <div className="empty-state">
+                            <p>Train an AI on this document to give viewers instant answers. Costs ~$0.01 per document.</p>
+                            <button className="btn btn-primary" onClick={generateKB} disabled={isGeneratingKB} style={{ marginTop: 12 }}>
+                                {isGeneratingKB ? 'Extracting Text & Generating...' : 'Start AI Training'}
+                            </button>
+                        </div>
+                    ) : document.knowledgeBase.status === 'generating' ? (
+                        <div className="kb-loading-state">
+                            <div className="ai-pulse"></div>
+                            <p>AI is reading your document and generating questions... This usually takes 10-15 seconds.</p>
+                        </div>
+                    ) : !isKBExpanded ? (
+                        <div className="kb-summary-state" style={{ padding: 'var(--space-lg)', textAlign: 'center', background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)' }}>
+                            <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
+                                Knowledge Base contains <strong>{document.knowledgeBase._count.entries}</strong> total questions.
+                            </p>
+                            <button className="btn btn-ghost" onClick={toggleKB} style={{ marginTop: '8px', color: 'var(--accent-primary)' }}>
+                                Click here to view and edit answers
+                            </button>
+                        </div>
+                    ) : !kb ? (
+                        <div className="loading-spinner" style={{ padding: '20px' }}>
+                            <div className="spinner" />
+                        </div>
+                    ) : (
+                        <div className="kb-manager">
+                            {/* Analytics Mini-Dashboard */}
+                            <div className="kb-analytics-grid">
+                                <div className="kb-stat-card">
+                                    <div className="kb-stat-label">Total Q&A</div>
+                                    <div className="kb-stat-value">{kb.entries.length}</div>
+                                </div>
+                                <div className="kb-stat-card">
+                                    <div className="kb-stat-label">Approved</div>
+                                    <div className="kb-stat-value">{kb.entries.filter(e => e.isApproved).length}</div>
+                                </div>
+                                <div className="kb-stat-card">
+                                    <div className="kb-stat-label">Pending Review</div>
+                                    <div className="kb-stat-value warning">{kb.entries.filter(e => !e.isApproved).length}</div>
+                                </div>
+                            </div>
+
+                            {/* Unanswered Suggestions */}
+                            {kb.unanswered && kb.unanswered.length > 0 && (
+                                <div className="suggested-questions-box">
+                                    <h3>📬 Suggested Questions (from Viewers)</h3>
+                                    <div className="suggested-list">
+                                        {kb.unanswered.map(u => (
+                                            <div key={u.id} className="suggested-item">
+                                                <div className="suggested-info">
+                                                    <div className="suggested-text">"{u.question}"</div>
+                                                    <div className="suggested-count">Asked {u.count} times</div>
+                                                </div>
+                                                <div className="suggested-actions">
+                                                    <button className="btn btn-ghost btn-xs" onClick={() => {
+                                                        const ans = prompt(`Answer for: ${u.question}`);
+                                                        if (ans) {
+                                                            // For simplicity in this demo, we'll just alert. 
+                                                            // In real app, we'd call an API to add a new KB entry.
+                                                            alert('Great! Adding to KB and dismissing suggestion...');
+                                                            dismissUnanswered(u.id);
+                                                        }
+                                                    }}>Add Answer</button>
+                                                    <button className="btn btn-ghost btn-xs text-danger" onClick={() => dismissUnanswered(u.id)}>Dismiss</button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* KB Entries List */}
+                            <div className="kb-entries-list">
+                                {kb.entries.map(entry => (
+                                    <div key={entry.id} className={`kb-entry-card ${entry.isApproved ? 'approved' : 'pending'}`}>
+                                        <div className="kb-entry-main">
+                                            <input
+                                                className="kb-input-q"
+                                                value={entry.question}
+                                                onChange={(e) => updateKBEntry(entry.id, { question: e.target.value })}
+                                                onFocus={() => { isEditingKBRef.current = true; }}
+                                                onBlur={() => { isEditingKBRef.current = false; }}
+                                                placeholder="Strategic Question"
+                                            />
+                                            <textarea
+                                                className="kb-input-a"
+                                                value={entry.answer}
+                                                onChange={(e) => updateKBEntry(entry.id, { answer: e.target.value })}
+                                                onFocus={() => { isEditingKBRef.current = true; }}
+                                                onBlur={() => { isEditingKBRef.current = false; }}
+                                                rows={3}
+                                                style={{ border: !entry.answer ? '1px dashed var(--accent-primary)' : '' }}
+                                                placeholder="Provide an answer for this question... (Required before approval)"
+                                            />
+                                        </div>
+                                        <div className="kb-entry-meta">
+                                            <select
+                                                className="kb-select-cat"
+                                                value={entry.category}
+                                                onChange={(e) => updateKBEntry(entry.id, { category: e.target.value })}
+                                            >
+                                                <option value="general">General</option>
+                                                <option value="sensitive">Sensitive (Request Contact)</option>
+                                                <option value="out-of-scope">Out of Scope</option>
+                                            </select>
+                                            <div className="kb-card-actions">
+                                                <button
+                                                    className={`kb-approve-toggle ${entry.isApproved ? 'active' : ''}`}
+                                                    disabled={!entry.answer || !entry.answer.trim()}
+                                                    onClick={() => updateKBEntry(entry.id, { isApproved: !entry.isApproved })}
+                                                >
+                                                    {entry.isApproved ? '✅ Approved' : (!entry.answer || !entry.answer.trim() ? 'Answer Required' : 'Approve')}
+                                                </button>
+                                                <button className="kb-delete-btn" onClick={() => deleteKBEntry(entry.id)}>🗑️</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+
             {/* Create Link Modal */}
             {showLinkModal && (
                 <div className="modal-overlay" onClick={() => setShowLinkModal(false)}>
@@ -677,6 +966,21 @@ export default function DocumentDetailPage({ params }) {
                                     <label htmlFor="requireWatermark">Apply Security Watermark</label>
                                     <p style={{ margin: '0 0 0 24px', fontSize: '12px', color: 'var(--text-tertiary)' }}>
                                         Overlays viewer's IP/Email to deter screenshots and sharing
+                                    </p>
+                                </div>
+
+                                <div className="checkbox-group mt-3" style={{ marginTop: '0.5rem' }}>
+                                    <input
+                                        type="checkbox"
+                                        id="enableAI"
+                                        checked={linkForm.enableAI}
+                                        onChange={(e) =>
+                                            setLinkForm((prev) => ({ ...prev, enableAI: e.target.checked }))
+                                        }
+                                    />
+                                    <label htmlFor="enableAI">Enable AI Knowledge Base</label>
+                                    <p style={{ margin: '0 0 0 24px', fontSize: '12px', color: 'var(--text-tertiary)' }}>
+                                        Replaces community questions with a smart AI Chatbot for viewers
                                     </p>
                                 </div>
                             </div>

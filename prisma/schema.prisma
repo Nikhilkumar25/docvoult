@@ -69,23 +69,24 @@ model Folder {
 }
 
 model Document {
-  id          String     @id @default(cuid())
-  title       String
-  fileName    String
-  fileUrl     String
-  fileSize    Int
-  pageCount   Int        @default(1)
-  userId      String
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
-  folderId    String?
-  workspaceId String?
-  comments    Comment[]
-  folder      Folder?    @relation(fields: [folderId], references: [id])
-  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workspace   Workspace? @relation(fields: [workspaceId], references: [id])
-  links       Link[]
-  views       View[]
+  id            String         @id @default(cuid())
+  title         String
+  fileName      String
+  fileUrl       String
+  fileSize      Int
+  pageCount     Int            @default(1)
+  userId        String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  folderId      String?
+  workspaceId   String?
+  comments      Comment[]
+  folder        Folder?        @relation(fields: [folderId], references: [id])
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace     Workspace?     @relation(fields: [workspaceId], references: [id])
+  knowledgeBase KnowledgeBase?
+  links         Link[]
+  views         View[]
 
   @@index([userId])
   @@index([workspaceId])
@@ -103,6 +104,7 @@ model Link {
   isActive         Boolean   @default(true)
   createdAt        DateTime  @default(now())
   requireWatermark Boolean   @default(false)
+  enableAI         Boolean   @default(false)
   document         Document  @relation(fields: [documentId], references: [id], onDelete: Cascade)
   views            View[]
 
@@ -156,4 +158,42 @@ model Comment {
 
   @@index([documentId])
   @@index([viewId])
+}
+
+model KnowledgeBase {
+  id         String               @id @default(cuid())
+  documentId String               @unique
+  status     String               @default("pending")
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
+  entries    KBEntry[]
+  document   Document             @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  unanswered UnansweredQuestion[]
+}
+
+model KBEntry {
+  id              String        @id @default(cuid())
+  knowledgeBaseId String
+  question        String
+  answer          String        @default("")
+  category        String        @default("general")
+  embedding       String?
+  isApproved      Boolean       @default(false)
+  sortOrder       Int           @default(0)
+  knowledgeBase   KnowledgeBase @relation(fields: [knowledgeBaseId], references: [id], onDelete: Cascade)
+
+  @@index([knowledgeBaseId])
+}
+
+model UnansweredQuestion {
+  id              String        @id @default(cuid())
+  knowledgeBaseId String
+  question        String
+  count           Int           @default(1)
+  createdAt       DateTime      @default(now())
+  lastAskedAt     DateTime      @default(now())
+  dismissed       Boolean       @default(false)
+  knowledgeBase   KnowledgeBase @relation(fields: [knowledgeBaseId], references: [id], onDelete: Cascade)
+
+  @@index([knowledgeBaseId])
 }

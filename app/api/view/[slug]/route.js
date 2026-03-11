@@ -2,25 +2,30 @@ export const dynamic = 'force-dynamic';
 import { NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 
+import { getCached } from '@/lib/memory-cache';
+
 // GET - Validate link and return document info
 export async function GET(request, { params }) {
     try {
         const { slug } = await params;
 
-        const link = await prisma.link.findUnique({
-            where: { slug },
-            include: {
-                document: {
-                    select: {
-                        id: true,
-                        title: true,
-                        pageCount: true,
-                        fileUrl: true,
-                        fileName: true,
+        const cacheKey = `viewer_link_${slug}`;
+        const link = await getCached(cacheKey, async () => {
+            return await prisma.link.findUnique({
+                where: { slug },
+                include: {
+                    document: {
+                        select: {
+                            id: true,
+                            title: true,
+                            pageCount: true,
+                            fileUrl: true,
+                            fileName: true,
+                        },
                     },
                 },
-            },
-        });
+            });
+        }, 5000); // 5s cache since links rarely change configuration
 
         if (!link) {
             return NextResponse.json({ error: 'Link not found' }, { status: 404 });
@@ -61,6 +66,7 @@ export async function GET(request, { params }) {
                     },
                     allowDownload: link.allowDownload,
                     requireWatermark: link.requireWatermark,
+                    enableAI: link.enableAI,
                     isRestored: true
                 });
             }
@@ -71,6 +77,7 @@ export async function GET(request, { params }) {
             hasPasscode: !!link.passcode,
             allowDownload: link.allowDownload,
             requireWatermark: link.requireWatermark,
+            enableAI: link.enableAI,
             document: {
                 title: link.document.title,
                 pageCount: link.document.pageCount,
@@ -146,6 +153,7 @@ export async function POST(request, { params }) {
             },
             allowDownload: link.allowDownload,
             requireWatermark: link.requireWatermark,
+            enableAI: link.enableAI,
         });
     } catch (error) {
         console.error('Error accessing document:', error);

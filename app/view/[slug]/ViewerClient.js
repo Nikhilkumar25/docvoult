@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
+import AIChatPanel from './AIChatPanel';
 
 const PDFRenderer = dynamic(() => import('./PDFRenderer'), {
     ssr: false,
@@ -119,6 +120,7 @@ export default function ViewerClient({ initialData }) {
 
             const data = await res.json();
             setDocumentData(data);
+            setLinkInfo(prev => ({ ...prev, ...data }));
             setViewId(data.viewId);
             sessionStorage.setItem(`viewId_${slug}`, data.viewId);
             totalStartTime.current = Date.now();
@@ -302,8 +304,8 @@ export default function ViewerClient({ initialData }) {
                 <div className="mobile-bottom-bar">
                     <button className={`mobile-action-btn ${isQuestionsOpen ? 'active' : ''}`} onClick={() => setIsQuestionsOpen(!isQuestionsOpen)}>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                        <span>Q&A</span>
-                        {questions.length > 0 && <span className="badge">{questions.length}</span>}
+                        <span>Questions</span>
+                        {!linkInfo.enableAI && questions.length > 0 && <span className="badge">{questions.length}</span>}
                     </button>
                     {documentData?.allowDownload && (
                         <a href={documentData.document.fileUrl} download className="mobile-action-btn">
@@ -318,36 +320,44 @@ export default function ViewerClient({ initialData }) {
                     <div className="mobile-drawer-overlay" onClick={() => setIsQuestionsOpen(false)}>
                         <div className="mobile-drawer" onClick={e => e.stopPropagation()}>
                             <div className="drawer-header">
-                                <h3>Questions</h3>
+                                <h3>{linkInfo.enableAI ? 'Questions (AI)' : 'Questions'}</h3>
                                 <button className="close-btn" onClick={() => setIsQuestionsOpen(false)}>✕</button>
                             </div>
-                            <div className="drawer-content comments-list">
-                                {questions.length === 0 ? (
-                                    <div className="empty-state">No questions yet. Ask one below!</div>
+                            <div className="drawer-body">
+                                {linkInfo.enableAI ? (
+                                    <AIChatPanel slug={slug} documentTitle={documentData?.document?.title} />
                                 ) : (
-                                    questions.map(q => (
-                                        <div key={q.id} className="comment-item">
-                                            <div className="comment-meta">
-                                                <span className="comment-user">{q.userName}</span>
-                                                {q.pageNumber && <span className="comment-page">P{q.pageNumber}</span>}
-                                            </div>
-                                            <div className="comment-text">{q.text}</div>
-                                            {q.response && (
-                                                <div className="creator-response">
-                                                    <div className="response-header">Response:</div>
-                                                    <div className="response-text">{q.response}</div>
-                                                </div>
+                                    <>
+                                        <div className="comments-list">
+                                            {questions.length === 0 ? (
+                                                <div className="empty-state">No questions yet. Ask one below!</div>
+                                            ) : (
+                                                questions.map(q => (
+                                                    <div key={q.id} className="comment-item">
+                                                        <div className="comment-meta">
+                                                            <span className="comment-user">{q.userName}</span>
+                                                            {q.pageNumber && <span className="comment-page">P{q.pageNumber}</span>}
+                                                        </div>
+                                                        <div className="comment-text">{q.text}</div>
+                                                        {q.response && (
+                                                            <div className="creator-response">
+                                                                <div className="response-header">Response:</div>
+                                                                <div className="response-text">{q.response}</div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ))
                                             )}
                                         </div>
-                                    ))
+                                        <form className="drawer-footer comment-form" onSubmit={handleQuestionSubmit}>
+                                            <div style={{ display: 'flex', gap: '8px', zIndex: 1000, background: 'var(--bg-card)' }}>
+                                                <input type="text" className="input" placeholder="Ask something..." value={newQuestion} onChange={(e) => setNewQuestion(e.target.value)} />
+                                                <button type="submit" className="btn btn-primary btn-sm">Ask</button>
+                                            </div>
+                                        </form>
+                                    </>
                                 )}
                             </div>
-                            <form className="drawer-footer comment-form" onSubmit={handleQuestionSubmit}>
-                                <div style={{ display: 'flex', gap: '8px', zIndex: 1000, background: 'var(--bg-card)' }}>
-                                    <input type="text" className="input" placeholder="Ask something..." value={newQuestion} onChange={(e) => setNewQuestion(e.target.value)} />
-                                    <button type="submit" className="btn btn-primary btn-sm">Ask</button>
-                                </div>
-                            </form>
                         </div>
                     </div>
                 )}
@@ -376,7 +386,7 @@ export default function ViewerClient({ initialData }) {
                     <button className="viewer-action-btn" onClick={() => setRotate(prev => (prev + 90) % 360)}>Rotate</button>
                     <button className="viewer-action-btn" onClick={toggleFullscreen}>Present</button>
                     <button className={`viewer-action-btn ${isQuestionsOpen ? 'active' : ''}`} onClick={() => setIsQuestionsOpen(!isQuestionsOpen)}>
-                        Questions {questions.length > 0 && <span className="comment-count-badge">{questions.length}</span>}
+                        {linkInfo.enableAI ? 'Questions & AI' : `Questions ${questions.length > 0 ? `(${questions.length})` : ''}`}
                     </button>
                 </div>
 
@@ -413,31 +423,37 @@ export default function ViewerClient({ initialData }) {
 
                 {isQuestionsOpen && (
                     <div className="viewer-comments-sidebar">
-                        <div className="comments-header">
-                            <h3>Questions</h3>
-                            <button className="close-btn" onClick={() => setIsQuestionsOpen(false)}>×</button>
-                        </div>
-                        <div className="comments-list">
-                            {questions.map(q => (
-                                <div key={q.id} className="comment-item">
-                                    <div className="comment-meta">
-                                        <span className="comment-user">{q.userName}</span>
-                                        {q.pageNumber && <span className="comment-page">Page {q.pageNumber}</span>}
-                                    </div>
-                                    <div className="comment-text">{q.text}</div>
-                                    {q.response && (
-                                        <div className="creator-response">
-                                            <div className="response-header">Creator Answered:</div>
-                                            <div className="response-text">{q.response}</div>
-                                        </div>
-                                    )}
+                        {linkInfo.enableAI ? (
+                            <AIChatPanel slug={slug} documentTitle={documentData?.document?.title} />
+                        ) : (
+                            <>
+                                <div className="comments-header">
+                                    <h3>Questions</h3>
+                                    <button className="close-btn" onClick={() => setIsQuestionsOpen(false)}>×</button>
                                 </div>
-                            ))}
-                        </div>
-                        <form className="comment-form" onSubmit={handleQuestionSubmit}>
-                            <textarea className="input" placeholder="Ask a question..." value={newQuestion} onChange={(e) => setNewQuestion(e.target.value)} rows={3} />
-                            <button type="submit" className="btn btn-primary btn-sm" style={{ width: '100%', marginTop: 8 }}>Ask Question</button>
-                        </form>
+                                <div className="comments-list">
+                                    {questions.map(q => (
+                                        <div key={q.id} className="comment-item">
+                                            <div className="comment-meta">
+                                                <span className="comment-user">{q.userName}</span>
+                                                {q.pageNumber && <span className="comment-page">Page {q.pageNumber}</span>}
+                                            </div>
+                                            <div className="comment-text">{q.text}</div>
+                                            {q.response && (
+                                                <div className="creator-response">
+                                                    <div className="response-header">Creator Answered:</div>
+                                                    <div className="response-text">{q.response}</div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                                <form className="comment-form" onSubmit={handleQuestionSubmit}>
+                                    <textarea className="input" placeholder="Ask a question..." value={newQuestion} onChange={(e) => setNewQuestion(e.target.value)} rows={3} />
+                                    <button type="submit" className="btn btn-primary btn-sm" style={{ width: '100%', marginTop: 8 }}>Ask Question</button>
+                                </form>
+                            </>
+                        )}
                     </div>
                 )}
             </div>

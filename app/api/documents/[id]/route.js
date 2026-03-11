@@ -5,6 +5,8 @@ import { authOptions } from '@/lib/auth';
 import { del } from '@vercel/blob';
 import prisma from '@/lib/db';
 
+import { getCached } from '@/lib/memory-cache';
+
 export async function GET(request, { params }) {
     try {
         const session = await getServerSession(authOptions);
@@ -14,79 +16,109 @@ export async function GET(request, { params }) {
 
         const { id } = await params;
 
-        const document = await prisma.document.findFirst({
-            where: {
-                id,
-                OR: [
-                    { userId: session.user.id },
-                    { workspace: { ownerId: session.user.id } },
-                    { workspace: { members: { some: { userId: session.user.id } } } }
-                ]
-            },
-            include: {
-                workspace: { include: { owner: true } },
-                links: {
-                    orderBy: { createdAt: 'desc' },
-                    include: {
-                        _count: { select: { views: true } },
-                    },
+        // Wrap the entire payload in a 2.5s memory cache to guarantee 0ms latency for polling hits
+        const cacheKey = `doc_${id}_${session.user.id}`;
+        const payload = await getCached(cacheKey, async () => {
+            const document = await prisma.document.findFirst({
+                where: {
+                    id,
+                    OR: [
+                        { userId: session.user.id },
+                        { workspace: { ownerId: session.user.id } },
+                        { workspace: { members: { some: { userId: session.user.id } } } }
+                    ]
                 },
-                views: {
-                    orderBy: { startedAt: 'desc' },
-                    include: {
-                        link: { select: { slug: true } },
-                        pageViews: {
-                            orderBy: { pageNumber: 'asc' },
+                include: {
+                    workspace: { include: { owner: true } },
+                    links: {
+                        orderBy: { createdAt: 'desc' },
+                        include: {
+                            _count: { select: { views: true } },
                         },
                     },
+                    views: {
+                        take: 20, // Only fetch the 20 most recent viewers for the UI table
+                        orderBy: { startedAt: 'desc' },
+                        include: {
+                            link: { select: { slug: true } },
+                        },
+                    },
+                    comments: {
+                        orderBy: { createdAt: 'desc' },
+                    },
+                    knowledgeBase: {
+                        select: {
+                            id: true,
+                            status: true,
+                            _count: { select: { entries: true } }
+                        }
+                    },
+                    _count: { select: { views: true } },
                 },
-                comments: {
-                    orderBy: { createdAt: 'desc' },
-                },
-                _count: { select: { views: true } },
-            },
-        });
+            });
 
-        if (!document) {
+            if (!document) {
+                return null;
+            }
+
+            // 1. Analytics Aggregations executed on Database Engine for performance
+            const totalViews = document._count.views;
+
+            // Unique viewers count using raw SQL or grouping: we'll use a simple group by wrapper
+            const viewAgg = await prisma.view.aggregate({
+                where: { documentId: id },
+                _sum: { duration: true },
+            });
+            const totalDuration = viewAgg._sum.duration || 0;
+            const avgDuration = totalViews > 0 ? Math.round(totalDuration / totalViews) : 0;
+
+            const uniqueViewersQuery = await prisma.view.groupBy({
+                where: { documentId: id, viewerEmail: { not: null } },
+                by: ['viewerEmail'],
+            });
+            const uniqueViewers = uniqueViewersQuery.length;
+
+            // 2. Page Stats Aggregations
+            const pageGroups = await prisma.pageView.groupBy({
+                by: ['pageNumber'],
+                where: { view: { documentId: id } },
+                _count: { id: true },
+                _sum: { duration: true },
+            });
+
+            const pageStats = {};
+            for (let i = 1; i <= document.pageCount; i++) {
+                pageStats[i] = { views: 0, totalDuration: 0 };
+            }
+
+            pageGroups.forEach(group => {
+                const pn = group.pageNumber;
+                pageStats[pn] = {
+                    views: group._count.id,
+                    totalDuration: group._sum.duration || 0,
+                };
+            });
+
+            const actualPageCount = Math.max(document.pageCount, ...Object.keys(pageStats).map(Number), 0);
+
+            return {
+                ...document,
+                pageCount: actualPageCount,
+                analytics: {
+                    totalViews,
+                    uniqueViewers,
+                    totalDuration,
+                    avgDuration,
+                    pageStats,
+                },
+            };
+        }, 2500);
+
+        if (!payload) {
             return NextResponse.json({ error: 'Document not found' }, { status: 404 });
         }
 
-        // Logic continues as before...
-        const totalViews = document._count.views;
-        const uniqueViewers = new Set(
-            document.views.filter((v) => v.viewerEmail).map((v) => v.viewerEmail)
-        ).size;
-        const totalDuration = document.views.reduce((sum, v) => sum + v.duration, 0);
-        const avgDuration = totalViews > 0 ? Math.round(totalDuration / totalViews) : 0;
-
-        const pageStats = {};
-        for (let i = 1; i <= document.pageCount; i++) {
-            pageStats[i] = { views: 0, totalDuration: 0 };
-        }
-
-        document.views.forEach((view) => {
-            view.pageViews.forEach((pv) => {
-                if (!pageStats[pv.pageNumber]) {
-                    pageStats[pv.pageNumber] = { views: 0, totalDuration: 0 };
-                }
-                pageStats[pv.pageNumber].views += 1;
-                pageStats[pv.pageNumber].totalDuration += pv.duration;
-            });
-        });
-
-        const actualPageCount = Math.max(document.pageCount, ...Object.keys(pageStats).map(Number), 0);
-
-        return NextResponse.json({
-            ...document,
-            pageCount: actualPageCount,
-            analytics: {
-                totalViews,
-                uniqueViewers,
-                totalDuration,
-                avgDuration,
-                pageStats,
-            },
-        });
+        return NextResponse.json(payload);
     } catch (error) {
         console.error('Error fetching document:', error);
         return NextResponse.json({ error: 'Failed to fetch document' }, { status: 500 });

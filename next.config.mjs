@@ -6,7 +6,8 @@ const nextConfig = {
     config.resolve.alias.canvas = false;
     return config;
   },
-  serverExternalPackages: ['@prisma/client'],
+  serverExternalPackages: ['@prisma/client', 'pdf-parse'],
+
   images: {
     remotePatterns: [
       {

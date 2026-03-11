@@ -5,6 +5,8 @@ import { authOptions } from '@/lib/auth';
 import prisma from '@/lib/db';
 import { v4 as uuidv4 } from 'uuid';
 
+import { getCached } from '@/lib/memory-cache';
+
 export async function GET(request, { params }) {
     try {
         const session = await getServerSession(authOptions);
@@ -14,6 +16,7 @@ export async function GET(request, { params }) {
 
         const { id } = await params;
 
+        // Verify document access
         const document = await prisma.document.findFirst({
             where: {
                 id,
@@ -29,13 +32,16 @@ export async function GET(request, { params }) {
             return NextResponse.json({ error: 'Document not found' }, { status: 404 });
         }
 
-        const links = await prisma.link.findMany({
-            where: { documentId: id },
-            include: {
-                _count: { select: { views: true } },
-            },
-            orderBy: { createdAt: 'desc' },
-        });
+        const cacheKey = `links_${id}`;
+        const links = await getCached(cacheKey, async () => {
+            return await prisma.link.findMany({
+                where: { documentId: id },
+                include: {
+                    _count: { select: { views: true } },
+                },
+                orderBy: { createdAt: 'desc' },
+            });
+        }, 2500);
 
         return NextResponse.json(links);
     } catch (error) {
@@ -96,6 +102,7 @@ export async function POST(request, { params }) {
                 expiresAt: body.expiresAt ? new Date(body.expiresAt) : null,
                 allowDownload: body.allowDownload || false,
                 requireWatermark: body.requireWatermark || false,
+                enableAI: body.enableAI || false,
                 isActive: true,
             },
         });
