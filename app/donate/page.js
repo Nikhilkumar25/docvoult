@@ -37,17 +37,22 @@ export default function DonatePage() {
             </nav>
 
             <div style={{ maxWidth: '600px', width: '100%', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-                <div className="hero-badge animate-float" style={{ marginBottom: '2rem' }}>
+                <div className="hero-badge animate-float" style={{ 
+                    marginBottom: '2rem',
+                    background: 'rgba(249,115,22,0.05)',
+                    border: '1px solid rgba(249,115,22,0.1)',
+                    color: 'var(--accent-primary)'
+                }}>
                     ❤️ Support Open Innovation
                 </div>
                 
-                <h1 style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>Support <span className="gradient-text">DocsVault</span></h1>
+                <h1 style={{ fontSize: '3rem', marginBottom: '1.5rem', color: 'var(--text-primary)' }}>Support <span className="gradient-text">DocsVault</span></h1>
                 <p style={{ color: 'var(--text-secondary)', marginBottom: '3rem' }}>
                     We are committed to building the best document sharing experience. Your support helps us keep the servers running and the features flowing.
                 </p>
 
                 <div className="glass-card" style={{ padding: '3rem', borderRadius: '32px', textAlign: 'left' }}>
-                    <h3 style={{ marginBottom: '1.5rem' }}>Choose your contribution</h3>
+                    <h3 style={{ marginBottom: '1.5rem', color: 'var(--text-primary)' }}>Choose your contribution</h3>
                     
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem', marginBottom: '2.5rem' }}>
                         {donationOptions.map((opt) => (
@@ -62,9 +67,9 @@ export default function DonatePage() {
                         ))}
                     </div>
 
-                    <div style={{ padding: '1.5rem', background: 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)', marginBottom: '2.5rem' }}>
+                    <div style={{ padding: '1.5rem', background: 'var(--bg-tertiary)', borderRadius: '16px', border: '1px solid var(--border)', marginBottom: '2.5rem' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                            <span style={{ color: 'var(--text-tertiary)' }}>Selected Amount</span>
+                            <span style={{ color: 'var(--text-secondary)' }}>Selected Amount</span>
                             <span style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--accent-primary)' }}>{symbol}{price}</span>
                         </div>
                         <p style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>

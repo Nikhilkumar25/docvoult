@@ -23,15 +23,20 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section className="hero">
-        <div className="hero-badge animate-float">
+      <section className="hero" style={{ paddingTop: '10rem', minHeight: 'auto' }}>
+        <div className="hero-badge animate-float" style={{ 
+          background: 'rgba(249,115,22,0.05)', 
+          border: '1px solid rgba(249,115,22,0.1)',
+          color: 'var(--accent-primary)',
+          marginBottom: '2rem'
+        }}>
           ✨ The Evolution of Document Sharing
         </div>
-        <h1 className="text-glow">
+        <h1 className="text-glow" style={{ color: 'var(--text-primary)' }}>
           Share Documents. <br />
           <span className="gradient-text">Augmented by AI.</span>
         </h1>
-        <p className="hero-subtitle">
+        <p className="hero-subtitle" style={{ color: 'var(--text-secondary)' }}>
             Securely distribute your documents with page-level tracking, email gated access, and an intelligent AI knowledge base that answers viewer questions automatically.
         </p>
         <div className="hero-actions">
@@ -49,10 +54,10 @@ export default function Home() {
           width: '90%', 
           maxWidth: '1000px', 
           height: '400px', 
-          background: 'rgba(255,255,255,0.05)', 
+          background: 'var(--bg-card)', 
           borderRadius: '24px', 
-          border: '1px solid rgba(249,115,22,0.2)',
-          boxShadow: '0 0 50px rgba(249,115,22,0.1)',
+          border: '1px solid var(--border)',
+          boxShadow: 'var(--shadow-lg)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',

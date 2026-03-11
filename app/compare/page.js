@@ -24,26 +24,26 @@ export default function ComparePage() {
             </nav>
 
             <div style={{ maxWidth: '900px', margin: '4rem auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
-                <h1 style={{ fontSize: '3.5rem', marginBottom: '1.5rem' }}>DocsVault vs <span className="gradient-text">The Giants</span></h1>
+                <h1 style={{ fontSize: '3.5rem', marginBottom: '1.5rem', color: 'var(--text-primary)' }}>DocsVault vs <span className="gradient-text">The Giants</span></h1>
                 <p style={{ color: 'var(--text-secondary)', marginBottom: '4rem' }}>
                     Why docsVault is the preferred choice for high-performance teams and individual builders.
                 </p>
 
-                <div className="glass-card" style={{ borderRadius: '24px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div className="glass-card" style={{ borderRadius: '24px', overflow: 'hidden', border: '1px solid var(--border)' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                         <thead>
-                            <tr style={{ background: 'rgba(255,255,255,0.05)' }}>
-                                <th style={{ padding: '1.5rem', color: 'var(--text-tertiary)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Feature</th>
-                                <th style={{ padding: '1.5rem', borderBottom: '1px solid rgba(249,115,22,0.3)', color: 'var(--accent-primary)' }}>DocsVault</th>
-                                <th style={{ padding: '1.5rem', color: 'var(--text-tertiary)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>DocSend</th>
-                                <th style={{ padding: '1.5rem', color: 'var(--text-tertiary)', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>Papermark</th>
+                            <tr style={{ background: 'var(--bg-tertiary)' }}>
+                                <th style={{ padding: '1.5rem', color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)' }}>Feature</th>
+                                <th style={{ padding: '1.5rem', borderBottom: '1px solid var(--accent-glow)', color: 'var(--accent-primary)' }}>DocsVault</th>
+                                <th style={{ padding: '1.5rem', color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)' }}>DocSend</th>
+                                <th style={{ padding: '1.5rem', color: 'var(--text-secondary)', borderBottom: '1px solid var(--border)' }}>Papermark</th>
                             </tr>
                         </thead>
                         <tbody>
                             {comparisonData.map((row, i) => (
-                                <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                                    <td style={{ padding: '1.25rem', fontWeight: '600' }}>{row.feature}</td>
-                                    <td style={{ padding: '1.25rem', background: 'rgba(249,115,22,0.02)', fontWeight: '700' }}>{row.docvault}</td>
+                                <tr key={i} style={{ borderBottom: '1px solid var(--border)', background: 'var(--bg-card)' }}>
+                                    <td style={{ padding: '1.25rem', fontWeight: '600', color: 'var(--text-primary)' }}>{row.feature}</td>
+                                    <td style={{ padding: '1.25rem', background: 'rgba(249,115,22,0.02)', fontWeight: '700', color: 'var(--text-primary)' }}>{row.docvault}</td>
                                     <td style={{ padding: '1.25rem', color: 'var(--text-secondary)' }}>{row.docsend}</td>
                                     <td style={{ padding: '1.25rem', color: 'var(--text-secondary)' }}>{row.papermark}</td>
                                 </tr>
@@ -54,7 +54,7 @@ export default function ComparePage() {
 
                 <div style={{ marginTop: '5rem' }}>
                     <div className="glass-card" style={{ padding: '3rem', borderRadius: '32px' }}>
-                        <h2 style={{ marginBottom: '1rem' }}>Ready to experience the future?</h2>
+                        <h2 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>Ready to experience the future?</h2>
                         <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem' }}>Join hundreds of teams switching to a faster, AI-enabled sharing platform.</p>
                         <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem' }}>
                             <Link href="/register" className="btn btn-primary btn-lg">Get Started Free</Link>

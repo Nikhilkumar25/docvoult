@@ -161,8 +161,8 @@ img {
   min-height: 100vh;
   position: relative;
   overflow-x: hidden;
-  background-color: #050505; /* Sleek dark background for landing */
-  color: #FFFFFF;
+  background-color: var(--bg-primary); 
+  color: var(--text-primary);
 }
 
 .landing-bg {
@@ -173,9 +173,9 @@ img {
   bottom: 0;
   z-index: 0;
   background: 
-    radial-gradient(circle at 20% 30%, rgba(249, 115, 22, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 80% 70%, rgba(234, 88, 12, 0.1) 0%, transparent 40%),
-    #050505;
+    radial-gradient(circle at 20% 30%, rgba(249, 115, 22, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 80% 70%, rgba(234, 88, 12, 0.03) 0%, transparent 40%),
+    var(--bg-primary);
 }
 
 /* Premium Animations */
@@ -202,10 +202,10 @@ img {
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
 }
 
 .glass-card:hover {
@@ -227,7 +227,7 @@ img {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(10, 10, 15, 0.8);
+  background: var(--bg-glass);
   backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border);
 }
