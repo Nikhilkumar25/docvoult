@@ -95,7 +95,7 @@ function DashboardShell({ children }) {
         { href: '/dashboard/upload', label: 'Upload', icon: '📤' },
     ];
 
-    const isAdmin = session.user?.email === process.env.NEXT_PUBLIC_ADMIN_EMAIL;
+    const isAdmin = session.user?.isAdmin;
     if (isAdmin) {
         navItems.push({ href: '/dashboard/admin', label: 'Admin', icon: '🛡️' });
     }

@@ -54,8 +54,7 @@ export default function AdminDashboard() {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        const adminEmail = process.env.NEXT_PUBLIC_ADMIN_EMAIL;
-        if (session && session.user?.email !== adminEmail) {
+        if (session && !session.user?.isAdmin) {
             router.push('/dashboard');
             return;
         }
