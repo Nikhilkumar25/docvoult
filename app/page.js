@@ -22,260 +22,290 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* 1. Vibrant Hero Section (Based on Slide 2) */}
-      <section className="hero container" style={{ 
-        paddingTop: '160px', 
-        paddingBottom: '100px',
-        display: 'grid',
-        gridTemplateColumns: '1.2fr 1fr',
-        gap: '4rem',
-        alignItems: 'center',
-        textAlign: 'left',
-        minHeight: 'auto'
+      {/* 1. Vibrant Hero Section */}
+      <section className="hero section-padding" style={{ 
+        paddingTop: '180px', 
+        minHeight: '90vh',
+        display: 'flex',
+        alignItems: 'center'
       }}>
-        <div className="animate-fadeInUp">
-          <div className="hero-badge" style={{ 
-            background: 'rgba(249,115,22,0.05)', 
-            border: '1px solid rgba(249,115,22,0.1)',
-            color: 'var(--accent-primary)',
-            marginBottom: '1.5rem',
-            display: 'inline-flex'
-          }}>
-            ✨ Next-Gen Document Distribution
-          </div>
-          <h1 style={{ 
-            fontSize: '5rem', 
-            fontWeight: '900', 
-            lineHeight: '1.1', 
-            marginBottom: '2rem',
-            color: 'var(--text-primary)'
-          }}>
-            Share Documents. <br />
-            <span className="gradient-text-vibrant">Augmented by AI.</span>
-          </h1>
-          <p style={{ 
-            fontSize: '1.25rem', 
-            color: 'var(--text-secondary)', 
-            marginBottom: '3rem',
-            maxWidth: '600px',
-            lineHeight: '1.6'
-          }}>
-            The most secure way to distribute your high-stakes documents, now with AI-powered Q&A for your viewers. Track engagement, gate access, and answer questions automatically.
-          </p>
-          <div className="hero-actions" style={{ display: 'flex', gap: '1.5rem' }}>
-            <Link href="/register" className="btn btn-primary btn-lg" style={{ padding: '1.25rem 2.5rem' }}>
-              Get Started Free
-            </Link>
-            <Link href="/compare" className="btn btn-secondary btn-lg" style={{ padding: '1.25rem 2.5rem' }}>
-              Compare with DocSend
-            </Link>
-          </div>
-        </div>
-
-        <div className="hero-visual animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
-          <div className="hero-vibrant-gradient" />
-          <div className="glass-card" style={{ 
-            width: '100%', 
-            height: '400px', 
-            borderRadius: '32px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 1,
-            position: 'relative'
-          }}>
-             <div className="mockup-window" style={{ width: '90%', height: '80%' }}>
-                <div className="mockup-header">
-                    <div className="dot" /> <div className="dot" /> <div className="dot" />
-                </div>
-                <div style={{ padding: '2rem', textAlign: 'center' }}>
-                    <div style={{ fontSize: '40px', marginBottom: '1rem' }}>📄✨</div>
-                    <p style={{ color: 'var(--text-secondary)' }}>Intelligent Document Preview</p>
-                    <div style={{ 
-                        marginTop: '2rem', 
-                        height: '100px', 
-                        background: 'var(--bg-tertiary)', 
-                        borderRadius: '12px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center'
-                    }}>
-                        <span className="text-glow" style={{ fontSize: '12px', color: 'var(--accent-primary)' }}>Analyzing content with AI...</span>
-                    </div>
-                </div>
-             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 2. AI Knowledge Base Showcase (Based on Slide 4) */}
-      <section style={{ padding: '100px 2rem', background: 'var(--bg-secondary)' }}>
-        <div className="container" style={{ 
-          display: 'grid', 
-          gridTemplateColumns: '1fr 1.2fr', 
-          gap: '6rem', 
-          alignItems: 'center' 
-        }}>
-           <div className="mockup-window animate-fadeInUp">
-                <div className="mockup-header">
-                    <div className="dot" /> <div className="dot" /> <div className="dot" />
-                    <span style={{ fontSize: '10px', color: 'var(--text-tertiary)', marginLeft: 'auto' }}>view.docvault.xyz/pitch-deck</span>
-                </div>
-                <div style={{ padding: '1.5rem', background: 'var(--bg-primary)' }}>
-                    <div style={{ height: '300px', background: 'white', borderRadius: '8px', border: '1px solid var(--border)', position: 'relative', overflow: 'hidden' }}>
-                        <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)', fontWeight: '700' }}>Investment Pitch Deck.pdf</div>
-                        <div style={{ padding: '1rem' }}>
-                            <div style={{ height: '10px', background: 'var(--bg-tertiary)', width: '60%', marginBottom: '10px' }} />
-                            <div style={{ height: '10px', background: 'var(--bg-tertiary)', width: '80%', marginBottom: '10px' }} />
-                            <div style={{ height: '10px', background: 'var(--bg-tertiary)', width: '40%', marginBottom: '10px' }} />
-                        </div>
-                        {/* Floating AI Chat Mockup */}
-                        <div className="glass-card animate-float" style={{ 
-                            position: 'absolute', 
-                            bottom: '20px', 
-                            right: '20px', 
-                            width: '240px',
-                            padding: '1rem',
-                            borderRadius: '16px',
-                            border: '1px solid var(--accent-glow)',
-                            boxShadow: 'var(--shadow-lg)'
-                        }}>
-                            <div style={{ fontSize: '10px', fontWeight: '700', color: 'var(--accent-primary)', marginBottom: '4px' }}>AI ANALYST</div>
-                            <p style={{ fontSize: '11px', lineHeight: '1.4' }}>&quot;The Q3 projections show a 40% YoY growth in recurring revenue.&quot;</p>
-                        </div>
-                    </div>
-                </div>
-           </div>
-
-           <div className="animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
-                <h2 style={{ fontSize: '3rem', marginBottom: '1.5rem' }}>AI <span className="gradient-text">Knowledge Base</span></h2>
-                <p style={{ fontSize: '1.15rem', color: 'var(--text-secondary)', marginBottom: '2rem', lineHeight: '1.6' }}>
-                    Stop repeating yourself in every meeting. Every document you share becomes an intelligent expert. Your viewers can ask specific questions and get instant, context-aware answers derived straight from your content.
-                </p>
-                <div style={{ display: 'grid', gap: '1rem' }}>
-                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                        <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--success-bg)', display: 'flex', alignItems: 'center', justifySelf: 'center', justifyContent: 'center' }}>⚡</div>
-                        <div>
-                            <span style={{ fontWeight: '700' }}>Instant Answers</span>
-                            <p style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>Reduce friction for decision makers with real-time Q&A.</p>
-                        </div>
-                    </div>
-                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                        <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'var(--accent-glow)', display: 'flex', alignItems: 'center', justifySelf: 'center', justifyContent: 'center' }}>🧠</div>
-                        <div>
-                            <span style={{ fontWeight: '700' }}>Semantic Understanding</span>
-                            <p style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>Advanced LLMs process your docs for deep analytical accuracy.</p>
-                        </div>
-                    </div>
-                </div>
-           </div>
-        </div>
-      </section>
-
-      {/* 3. Process Flow Section (Based on Slide 5) */}
-      <section style={{ padding: '100px 2rem', textAlign: 'center' }}>
         <div className="container">
-            <h2 style={{ fontSize: '3rem', marginBottom: '4rem' }}>How it <span className="gradient-text">Works</span></h2>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '3rem' }}>
-                <div className="animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
-                    <div className="step-card">
-                        <div className="step-number">1</div>
-                        <h3>Upload</h3>
-                        <p style={{ color: 'var(--text-tertiary)', fontSize: '14px', marginTop: '1rem' }}>
-                            Securely upload your PDFs. Our system automatically indexes content for AI semantic search.
-                        </p>
-                        <div style={{ marginTop: '2rem', height: '120px', background: 'var(--bg-primary)', borderRadius: '12px', border: '1px dashed var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px' }}>
-                            📁
-                        </div>
-                    </div>
-                </div>
-                <div className="animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
-                    <div className="step-card">
-                        <div className="step-number">2</div>
-                        <h3>Configure</h3>
-                        <p style={{ color: 'var(--text-tertiary)', fontSize: '14px', marginTop: '1rem' }}>
-                            Set your gatekeeping rules. Choose between Email Gate, Passcode, or Expiration dates.
-                        </p>
-                        <div style={{ marginTop: '2rem', padding: '1rem', background: 'var(--bg-primary)', borderRadius: '12px', textAlign: 'left' }}>
-                            <div style={{ height: '8px', width: '100%', background: 'var(--accent-primary)', opacity: 0.2, borderRadius: '4px', marginBottom: '10px' }} />
-                            <div style={{ height: '8px', width: '60%', background: 'var(--accent-primary)', opacity: 0.1, borderRadius: '4px' }} />
-                        </div>
-                    </div>
-                </div>
-                <div className="animate-fadeInUp" style={{ animationDelay: '0.3s' }}>
-                    <div className="step-card">
-                        <div className="step-number">3</div>
-                        <h3>Analyze</h3>
-                        <p style={{ color: 'var(--text-tertiary)', fontSize: '14px', marginTop: '1rem' }}>
-                            Get notified when viewers interact. Track page-level analytics and see AI chat logs.
-                        </p>
-                        <div style={{ marginTop: '2rem', height: '120px', background: 'var(--bg-primary)', borderRadius: '12px', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                             <div style={{ width: '40px', height: '60px', background: 'var(--accent-primary)', opacity: 0.3, borderRadius: '4px', margin: '2px' }} />
-                             <div style={{ width: '40px', height: '80px', background: 'var(--accent-primary)', opacity: 0.5, borderRadius: '4px', margin: '2px' }} />
-                             <div style={{ width: '40px', height: '40px', background: 'var(--accent-primary)', opacity: 0.2, borderRadius: '4px', margin: '2px' }} />
-                        </div>
-                    </div>
-                </div>
+          <div style={{ 
+            display: 'grid',
+            gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1fr)',
+            gap: 'var(--space-3xl)',
+            alignItems: 'center'
+          }}>
+            <div className="animate-fadeInUp">
+              <div className="hero-badge" style={{ 
+                background: 'rgba(249,115,22,0.08)', 
+                border: '1px solid var(--border-accent)',
+                color: 'var(--accent-primary)',
+                marginBottom: 'var(--space-lg)',
+                display: 'inline-flex',
+                padding: '0.5rem 1rem',
+                borderRadius: 'var(--radius-full)',
+                fontSize: 'var(--text-xs)',
+                fontWeight: '700',
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em'
+              }}>
+                ✨ The Future of Document Distribution
+              </div>
+              <h1 style={{ 
+                fontSize: 'clamp(3rem, 5vw, 5.5rem)', 
+                fontWeight: '900', 
+                lineHeight: '1.05', 
+                marginBottom: 'var(--space-xl)',
+                color: 'var(--text-primary)',
+                letterSpacing: '-0.02em'
+              }}>
+                Share Documents. <br />
+                <span className="gradient-text-vibrant">Augmented by AI.</span>
+              </h1>
+              <p style={{ 
+                fontSize: 'var(--text-lg)', 
+                color: 'var(--text-secondary)', 
+                marginBottom: 'var(--space-2xl)',
+                maxWidth: '560px',
+                lineHeight: '1.6'
+              }}>
+                Securely distribute your high-stakes documents with intelligent Q&A for your viewers. Track engagement, gate access, and answer viewer questions automatically using our local AI Knowledge Base.
+              </p>
+              <div style={{ display: 'flex', gap: 'var(--space-md)', flexWrap: 'wrap' }}>
+                <Link href="/register" className="btn btn-primary btn-lg" style={{ padding: '1.25rem 2.5rem' }}>
+                  Get Started Free
+                </Link>
+                <Link href="/compare" className="btn btn-secondary btn-lg" style={{ padding: '1.25rem 2.5rem' }}>
+                  Compare Features →
+                </Link>
+              </div>
             </div>
+
+            <div className="hero-visual animate-fadeInUp" style={{ animationDelay: '0.2s' }}>
+              <div className="hero-vibrant-gradient" />
+              <div className="mockup-window" style={{ width: '100%', maxWidth: '540px' }}>
+                <div className="mockup-header">
+                  <div className="dot" /> <div className="dot" /> <div className="dot" />
+                </div>
+                <div style={{ padding: 'var(--space-xl)', textAlign: 'center' }}>
+                  <div className="animate-float" style={{ fontSize: '4rem', marginBottom: 'var(--space-md)' }}>📄✨</div>
+                  <h3 style={{ color: 'var(--text-primary)', marginBottom: 'var(--space-xs)' }}>AI-Enabled Dashboard</h3>
+                  <p style={{ color: 'var(--text-tertiary)', fontSize: 'var(--text-sm)' }}>Instant Semantic indexing processing...</p>
+                  
+                  <div style={{ 
+                    marginTop: 'var(--space-xl)', 
+                    height: '140px', 
+                    background: 'var(--bg-tertiary)', 
+                    borderRadius: 'var(--radius-lg)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '12px',
+                    padding: 'var(--space-md)'
+                  }}>
+                    <div style={{ height: '8px', width: '80%', background: 'var(--accent-primary)', opacity: 0.2, borderRadius: '4px' }} />
+                    <div style={{ height: '8px', width: '60%', background: 'var(--accent-primary)', opacity: 0.1, borderRadius: '4px' }} />
+                    <span className="text-glow" style={{ fontSize: '10px', fontWeight: '700', color: 'var(--accent-primary)', marginTop: '8px' }}>NEURAL ENGINE ACTIVE</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* 4. Secure Features Grid (Based on Slide 6) */}
-      <section style={{ padding: '100px 2rem', background: 'var(--bg-secondary)' }}>
-        <div className="container" style={{ textAlign: 'center' }}>
-            <h2 style={{ fontSize: '3rem', marginBottom: '1rem' }}>Professional <span className="gradient-text">Security</span></h2>
-            <p style={{ color: 'var(--text-secondary)', marginBottom: '5rem' }}>Enterprise-grade features for businesses of all sizes.</p>
-            
-            <div className="features-grid">
-                <div className="feature-card glass-card">
-                    <div className="feature-icon" style={{ background: 'var(--accent-glow)' }}>📧</div>
-                    <h3 style={{ marginBottom: '1rem' }}>Email Gating</h3>
-                    <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Know exactly who is viewing. Capture names and emails before granting access to your sensitive material.</p>
+      {/* 2. AI Knowledge Base Section */}
+      <section className="section-padding" style={{ background: 'var(--bg-secondary)', borderTop: '1px solid var(--border)' }}>
+        <div className="container">
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', 
+            gap: 'var(--space-3xl)', 
+            alignItems: 'center' 
+          }}>
+            <div className="mockup-window animate-fadeInUp">
+              <div className="mockup-header">
+                <div className="dot" /> <div className="dot" /> <div className="dot" />
+                <span style={{ fontSize: '10px', color: 'var(--text-tertiary)', marginLeft: 'auto', fontWeight: '500' }}>view.docvault.xyz/pitch-deck-2026</span>
+              </div>
+              <div style={{ padding: 'var(--space-lg)', background: 'var(--bg-primary)' }}>
+                <div style={{ height: '360px', background: 'white', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', position: 'relative', overflow: 'hidden' }}>
+                  <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)', fontWeight: '700', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '12px' }}>Quarterly_Financial_Report.pdf</span>
+                    <span style={{ fontSize: '10px', color: 'var(--success)', fontWeight: '700' }}>AI READY</span>
+                  </div>
+                  <div style={{ padding: '1.5rem' }}>
+                    <div style={{ height: '12px', background: 'var(--bg-tertiary)', width: '70%', marginBottom: '12px', borderRadius: '4px' }} />
+                    <div style={{ height: '12px', background: 'var(--bg-tertiary)', width: '90%', marginBottom: '12px', borderRadius: '4px' }} />
+                    <div style={{ height: '12px', background: 'var(--bg-tertiary)', width: '50%', marginBottom: '12px', borderRadius: '4px' }} />
+                    <div style={{ height: '12px', background: 'var(--bg-tertiary)', width: '80%', marginBottom: '12px', borderRadius: '4px' }} />
+                  </div>
+                  {/* Floating AI Chat Mockup */}
+                  <div className="glass-card animate-float" style={{ 
+                    position: 'absolute', 
+                    bottom: '24px', 
+                    right: '24px', 
+                    width: '280px',
+                    padding: 'var(--space-md)',
+                    borderRadius: 'var(--radius-xl)',
+                    border: '1px solid var(--border-accent)',
+                    boxShadow: 'var(--shadow-lg)',
+                    zIndex: 2
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--success)' }} />
+                      <span style={{ fontSize: '10px', fontWeight: '800', color: 'var(--text-primary)', textTransform: 'uppercase' }}>DocsVault AI</span>
+                    </div>
+                    <p style={{ fontSize: '12px', lineHeight: '1.5', color: 'var(--text-secondary)' }}>
+                      &quot;Based on page 14, the projected revenue for FY27 is <strong>$4.2M</strong>, representing a 22% increase.&quot;
+                    </p>
+                  </div>
                 </div>
-                <div className="feature-card glass-card">
-                    <div className="feature-icon" style={{ background: 'var(--success-bg)' }}>🔑</div>
-                    <h3 style={{ marginBottom: '1rem' }}>Passcode Access</h3>
-                    <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Add an extra layer of protection. Ensure only intended recipients with the correct passcode can unlock documents.</p>
-                </div>
-                <div className="feature-card glass-card">
-                    <div className="feature-icon" style={{ background: 'var(--danger-bg)' }}>⏳</div>
-                    <h3 style={{ marginBottom: '1rem' }}>Auto Expiry</h3>
-                    <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Control the timeline. Automatically disable sharing links after a specific date or time to prevent leaks.</p>
-                </div>
+              </div>
             </div>
 
-            <div style={{ marginTop: '6rem', padding: '4rem', borderRadius: '40px', background: 'var(--accent-gradient)', color: 'white', textAlign: 'center' }}>
-                <h2 style={{ color: 'white', fontSize: '3rem', marginBottom: '1rem' }}>Ready to Share Better?</h2>
-                <p style={{ opacity: 0.9, marginBottom: '2.5rem', fontSize: '1.25rem' }}>Join the next evolution of document distribution today.</p>
-                <Link href="/register" className="btn btn-secondary btn-lg" style={{ background: 'white', color: 'var(--accent-primary)', border: 'none' }}>
-                    Create Your First Vault →
-                </Link>
+            <div className="animate-fadeInUp" style={{ animationDelay: '0.1s' }}>
+              <h2 style={{ fontSize: 'var(--text-5xl)', fontWeight: '800', marginBottom: 'var(--space-lg)', color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
+                Your Documents, <br />
+                <span className="gradient-text">Now Intelligent.</span>
+              </h2>
+              <p style={{ fontSize: 'var(--text-lg)', color: 'var(--text-secondary)', marginBottom: 'var(--space-2xl)', lineHeight: '1.7' }}>
+                Every document you share becomes an instant knowledge base. Viewers can ask any complex question and get accurate, context-aware answers derived straight from your content—no manual FAQ needed.
+              </p>
+              
+              <div style={{ display: 'grid', gap: 'var(--space-lg)' }}>
+                {[
+                  { icon: '⚡', title: 'Zero-Latency Responses', desc: 'Queries are answered instantly using our edge-optimized AI engine.' },
+                  { icon: '🔒', title: 'Private & Secure', desc: 'Your data is processed locally and never used to train public models.' }
+                ].map((item, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 'var(--space-md)', alignItems: 'flex-start' }}>
+                    <div style={{ 
+                      minWidth: '48px', height: '48px', borderRadius: '12px', background: 'var(--bg-tertiary)', 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' 
+                    }}>{item.icon}</div>
+                    <div>
+                      <h4 style={{ color: 'var(--text-primary)', marginBottom: '2px' }}>{item.title}</h4>
+                      <p style={{ fontSize: '14px', color: 'var(--text-tertiary)' }}>{item.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 3. Process Flow Section */}
+      <section className="section-padding" style={{ borderTop: '1px solid var(--border)' }}>
+        <div className="container" style={{ textAlign: 'center' }}>
+          <h2 style={{ fontSize: 'var(--text-5xl)', fontWeight: '800', marginBottom: 'var(--space-md)', color: 'var(--text-primary)' }}>
+            Seamless <span className="gradient-text">Workflow</span>
+          </h2>
+          <p style={{ color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto var(--space-3xl)' }}>
+            From upload to analytics, DocsVault streamlines your document distribution in three simple steps.
+          </p>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 'var(--space-2xl)' }}>
+            {[
+              { id: '01', title: 'Upload & Index', desc: 'Drag and drop your PDFs. We instantly index the text for semantic AI search.', icon: '📤' },
+              { id: '02', title: 'Set Rules', desc: 'Secure with Email Gates, Passcodes, or Auto-Expiry to control access.', icon: '⚙️' },
+              { id: '03', title: 'Distribute & Track', desc: 'Share your link and watch real-time page-level analytics and AI logs.', icon: '📊' }
+            ].map((step, i) => (
+              <div key={i} className="animate-fadeInUp" style={{ animationDelay: `${0.1 * (i+1)}s` }}>
+                <div className="step-card" style={{ textAlign: 'left' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
+                    <span style={{ fontSize: '2.5rem', fontWeight: '900', color: 'var(--accent-primary)', opacity: 0.1 }}>{step.id}</span>
+                    <div style={{ fontSize: '2rem' }}>{step.icon}</div>
+                  </div>
+                  <h3 style={{ marginBottom: 'var(--space-sm)' }}>{step.title}</h3>
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '14px', lineHeight: '1.6' }}>{step.desc}</p>
+                  
+                  <div style={{ marginTop: 'auto', paddingTop: 'var(--space-xl)' }}>
+                    <div style={{ height: '4px', width: '100%', background: 'var(--bg-tertiary)', borderRadius: '2px', overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: i === 0 ? '30%' : i === 1 ? '60%' : '100%', background: 'var(--accent-primary)' }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 4. Secure Features Grid */}
+      <section className="section-padding" style={{ background: 'var(--bg-secondary)', borderTop: '1px solid var(--border)' }}>
+        <div className="container" style={{ textAlign: 'center' }}>
+          <h2 style={{ fontSize: 'var(--text-5xl)', fontWeight: '800', marginBottom: 'var(--space-md)', color: 'var(--text-primary)' }}>
+            Enterprise <span className="gradient-text">Security</span>
+          </h2>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-3xl)' }}>Professional grade controls for every shared link.</p>
+          
+          <div className="features-grid" style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(3, 1fr)', 
+            gap: 'var(--space-xl)' 
+          }}>
+            {[
+              { icon: '📧', title: 'Email Gating', desc: 'Require viewers to provide their identity. Perfect for lead generation and tracking.', bg: 'var(--accent-glow)' },
+              { icon: '🔑', title: 'Secure Passcode', desc: 'Add a secondary layer of protection with customizable access codes.', bg: 'var(--success-bg)' },
+              { icon: '⏳', title: 'Auto-Expiry', desc: 'Links vanish after a set date or view count. Ideal for time-sensitive deals.', bg: 'var(--danger-bg)' }
+            ].map((feat, i) => (
+              <div key={i} className="feature-card glass-card" style={{ textAlign: 'left' }}>
+                <div style={{ 
+                  width: '56px', height: '56px', borderRadius: '16px', background: feat.bg, 
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', marginBottom: 'var(--space-lg)'
+                }}>{feat.icon}</div>
+                <h3 style={{ marginBottom: 'var(--space-sm)' }}>{feat.title}</h3>
+                <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: '1.5' }}>{feat.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="animate-fadeInUp" style={{ 
+            marginTop: '8rem', 
+            padding: 'var(--space-3xl)', 
+            borderRadius: '48px', 
+            background: 'var(--accent-gradient)', 
+            color: 'white',
+            boxShadow: '0 20px 40px rgba(249, 115, 22, 0.2)'
+          }}>
+            <h2 style={{ color: 'white', fontSize: 'clamp(2rem, 4vw, 3.5rem)', fontWeight: '900', marginBottom: 'var(--space-lg)' }}>
+              Ready to Upgrade Your <br /> Document Experience?
+            </h2>
+            <p style={{ opacity: 0.9, marginBottom: '2.5rem', fontSize: 'var(--text-lg)', maxWidth: '600px', margin: '0 auto 2.5rem' }}>
+              Join forward-thinking teams using AI to simplify distribution and maximize engagement.
+            </p>
+            <Link href="/register" className="btn btn-secondary btn-lg" style={{ 
+              background: 'white', color: 'var(--accent-primary)', border: 'none', 
+              padding: '1.25rem 3rem', fontWeight: '800', boxShadow: '0 10px 20px rgba(0,0,0,0.1)'
+            }}>
+              Get Started for Free →
+            </Link>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer style={{ padding: '4rem', borderTop: '1px solid var(--border)', textAlign: 'center' }}>
-        <div className="landing-logo" style={{ justifyContent: 'center', marginBottom: '1rem' }}>
-          <div className="logo-icon">📄</div> DocsVault
-        </div>
-        <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>© 2026 DocsVault. Built with ❤️ for the AI Era.</p>
-        <div style={{ display: 'flex', gap: '2rem', justifyContent: 'center', marginTop: '2rem' }}>
-            <Link href="/compare" style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>Compare</Link>
-            <Link href="/donate" style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>Donate</Link>
-            <Link href="https://github.com/Nikhilkumar25/docvoult" style={{ fontSize: '13px', color: 'var(--text-tertiary)' }}>GitHub</Link>
+      <footer className="section-padding" style={{ background: 'var(--bg-primary)', borderTop: '1px solid var(--border)', textAlign: 'center' }}>
+        <div className="container">
+          <div className="landing-logo" style={{ justifyContent: 'center', marginBottom: 'var(--space-md)' }}>
+            <div className="logo-icon">📄</div> DocsVault
+          </div>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>© 2026 DocsVault. Next-generation document distribution.</p>
+          <div style={{ display: 'flex', gap: 'var(--space-xl)', justifyContent: 'center', marginTop: 'var(--space-xl)' }}>
+            <Link href="/compare" style={{ fontSize: '13px', color: 'var(--text-tertiary)', fontWeight: '600' }}>Compare</Link>
+            <Link href="/donate" style={{ fontSize: '13px', color: 'var(--text-tertiary)', fontWeight: '600' }}>Donate</Link>
+            <Link href="https://github.com/Nikhilkumar25/docvoult" style={{ fontSize: '13px', color: 'var(--text-tertiary)', fontWeight: '600' }}>GitHub</Link>
+          </div>
         </div>
       </footer>
 
       <style jsx>{`
-        .container {
-          max-width: 1200px;
-          margin: 0 auto;
-        }
         .hero-badge {
           padding: 0.5rem 1rem;
           border-radius: 99px;
-          font-size: 0.875rem;
           font-weight: 600;
         }
         .gradient-text {
@@ -284,33 +314,15 @@ export default function Home() {
           background-clip: text;
           -webkit-text-fill-color: transparent;
         }
-        .features-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 2rem;
-        }
-        .feature-card {
-            padding: 2.5rem;
-            border-radius: 24px;
-            text-align: left;
-            transition: var(--transition-base);
-        }
-        .feature-card:hover { transform: translateY(-5px); border-color: var(--accent-primary); }
-        .feature-icon {
-            width: 56px;
-            height: 56px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            margin-bottom: 2rem;
-        }
         @media (max-width: 1024px) {
-          .hero.container { grid-template-columns: 1fr; text-align: center; }
-          .hero-visual { display: none; }
-          .features-grid { grid-template-columns: 1fr; }
-          footer { padding: 2rem; }
+          .hero .container > div { grid-template-columns: 1fr !important; text-align: center !important; }
+          .hero-visual { display: none !important; }
+          .hero h1 { font-size: 3.5rem !important; }
+          .hero p { margin: 0 auto 2rem !important; }
+          .hero-actions { justify-content: center !important; }
+          
+          section[style*="grid-template-columns: minmax(0, 1fr)"] { grid-template-columns: 1fr !important; text-align: center !important; }
+          div[style*="grid-template-columns: repeat(3, 1fr)"] { grid-template-columns: 1fr !important; }
         }
       `}</style>
     </div>
