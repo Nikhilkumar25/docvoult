@@ -1,14 +1,14 @@
 {
   "company": {
     "name": "DocsVault HQ",
-    "mission": "Build and grow DocsVault into a self-sustaining AI-powered secure document sharing platform through continuous R&D and automated feature implementation.",
+    "mission": "Build and grow DocsVault into a self-sustaining AI-powered secure document sharing platform. CURRENT TARGET: Earn $10 revenue in March to unlock $25 budget for April.",
     "board": [
       {
         "name": "Nikhil Aggarwal",
         "role": "CEO / Board",
         "email": "nikhil.aggarwal@zomato.com",
         "approvalRequired": true,
-        "notes": "All PR merges to 'main' require Nikhil's manual review and approval."
+        "notes": "Performance-Based Budgeting Plan: March budget is $10. If $10 revenue is earned, April budget unlocks to $25. If $30 revenue earned in April, May budget unlocks to $50."
       }
     ]
   },
@@ -36,7 +36,7 @@
         "description": "Weekly R&D + Implementation: Mondays at 9:00 AM IST"
       },
       "budget": {
-        "monthlyLimitUSD": 20
+        "monthlyLimitUSD": 8
       },
       "adapterConfig": {
         "command": "/Users/nikhil.aggarwal@zomato.com/.gemini/antigravity/scratch/docvault/.ai/bin/claude",
@@ -75,7 +75,7 @@
         "description": "Weekly Social Planning: Fridays at 10:00 AM IST"
       },
       "budget": {
-        "monthlyLimitUSD": 5
+        "monthlyLimitUSD": 2
       },
       "capabilities": [
         "web_search",
