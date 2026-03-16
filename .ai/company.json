@@ -1,0 +1,141 @@
+{
+  "company": {
+    "name": "DocsVault HQ",
+    "mission": "Build and grow DocsVault into the leading AI-powered secure document sharing platform, maximizing user retention and monthly recurring revenue.",
+    "board": [
+      {
+        "name": "Nikhil Aggarwal",
+        "role": "CEO / Board",
+        "email": "nikhil.aggarwal@zomato.com",
+        "approvalRequired": true,
+        "notes": "All PR merges to 'main' require Nikhil's manual review and approval. All new agent hires require Nikhil's approval."
+      }
+    ]
+  },
+  "governance": {
+    "mergePolicy": {
+      "targetBranch": "main",
+      "sourceBranch": "ai",
+      "requiresBoardApproval": true,
+      "autoMerge": false,
+      "description": "All AI-generated code changes must be committed to the 'ai' branch. A PR must be opened for board review. Board must manually approve and merge. No agent may merge to 'main' directly."
+    },
+    "agentHiring": {
+      "requiresBoardApproval": true
+    },
+    "budgetOverride": {
+      "requiresBoardApproval": true
+    }
+  },
+  "agents": [
+    {
+      "id": "product-manager",
+      "name": "Product Manager",
+      "provider": "anthropic",
+      "model": "claude-3-5-sonnet-latest",
+      "skillsPath": ".ai/agents/product-manager/SKILLS.md",
+      "codingTool": null,
+      "heartbeat": {
+        "schedule": "0 9 * * 1",
+        "timezone": "Asia/Kolkata",
+        "description": "Runs every Monday at 9:00 AM IST"
+      },
+      "budget": {
+        "monthlyLimitUSD": 30
+      },
+      "capabilities": [
+        "web_search",
+        "database_read_only",
+        "create_tickets",
+        "read_codebase"
+      ],
+      "outputs": [
+        "Paperclip tickets for Developer Agent",
+        "Weekly marketing brief ticket for Marketing Manager",
+        "Strategic analysis report"
+      ]
+    },
+    {
+      "id": "marketing-manager",
+      "name": "Marketing Manager",
+      "provider": "anthropic",
+      "model": "claude-3-5-sonnet-latest",
+      "skillsPath": ".ai/agents/marketing-manager/SKILLS.md",
+      "codingTool": null,
+      "heartbeat": {
+        "schedule": "0 10 * * *",
+        "timezone": "Asia/Kolkata",
+        "description": "Runs every day at 10:00 AM IST"
+      },
+      "budget": {
+        "monthlyLimitUSD": 20
+      },
+      "capabilities": [
+        "web_search",
+        "browser_control",
+        "twitter_post",
+        "product_hunt_manage",
+        "read_git_log"
+      ],
+      "outputs": [
+        "Twitter/X posts",
+        "Product Hunt responses",
+        "Feature announcement threads"
+      ]
+    },
+    {
+      "id": "developer",
+      "name": "Developer",
+      "provider": "anthropic",
+      "model": "claude-3-5-sonnet-latest",
+      "skillsPath": ".ai/agents/developer/SKILLS.md",
+      "codingTool": "antigravity",
+      "heartbeat": {
+        "schedule": "on_ticket",
+        "description": "Wakes up when assigned a ticket by the Product Manager"
+      },
+      "budget": {
+        "monthlyLimitUSD": 50
+      },
+      "capabilities": [
+        "read_codebase",
+        "write_code",
+        "run_terminal",
+        "git_commit",
+        "git_push",
+        "open_pull_request"
+      ],
+      "gitRules": {
+        "allowedBranches": ["ai"],
+        "forbiddenBranches": ["main"],
+        "requirePRForMerge": true,
+        "boardApprovalRequired": true
+      },
+      "outputs": [
+        "Code commits on 'ai' branch",
+        "Pull Requests to 'main'",
+        "Ticket status updates"
+      ]
+    }
+  ],
+  "orgChart": {
+    "board": "Nikhil Aggarwal (Human)",
+    "structure": {
+      "Product Manager": {
+        "reports_to": "Board",
+        "manages": ["Developer"],
+        "collaborates_with": ["Marketing Manager"]
+      },
+      "Marketing Manager": {
+        "reports_to": "Board",
+        "manages": [],
+        "collaborates_with": ["Product Manager"]
+      },
+      "Developer": {
+        "reports_to": "Product Manager",
+        "manages": [],
+        "collaborates_with": []
+      }
+    }
+  }
+}
