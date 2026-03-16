@@ -44,7 +44,10 @@
         "monthlyLimitUSD": 30
       },
       "adapterConfig": {
-        "command": "/Users/nikhil.aggarwal@zomato.com/.gemini/antigravity/scratch/docvault/.ai/bin/claude"
+        "command": "/Users/nikhil.aggarwal@zomato.com/.gemini/antigravity/scratch/docvault/.ai/bin/claude",
+        "env": {
+          "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}"
+        }
       },
       "capabilities": [
         "web_search",
@@ -62,10 +65,13 @@
       "id": "marketing-manager",
       "name": "Marketing Manager",
       "provider": "anthropic",
-      "model": "claude-3-5-sonnet-latest",
+      "model": "",
       "skillsPath": ".ai/agents/marketing-manager/SKILLS.md",
       "adapterConfig": {
-        "command": "/Users/nikhil.aggarwal@zomato.com/.gemini/antigravity/scratch/docvault/.ai/bin/claude"
+        "command": "/Users/nikhil.aggarwal@zomato.com/.gemini/antigravity/scratch/docvault/.ai/bin/claude",
+        "env": {
+          "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}"
+        }
       },
       "codingTool": null,
       "heartbeat": {
@@ -93,10 +99,13 @@
       "id": "developer",
       "name": "Developer",
       "provider": "anthropic",
-      "model": "claude-3-5-sonnet-latest",
+      "model": "",
       "skillsPath": ".ai/agents/developer/SKILLS.md",
       "adapterConfig": {
-        "command": "/Users/nikhil.aggarwal@zomato.com/.gemini/antigravity/scratch/docvault/.ai/bin/claude"
+        "command": "/Users/nikhil.aggarwal@zomato.com/.gemini/antigravity/scratch/docvault/.ai/bin/claude",
+        "env": {
+          "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}"
+        }
       },
       "codingTool": "antigravity",
       "heartbeat": {
