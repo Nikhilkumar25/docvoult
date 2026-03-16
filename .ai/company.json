@@ -43,6 +43,9 @@
       "budget": {
         "monthlyLimitUSD": 30
       },
+      "adapterConfig": {
+        "command": "/Users/nikhil.aggarwal@zomato.com/.gemini/antigravity/scratch/docvault/.ai/bin/claude"
+      },
       "capabilities": [
         "web_search",
         "database_read_only",
@@ -61,6 +64,9 @@
       "provider": "anthropic",
       "model": "claude-3-5-sonnet-latest",
       "skillsPath": ".ai/agents/marketing-manager/SKILLS.md",
+      "adapterConfig": {
+        "command": "/Users/nikhil.aggarwal@zomato.com/.gemini/antigravity/scratch/docvault/.ai/bin/claude"
+      },
       "codingTool": null,
       "heartbeat": {
         "schedule": "0 10 * * *",
@@ -89,6 +95,9 @@
       "provider": "anthropic",
       "model": "claude-3-5-sonnet-latest",
       "skillsPath": ".ai/agents/developer/SKILLS.md",
+      "adapterConfig": {
+        "command": "/Users/nikhil.aggarwal@zomato.com/.gemini/antigravity/scratch/docvault/.ai/bin/claude"
+      },
       "codingTool": "antigravity",
       "heartbeat": {
         "schedule": "on_ticket",
