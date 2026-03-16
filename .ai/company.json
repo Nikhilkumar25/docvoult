@@ -1,14 +1,14 @@
 {
   "company": {
     "name": "DocsVault HQ",
-    "mission": "Build and grow DocsVault into the leading AI-powered secure document sharing platform, maximizing user retention and monthly recurring revenue.",
+    "mission": "Build and grow DocsVault into a self-sustaining AI-powered secure document sharing platform through continuous R&D and automated feature implementation.",
     "board": [
       {
         "name": "Nikhil Aggarwal",
         "role": "CEO / Board",
         "email": "nikhil.aggarwal@zomato.com",
         "approvalRequired": true,
-        "notes": "All PR merges to 'main' require Nikhil's manual review and approval. All new agent hires require Nikhil's approval."
+        "notes": "All PR merges to 'main' require Nikhil's manual review and approval."
       }
     ]
   },
@@ -18,30 +18,25 @@
       "sourceBranch": "ai",
       "requiresBoardApproval": true,
       "autoMerge": false,
-      "description": "All AI-generated code changes must be committed to the 'ai' branch. A PR must be opened for board review. Board must manually approve and merge. No agent may merge to 'main' directly."
-    },
-    "agentHiring": {
-      "requiresBoardApproval": true
-    },
-    "budgetOverride": {
-      "requiresBoardApproval": true
+      "description": "All AI changes are committed to 'ai' branch. Merges to 'main' require manual board approval."
     }
   },
   "agents": [
     {
-      "id": "product-manager",
-      "name": "Product Manager",
+      "id": "docsvault-engine",
+      "name": "DocsVault Engine",
+      "role": "pm_engineer",
       "provider": "anthropic",
-      "model": "claude-3-5-sonnet-latest",
-      "skillsPath": ".ai/agents/product-manager/SKILLS.md",
-      "codingTool": null,
+      "model": "",
+      "skillsPath": ".ai/agents/engine/SKILLS.md",
+      "codingTool": "antigravity",
       "heartbeat": {
         "schedule": "0 9 * * 1",
         "timezone": "Asia/Kolkata",
-        "description": "Runs every Monday at 9:00 AM IST"
+        "description": "Weekly R&D + Implementation: Mondays at 9:00 AM IST"
       },
       "budget": {
-        "monthlyLimitUSD": 30
+        "monthlyLimitUSD": 20
       },
       "adapterConfig": {
         "command": "/Users/nikhil.aggarwal@zomato.com/.gemini/antigravity/scratch/docvault/.ai/bin/claude",
@@ -52,18 +47,19 @@
       "capabilities": [
         "web_search",
         "database_read_only",
-        "create_tickets",
-        "read_codebase"
+        "read_codebase",
+        "write_code"
       ],
       "outputs": [
-        "Paperclip tickets for Developer Agent",
-        "Weekly marketing brief ticket for Marketing Manager",
-        "Strategic analysis report"
+        "Code changes on 'ai' branch",
+        "Pull Requests to 'main'",
+        ".ai/ENGINE_LOG.md updates"
       ]
     },
     {
       "id": "marketing-manager",
       "name": "Marketing Manager",
+      "role": "cmo",
       "provider": "anthropic",
       "model": "",
       "skillsPath": ".ai/agents/marketing-manager/SKILLS.md",
@@ -73,86 +69,33 @@
           "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}"
         }
       },
-      "codingTool": null,
       "heartbeat": {
-        "schedule": "0 10 * * *",
+        "schedule": "0 10 * * 5",
         "timezone": "Asia/Kolkata",
-        "description": "Runs every day at 10:00 AM IST"
+        "description": "Weekly Social Planning: Fridays at 10:00 AM IST"
       },
       "budget": {
-        "monthlyLimitUSD": 20
+        "monthlyLimitUSD": 5
       },
       "capabilities": [
         "web_search",
-        "browser_control",
-        "twitter_post",
-        "product_hunt_manage",
         "read_git_log"
       ],
       "outputs": [
-        "Twitter/X posts",
-        "Product Hunt responses",
-        "Feature announcement threads"
-      ]
-    },
-    {
-      "id": "developer",
-      "name": "Developer",
-      "provider": "anthropic",
-      "model": "",
-      "skillsPath": ".ai/agents/developer/SKILLS.md",
-      "adapterConfig": {
-        "command": "/Users/nikhil.aggarwal@zomato.com/.gemini/antigravity/scratch/docvault/.ai/bin/claude",
-        "env": {
-          "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}"
-        }
-      },
-      "codingTool": "antigravity",
-      "heartbeat": {
-        "schedule": "on_ticket",
-        "description": "Wakes up when assigned a ticket by the Product Manager"
-      },
-      "budget": {
-        "monthlyLimitUSD": 50
-      },
-      "capabilities": [
-        "read_codebase",
-        "write_code",
-        "run_terminal",
-        "git_commit",
-        "git_push",
-        "open_pull_request"
-      ],
-      "gitRules": {
-        "allowedBranches": ["ai"],
-        "forbiddenBranches": ["main"],
-        "requirePRForMerge": true,
-        "boardApprovalRequired": true
-      },
-      "outputs": [
-        "Code commits on 'ai' branch",
-        "Pull Requests to 'main'",
-        "Ticket status updates"
+        ".ai/SOCIAL_CALENDAR.md updates"
       ]
     }
   ],
   "orgChart": {
     "board": "Nikhil Aggarwal (Human)",
     "structure": {
-      "Product Manager": {
+      "DocsVault Engine": {
         "reports_to": "Board",
-        "manages": ["Developer"],
         "collaborates_with": ["Marketing Manager"]
       },
       "Marketing Manager": {
         "reports_to": "Board",
-        "manages": [],
-        "collaborates_with": ["Product Manager"]
-      },
-      "Developer": {
-        "reports_to": "Product Manager",
-        "manages": [],
-        "collaborates_with": []
+        "collaborates_with": ["DocsVault Engine"]
       }
     }
   }
