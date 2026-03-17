@@ -46,8 +46,8 @@ function HomeContent() {
                 <div className="flex flex-col lg:flex-row gap-16 items-center">
                     <div className="flex flex-col gap-8 flex-1 text-center lg:text-left animate-fadeInUp">
                         <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-[1.05] tracking-tight text-slate-900">
-                            Share <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-primary inline-block min-w-[300px] text-left transition-opacity duration-300">{animatedWords[wordIndex]}</span>. <br className="hidden lg:block" />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-400">Augmented by AI.</span>
+                            The Smarter Way to Share <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-primary inline-block min-w-[300px] text-left transition-opacity duration-300">{animatedWords[wordIndex]}</span>. <br className="hidden lg:block" />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-orange-400">Better Conversion Rates with AI.</span>
                         </h1>
                         <p className="text-xl text-slate-600 leading-relaxed max-w-xl mx-auto lg:mx-0 font-medium">
                             Experience a secure document sharing platform enhanced with intelligent AI capabilities. Interactive AI sharing leads to higher pitch deck conversion rates, drastically improved stakeholder communication, and the ability to reach more people effectively.
@@ -98,7 +98,7 @@ function HomeContent() {
                 <div className="max-w-7xl mx-auto relative z-10">
                     <div className="mb-16 text-center lg:text-left max-w-2xl mx-auto lg:mx-0">
                         <span className="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-black tracking-widest uppercase mb-6 inline-block">Intelligent Analytics</span>
-                        <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 font-display">Don't Just Read. <span className="text-slate-400">Interact.</span></h2>
+                        <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 font-display">The Intelligent <span className="text-primary">DocSend Alternative.</span></h2>
                         <p className="text-slate-600 text-lg md:text-xl font-medium">Interact with your documents like never before using our integrated AI chat. Obtain instant insights, trends, and summaries in milliseconds.</p>
                     </div>
                     <div className="flex flex-col lg:flex-row gap-12 items-center justify-between">

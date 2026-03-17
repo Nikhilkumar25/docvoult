@@ -1,9 +1,42 @@
 import './globals.css';
 
 export const metadata = {
-  title: 'DocsVault — Secure Document Sharing & Analytics',
-  description: 'Share documents securely with tracking. Know who views your files, which pages they read, and how long they spend. The modern DocSend alternative.',
-  keywords: 'document sharing, analytics, PDF tracking, secure links, DocSend alternative',
+  title: 'DocsVault — The Smarter Way to Share Pitch Decks & Documents',
+  description: 'Boost your conversion rates with DocsVault. The intelligent DocSend alternative for secure document sharing and real-time investor analytics. Know exactly who views your pitch deck and when.',
+  keywords: 'pitch deck, document sharing, DocSend alternative, Papermark, secure document tracking, investor analytics, document security, pitch deck conversion',
+  openGraph: {
+    title: 'DocsVault — The Smarter Way to Share Pitch Decks',
+    description: 'Secure document sharing with real-time analytics. The modern alternative to DocSend and Papermark.',
+    url: 'https://docvault.zomato.com',
+    siteName: 'DocsVault',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+};
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  'name': 'DocsVault',
+  'operatingSystem': 'Web',
+  'applicationCategory': 'BusinessApplication',
+  'offers': {
+    '@type': 'Offer',
+    'price': '0',
+    'priceCurrency': 'USD',
+  },
+  'aggregateRating': {
+    '@type': 'AggregateRating',
+    'ratingValue': '4.9',
+    'ratingCount': '124',
+  },
 };
 
 export default function RootLayout({ children }) {
@@ -19,6 +52,10 @@ export default function RootLayout({ children }) {
         <link 
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" 
           rel="stylesheet" 
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
       <body>{children}</body>

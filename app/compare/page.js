@@ -56,8 +56,10 @@ export default function ComparePage() {
                     <div className="glass-card" style={{ padding: '3rem', borderRadius: '32px' }}>
                         <h2 style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>Ready to experience the future?</h2>
                         <p style={{ color: 'var(--text-secondary)', marginBottom: '2.5rem' }}>Join hundreds of teams switching to a faster, AI-enabled sharing platform.</p>
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem' }}>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1.5rem' }}>
                             <Link href="/register" className="btn btn-primary btn-lg">Get Started Free</Link>
+                            <Link href="/compare/docsend" className="btn btn-secondary btn-lg">DocsVault vs DocSend</Link>
+                            <Link href="/compare/papermark" className="btn btn-secondary btn-lg">DocsVault vs Papermark</Link>
                             <Link href="/" className="btn btn-secondary btn-lg">Back to Home</Link>
                         </div>
                     </div>
