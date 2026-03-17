@@ -265,6 +265,7 @@ function HomeContent() {
                         <p className="text-slate-400 text-sm font-medium">© 2026 DocsVault Inc. All rights reserved.</p>
                     </div>
                     <div className="flex gap-8 text-slate-400 text-xs font-black uppercase tracking-widest">
+                        <Link href="/alternatives/docsend-free" className="hover:text-primary transition-colors">DocSend for Free</Link>
                         <Link href="/compare" className="hover:text-primary transition-colors">Compare</Link>
                         <Link href="/donate" className="hover:text-primary transition-colors">Support Us</Link>
                         <Link href="https://github.com/Nikhilkumar25/docvoult" className="hover:text-primary transition-colors">GitHub</Link>

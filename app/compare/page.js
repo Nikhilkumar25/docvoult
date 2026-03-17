@@ -59,6 +59,7 @@ export default function ComparePage() {
                         <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1.5rem' }}>
                             <Link href="/register" className="btn btn-primary btn-lg">Get Started Free</Link>
                             <Link href="/compare/docsend" className="btn btn-secondary btn-lg">DocsVault vs DocSend</Link>
+                            <Link href="/alternatives/docsend-free" className="btn btn-secondary btn-lg">DocSend for Free?</Link>
                             <Link href="/compare/papermark" className="btn btn-secondary btn-lg">DocsVault vs Papermark</Link>
                             <Link href="/" className="btn btn-secondary btn-lg">Back to Home</Link>
                         </div>
