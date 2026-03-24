@@ -464,11 +464,11 @@ export default function ViewerClient({ initialData }) {
             {/* Signature Pad Modal */}
             {showSignaturePad && (
                 <div className="modal-overlay" style={{ zIndex: 3000 }} onClick={() => setShowSignaturePad(false)}>
-                    <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: '500px', padding: '20px' }}>
+                    <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: '500px' }}>
                         <SignaturePad 
                             onSign={handleSignatureSubmit} 
                             onCancel={() => setShowSignaturePad(false)} 
-                            signerName={signatureRequest.signerName || email}
+                            signerName={signatureRequest?.signerName || email}
                         />
                     </div>
                 </div>

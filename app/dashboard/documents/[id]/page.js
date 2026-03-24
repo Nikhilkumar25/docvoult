@@ -1167,40 +1167,40 @@ export default function DocumentDetailPage({ params }) {
             {/* Signature Request Modal */}
             {showSignModal && (
                 <div className="modal-overlay" onClick={() => setShowSignModal(false)}>
-                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
                             <h2>Request Document Signature</h2>
-                            <button className="close-btn" onClick={() => setShowSignModal(false)}>×</button>
+                            <button className="modal-close" onClick={() => setShowSignModal(false)}>✕</button>
                         </div>
                         <form onSubmit={handleRequestSignature}>
-                            <div className="form-group" style={{ marginBottom: '1rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Signer Email</label>
-                                <input
-                                    type="email"
-                                    className="input"
-                                    placeholder="signer@example.com"
-                                    value={signForm.signerEmail}
-                                    onChange={(e) => setSignForm({ ...signForm, signerEmail: e.target.value })}
-                                    required
-                                    style={{ width: '100%' }}
-                                />
+                            <div className="modal-body">
+                                <div className="input-group" style={{ marginBottom: '1.5rem' }}>
+                                    <label>Signer Email</label>
+                                    <input
+                                        type="email"
+                                        className="input"
+                                        placeholder="signer@example.com"
+                                        value={signForm.signerEmail}
+                                        onChange={(e) => setSignForm({ ...signForm, signerEmail: e.target.value })}
+                                        required
+                                    />
+                                </div>
+                                <div className="input-group" style={{ marginBottom: '1.5rem' }}>
+                                    <label>Signer Name (Optional)</label>
+                                    <input
+                                        type="text"
+                                        className="input"
+                                        placeholder="John Doe"
+                                        value={signForm.signerName}
+                                        onChange={(e) => setSignForm({ ...signForm, signerName: e.target.value })}
+                                    />
+                                </div>
                             </div>
-                            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Signer Name (Optional)</label>
-                                <input
-                                    type="text"
-                                    className="input"
-                                    placeholder="John Doe"
-                                    value={signForm.signerName}
-                                    onChange={(e) => setSignForm({ ...signForm, signerName: e.target.value })}
-                                    style={{ width: '100%' }}
-                                />
-                            </div>
-                            <div style={{ display: 'flex', gap: '1rem' }}>
-                                <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowSignModal(false)}>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={() => setShowSignModal(false)}>
                                     Cancel
                                 </button>
-                                <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={requestingSign}>
+                                <button type="submit" className="btn btn-primary" disabled={requestingSign}>
                                     {requestingSign ? 'Sending...' : 'Send Request'}
                                 </button>
                             </div>
