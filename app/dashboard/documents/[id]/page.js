@@ -613,10 +613,14 @@ export default function DocumentDetailPage({ params }) {
                                                     className="btn btn-secondary btn-sm"
                                                     onClick={() => {
                                                         const firstLink = document.links?.[0];
-                                                        if (firstLink) copyLink(firstLink.slug);
+                                                        if (firstLink) {
+                                                            copyLink(firstLink.slug);
+                                                        } else {
+                                                            alert('No sharing links found. Please create a link first.');
+                                                        }
                                                     }}
                                                 >
-                                                    📋 Copy Link
+                                                    {document.links?.[0] && copied === document.links[0].slug ? '✓ Copied!' : '📋 Copy Link'}
                                                 </button>
                                             ) : (
                                                 <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
