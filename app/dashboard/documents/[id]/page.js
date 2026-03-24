@@ -73,6 +73,11 @@ export default function DocumentDetailPage({ params }) {
     const [creatingLink, setCreatingLink] = useState(false);
     const [linkError, setLinkError] = useState('');
 
+    // Signature Request state
+    const [showSignModal, setShowSignModal] = useState(false);
+    const [signForm, setSignForm] = useState({ signerEmail: '', signerName: '' });
+    const [requestingSign, setRequestingSign] = useState(false);
+
     // Update File form
     const fileInputRef = useRef(null);
     const [updatingFile, setUpdatingFile] = useState(false);
@@ -356,6 +361,33 @@ export default function DocumentDetailPage({ params }) {
         }
     };
 
+    const handleRequestSignature = async (e) => {
+        e.preventDefault();
+        setRequestingSign(true);
+        try {
+            const res = await fetch(`/api/documents/${id}/signature-requests`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(signForm),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setDocument(prev => ({
+                    ...prev,
+                    signatureRequests: [data, ...(prev.signatureRequests || [])]
+                }));
+                setShowSignModal(false);
+                setSignForm({ signerEmail: '', signerName: '' });
+            } else {
+                alert(data.error || 'Failed to request signature');
+            }
+        } catch (err) {
+            console.error('Error:', err);
+        } finally {
+            setRequestingSign(false);
+        }
+    };
+
     const copyLink = (slug) => {
         const url = `${window.location.origin}/view/${slug}`;
         navigator.clipboard.writeText(url);
@@ -417,6 +449,9 @@ export default function DocumentDetailPage({ params }) {
                     )}
                     <button className="btn btn-primary" onClick={() => setShowLinkModal(true)} disabled={updatingFile}>
                         🔗 Create Link
+                    </button>
+                    <button className="btn btn-accent" onClick={() => setShowSignModal(true)} disabled={updatingFile}>
+                        ✍️ Request Signature
                     </button>
                 </div>
             </div>
@@ -534,6 +569,59 @@ export default function DocumentDetailPage({ params }) {
                     )}
                 </div>
             </div>
+            {/* Signature Requests */}
+            <div className="section-panel" style={{ borderLeft: '4px solid #f59e0b', marginBottom: '2rem' }}>
+                <div className="section-panel-header">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '1.25rem' }}>✍️</span>
+                        <h2 style={{ margin: 0 }}>Signature Requests</h2>
+                    </div>
+                </div>
+                <div className="section-panel-body">
+                    {!document.signatureRequests || document.signatureRequests.length === 0 ? (
+                        <div className="empty-state" style={{ padding: 'var(--space-xl)', textAlign: 'center' }}>
+                            <p style={{ color: 'var(--text-tertiary)' }}>No signature requests yet. Request a signature to execute a contract.</p>
+                        </div>
+                    ) : (
+                        <table className="links-table">
+                            <thead>
+                                <tr>
+                                    <th>Signer</th>
+                                    <th>Status</th>
+                                    <th>Requested</th>
+                                    <th>Signed At</th>
+                                    <th>Audit</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {document.signatureRequests.map((req) => (
+                                    <tr key={req.id}>
+                                        <td>
+                                            <div style={{ fontWeight: 600 }}>{req.signerName || 'Unnamed Signer'}</div>
+                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>{req.signerEmail}</div>
+                                        </td>
+                                        <td>
+                                            <span className={`badge ${req.status === 'signed' ? 'badge-success' : 'badge-warning'}`}>
+                                                {req.status.toUpperCase()}
+                                            </span>
+                                        </td>
+                                        <td>{formatDate(req.createdAt)}</td>
+                                        <td>{req.signedAt ? formatDate(req.signedAt) : '—'}</td>
+                                        <td>
+                                            {req.signatures?.[0] ? (
+                                                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+                                                    IP: {req.signatures[0].ipAddress}
+                                                </div>
+                                            ) : '—'}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
+                </div>
+            </div>
+
             {/* Page Engagement Stats */}
             <div className="section-panel">
                 <div className="section-panel-header">
@@ -1059,6 +1147,51 @@ export default function DocumentDetailPage({ params }) {
                                 </button>
                                 <button type="submit" className="btn btn-primary" disabled={sendingReply}>
                                     {sendingReply ? 'Sending...' : 'Send Reply & Email'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Signature Request Modal */}
+            {showSignModal && (
+                <div className="modal-overlay" onClick={() => setShowSignModal(false)}>
+                    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h2>Request Document Signature</h2>
+                            <button className="close-btn" onClick={() => setShowSignModal(false)}>×</button>
+                        </div>
+                        <form onSubmit={handleRequestSignature}>
+                            <div className="form-group" style={{ marginBottom: '1rem' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Signer Email</label>
+                                <input
+                                    type="email"
+                                    className="input"
+                                    placeholder="signer@example.com"
+                                    value={signForm.signerEmail}
+                                    onChange={(e) => setSignForm({ ...signForm, signerEmail: e.target.value })}
+                                    required
+                                    style={{ width: '100%' }}
+                                />
+                            </div>
+                            <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Signer Name (Optional)</label>
+                                <input
+                                    type="text"
+                                    className="input"
+                                    placeholder="John Doe"
+                                    value={signForm.signerName}
+                                    onChange={(e) => setSignForm({ ...signForm, signerName: e.target.value })}
+                                    style={{ width: '100%' }}
+                                />
+                            </div>
+                            <div style={{ display: 'flex', gap: '1rem' }}>
+                                <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowSignModal(false)}>
+                                    Cancel
+                                </button>
+                                <button type="submit" className="btn btn-primary" style={{ flex: 1 }} disabled={requestingSign}>
+                                    {requestingSign ? 'Sending...' : 'Send Request'}
                                 </button>
                             </div>
                         </form>

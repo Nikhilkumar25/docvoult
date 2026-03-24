@@ -53,6 +53,10 @@ export async function GET(request, { params }) {
                             _count: { select: { entries: true } }
                         }
                     },
+                    signatureRequests: {
+                        orderBy: { createdAt: 'desc' },
+                        include: { signatures: true }
+                    },
                     _count: { select: { views: true } },
                 },
             });

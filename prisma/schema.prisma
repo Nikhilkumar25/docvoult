@@ -87,6 +87,7 @@ model Document {
   knowledgeBase KnowledgeBase?
   links         Link[]
   views         View[]
+  signatureRequests SignatureRequest[]
 
   @@index([userId])
   @@index([workspaceId])
@@ -197,4 +198,33 @@ model UnansweredQuestion {
   knowledgeBase   KnowledgeBase @relation(fields: [knowledgeBaseId], references: [id], onDelete: Cascade)
 
   @@index([knowledgeBaseId])
+}
+
+model SignatureRequest {
+  id          String   @id @default(cuid())
+  documentId  String
+  signerEmail String
+  signerName  String?
+  status      String   @default("pending") // pending, signed, declined
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  signedAt    DateTime?
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  signatures  Signature[]
+
+  @@index([documentId])
+  @@index([signerEmail])
+}
+
+model Signature {
+  id                 String           @id @default(cuid())
+  requestId          String
+  signatureData      String           // SVG or Base64 data
+  ipAddress          String?
+  userAgent          String?
+  documentHash       String?          // Hash of the document at time of signing
+  signedAt           DateTime         @default(now())
+  signatureRequest   SignatureRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([requestId])
 }

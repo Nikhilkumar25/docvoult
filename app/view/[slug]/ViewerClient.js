@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import AIChatPanel from './AIChatPanel';
+import SignaturePad from '@/components/SignaturePad';
 
 const PDFRenderer = dynamic(() => import('./PDFRenderer'), {
     ssr: false,
@@ -37,6 +38,11 @@ export default function ViewerClient({ initialData }) {
     const [viewId, setViewId] = useState(initialData.viewId || null);
     const [rotate, setRotate] = useState(0);
     const [isMobile, setIsMobile] = useState(false);
+
+    // Signature state
+    const [signatureRequest, setSignatureRequest] = useState(null);
+    const [showSignaturePad, setShowSignaturePad] = useState(false);
+    const [isSigned, setIsSigned] = useState(false);
 
     const canvasRef = useRef(null);
     const pageStartTime = useRef(Date.now());
@@ -125,6 +131,17 @@ export default function ViewerClient({ initialData }) {
             sessionStorage.setItem(`viewId_${slug}`, data.viewId);
             totalStartTime.current = Date.now();
             pageStartTime.current = Date.now();
+
+            // Check for signature requests
+            if (data.signatureRequests && email) {
+                const pendingRequest = data.signatureRequests.find(
+                    req => req.signerEmail.toLowerCase() === email.toLowerCase() && req.status === 'pending'
+                );
+                if (pendingRequest) {
+                    setSignatureRequest(pendingRequest);
+                }
+            }
+
             setState('viewing');
         } catch (err) {
             setError('Failed to access document');
@@ -137,6 +154,33 @@ export default function ViewerClient({ initialData }) {
         e.preventDefault();
         setError('');
         await accessDocument({ email, name, passcode });
+    };
+
+    const handleSignatureSubmit = async (signatureData) => {
+        try {
+            const res = await fetch(`/api/view/${slug}/sign`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    signatureData,
+                    email: email,
+                    requestId: signatureRequest.id
+                }),
+            });
+
+            if (res.ok) {
+                setIsSigned(true);
+                setShowSignaturePad(false);
+                setSignatureRequest(prev => ({ ...prev, status: 'signed' }));
+                alert('Document signed successfully!');
+            } else {
+                const data = await res.json();
+                alert(data.error || 'Failed to submit signature');
+            }
+        } catch (err) {
+            console.error('Signing error:', err);
+            alert('Connection error. Please try again.');
+        }
     };
 
     const trackPageView = useCallback(async (page, duration, totalDuration) => {
@@ -278,7 +322,10 @@ export default function ViewerClient({ initialData }) {
         return (
             <div className={`viewer-container mobile-view ${state === 'viewing' ? 'active' : ''}`}>
                 <div className="mobile-toolbar">
-                    <div className="viewer-title">{documentData?.document?.title}</div>
+                    <div className="viewer-title">
+                        {documentData?.document?.title}
+                        {isSigned && <span style={{ marginLeft: '8px', fontSize: '0.7rem', background: 'var(--success)', color: 'white', padding: '2px 6px', borderRadius: '4px' }}>SIGNED</span>}
+                    </div>
                     <span className="page-indicator">{pageNumber} / {numPages || '?'}</span>
                 </div>
 
@@ -367,10 +414,72 @@ export default function ViewerClient({ initialData }) {
 
     // --- DESKTOP LAYOUT ---
     return (
-        <div className="viewer-container">
+        <div className={`viewer-container ${signatureRequest && signatureRequest.status === 'pending' && !isSigned ? 'has-signature-banner' : ''}`}>
+            {/* Signature Banner */}
+            {signatureRequest && signatureRequest.status === 'pending' && !isSigned && (
+                <div className="signature-banner" style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    zIndex: 2000,
+                    background: '#f59e0b',
+                    color: 'white',
+                    padding: '10px 20px',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    gap: '20px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ fontSize: '1.2rem' }}>✍️</span>
+                        <span style={{ fontWeight: 600 }}>Your signature is required for this document</span>
+                    </div>
+                    <button 
+                        className="btn" 
+                        onClick={() => setShowSignaturePad(true)}
+                        style={{ 
+                            background: 'white', 
+                            color: '#d97706',
+                            fontWeight: 700,
+                            padding: '6px 16px',
+                            borderRadius: '20px',
+                            border: 'none',
+                            fontSize: '0.85rem',
+                            cursor: 'pointer'
+                        }}
+                    >
+                        Sign Document
+                    </button>
+                    <style>{`
+                        .has-signature-banner .viewer-toolbar { top: 44px !important; }
+                        .has-signature-banner .viewer-content { margin-top: 44px !important; }
+                        .has-signature-banner .mobile-toolbar { top: 44px !important; }
+                        .has-signature-banner .mobile-view .viewer-content { margin-top: 44px !important; }
+                    `}</style>
+                </div>
+            )}
+
+            {/* Signature Pad Modal */}
+            {showSignaturePad && (
+                <div className="modal-overlay" style={{ zIndex: 3000 }} onClick={() => setShowSignaturePad(false)}>
+                    <div onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: '500px', padding: '20px' }}>
+                        <SignaturePad 
+                            onSign={handleSignatureSubmit} 
+                            onCancel={() => setShowSignaturePad(false)} 
+                            signerName={signatureRequest.signerName || email}
+                        />
+                    </div>
+                </div>
+            )}
+
             <div className="viewer-toolbar desktop-only">
                 <div className="viewer-toolbar-left">
-                    <div className="viewer-title">{documentData?.document?.title}</div>
+                    <div className="viewer-title">
+                        {documentData?.document?.title}
+                        {isSigned && <span style={{ marginLeft: '12px', fontSize: '0.75rem', background: '#22c55e', color: 'white', padding: '3px 8px', borderRadius: '4px', verticalAlign: 'middle' }}>SIGNED</span>}
+                    </div>
                 </div>
 
                 <div className="viewer-actions">
