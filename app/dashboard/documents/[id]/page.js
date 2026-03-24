@@ -405,7 +405,7 @@ export default function DocumentDetailPage({ params }) {
 
     if (!document) return null;
 
-    const { analytics } = document;
+    const analytics = document?.analytics || { pageStats: {}, totalViews: 0 };
     const maxPageDuration = Math.max(
         ...Object.values(analytics.pageStats).map((s) => s.totalDuration),
         1
@@ -590,7 +590,7 @@ export default function DocumentDetailPage({ params }) {
                                     <th>Status</th>
                                     <th>Requested</th>
                                     <th>Signed At</th>
-                                    <th>Audit</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -608,11 +608,21 @@ export default function DocumentDetailPage({ params }) {
                                         <td>{formatDate(req.createdAt)}</td>
                                         <td>{req.signedAt ? formatDate(req.signedAt) : '—'}</td>
                                         <td>
-                                            {req.signatures?.[0] ? (
+                                            {!req.signedAt ? (
+                                                <button 
+                                                    className="btn btn-secondary btn-sm"
+                                                    onClick={() => {
+                                                        const firstLink = document.links?.[0];
+                                                        if (firstLink) copyLink(firstLink.slug);
+                                                    }}
+                                                >
+                                                    📋 Copy Link
+                                                </button>
+                                            ) : (
                                                 <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
-                                                    IP: {req.signatures[0].ipAddress}
+                                                    IP: {req.signatures?.[0]?.ipAddress || '—'}
                                                 </div>
-                                            ) : '—'}
+                                            )}
                                         </td>
                                     </tr>
                                 ))}
