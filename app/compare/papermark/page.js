@@ -1,3 +1,6 @@
+import Link from 'next/link';
+import DocVaultLogo from '@/components/DocVaultLogo';
+
 export const metadata = {
     title: 'DocsVault vs Papermark | Superior Document Sharing Analytics',
     description: 'Compare DocsVault and Papermark. See how our AI-powered document analytics help you achieve better conversion rates than basic open-source alternatives.',

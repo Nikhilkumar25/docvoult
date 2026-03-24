@@ -1,3 +1,6 @@
+import Link from 'next/link';
+import DocVaultLogo from '@/components/DocVaultLogo';
+
 export const metadata = {
     title: 'DocsVault vs DocSend | The Smarter Pitch Deck Alternative',
     description: 'Compare DocsVault and DocSend. Discover why DocsVault is the smarter way to share pitch decks with AI-powered analytics and better conversion rates.',
