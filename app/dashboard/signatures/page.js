@@ -74,8 +74,8 @@ export default function SignaturesPage() {
     const [step, setStep] = useState(1);
     const [signatureFields, setSignatureFields] = useState([]);
 
-    // Documents for picker
-    const { data: myDocuments = [] } = useData(`/api/documents?foo=bar${wsParam}`);
+    // Documents for picker (fetch all files across all folders)
+    const { data: myDocuments = [] } = useData(`/api/documents?all=true${wsParam}`);
 
     const handleCreate = async (e) => {
         e.preventDefault();

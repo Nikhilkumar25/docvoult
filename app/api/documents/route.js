@@ -16,12 +16,13 @@ export async function GET(request) {
         const { searchParams } = new URL(request.url);
         const folderId = searchParams.get('folderId');
         const workspaceId = searchParams.get('workspaceId');
+        const isAll = searchParams.get('all') === 'true';
 
         let whereClause;
         if (workspaceId) {
             whereClause = {
                 workspaceId,
-                folderId: folderId || null,
+                ...(!isAll && { folderId: folderId || null }),
                 OR: [
                     { workspace: { ownerId: session.user.id } },
                     { workspace: { members: { some: { userId: session.user.id } } } },
@@ -32,7 +33,7 @@ export async function GET(request) {
             // Show user's own docs OR docs where they are a signature recipient
             whereClause = {
                 workspaceId: null,
-                folderId: folderId || null,
+                ...(!isAll && { folderId: folderId || null }),
                 OR: [
                     { userId: session.user.id },
                     { signatureRequests: { some: { signerEmail: session.user.email } } }
