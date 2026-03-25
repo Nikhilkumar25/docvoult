@@ -476,7 +476,7 @@ export default function SignaturesPage() {
                                             onChange={(e) => setCreateForm({ ...createForm, documentId: e.target.value })}
                                         >
                                             <option value="">Choose a document...</option>
-                                            {myDocuments.filter(d => d.isOwner).map(doc => (
+                                            {myDocuments.map((doc) => (
                                                 <option key={doc.id} value={doc.id}>{doc.title} ({doc.fileName})</option>
                                             ))}
                                         </select>

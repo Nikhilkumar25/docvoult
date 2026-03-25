@@ -69,6 +69,7 @@ export async function GET(request) {
                     title: doc.title,
                     fileName: doc.fileName,
                     fileSize: doc.fileSize,
+                    fileUrl: doc.fileUrl,
                     pageCount: doc.pageCount,
                     createdAt: doc.createdAt,
                     totalViews: doc._count.views,
