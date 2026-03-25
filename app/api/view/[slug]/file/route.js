@@ -53,7 +53,11 @@ export async function GET(req, { params }) {
         // 4. Return the stream with correct headers for aggressive caching
         const headers = new Headers();
         headers.set('Content-Type', 'application/pdf');
-        headers.set('Content-Disposition', `inline; filename="${link.document.fileName}"`);
+        
+        // Encode filename to handle non-ASCII characters (RFC 5987)
+        const encodedFileName = encodeURIComponent(link.document.fileName);
+        headers.set('Content-Disposition', `inline; filename="document.pdf"; filename*=UTF-8''${encodedFileName}`);
+        
         // Cache aggressively: 1 day in browser, 7 days stale-while-revalidate
         headers.set('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800, immutable');
         // ETag based on document ID + updatedAt for cache busting on file update
