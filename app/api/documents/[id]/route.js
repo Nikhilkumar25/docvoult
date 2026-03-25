@@ -25,7 +25,8 @@ export async function GET(request, { params }) {
                     OR: [
                         { userId: session.user.id },
                         { workspace: { ownerId: session.user.id } },
-                        { workspace: { members: { some: { userId: session.user.id } } } }
+                        { workspace: { members: { some: { userId: session.user.id } } } },
+                        { signatureRequests: { some: { signerEmail: session.user.email } } }
                     ]
                 },
                 include: {
@@ -55,7 +56,13 @@ export async function GET(request, { params }) {
                     },
                     signatureRequests: {
                         orderBy: { createdAt: 'desc' },
-                        include: { signatures: true }
+                        include: {
+                            signatures: true,
+                            activities: {
+                                orderBy: { createdAt: 'desc' },
+                                take: 5,
+                            },
+                        }
                     },
                     _count: { select: { views: true } },
                 },
@@ -104,6 +111,19 @@ export async function GET(request, { params }) {
             });
 
             const actualPageCount = Math.max(document.pageCount, ...Object.keys(pageStats).map(Number), 0);
+
+            // POST-FETCH PRIVACY FILTER: Signers only see their own requests
+            const isOwnerOrMember = document.userId === session.user.id || 
+                (document.workspaceId && (
+                    document.workspace.ownerId === session.user.id || 
+                    document.workspace.members.some(m => m.userId === session.user.id)
+                ));
+
+            if (!isOwnerOrMember) {
+                document.signatureRequests = document.signatureRequests.filter(
+                    req => req.signerEmail.toLowerCase() === session.user.email.toLowerCase()
+                );
+            }
 
             return {
                 ...document,

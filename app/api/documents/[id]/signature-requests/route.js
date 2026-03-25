@@ -44,7 +44,7 @@ export async function POST(request, { params }) {
         }
 
         const { id: documentId } = await params;
-        const { signerEmail, signerName } = await request.json();
+        const { signerEmail, signerName, role, message, accessCode, expiresAt, order } = await request.json();
 
         if (!signerEmail) {
             return NextResponse.json({ error: 'Signer email is required' }, { status: 400 });
@@ -66,13 +66,31 @@ export async function POST(request, { params }) {
             return NextResponse.json({ error: 'Document not found' }, { status: 404 });
         }
 
-        const signatureRequest = await prisma.signatureRequest.create({
-            data: {
-                documentId,
-                signerEmail,
-                signerName,
-                status: 'pending'
-            }
+        const signatureRequest = await prisma.$transaction(async (tx) => {
+            const req = await tx.signatureRequest.create({
+                data: {
+                    documentId,
+                    signerEmail,
+                    signerName: signerName || null,
+                    role: role || 'signer',
+                    message: message || null,
+                    accessCode: accessCode || null,
+                    expiresAt: expiresAt ? new Date(expiresAt) : null,
+                    order: order || 0,
+                    status: 'pending'
+                }
+            });
+
+            await tx.signatureActivity.create({
+                data: {
+                    requestId: req.id,
+                    action: 'created',
+                    actor: session.user.email,
+                    details: `Signature request sent to ${signerEmail}${role && role !== 'signer' ? ` as ${role}` : ''}`,
+                }
+            });
+
+            return req;
         });
 
         return NextResponse.json(signatureRequest);

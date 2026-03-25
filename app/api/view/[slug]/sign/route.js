@@ -57,6 +57,17 @@ export async function POST(request, { params }) {
                 }
             });
 
+            // Create activity log entry
+            await tx.signatureActivity.create({
+                data: {
+                    requestId,
+                    action: 'signed',
+                    actor: email,
+                    details: 'Document signed successfully',
+                    ipAddress,
+                }
+            });
+
             return sig;
         });
 

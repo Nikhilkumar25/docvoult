@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import AIChatPanel from './AIChatPanel';
 import SignaturePad from '@/components/SignaturePad';
@@ -10,8 +11,10 @@ const PDFRenderer = dynamic(() => import('./PDFRenderer'), {
     loading: () => <div className="loading-spinner"><div className="spinner" /></div>
 });
 
-export default function ViewerClient({ initialData }) {
+export default function ViewerClient({ initialData, currentUserEmail }) {
     const { slug } = initialData;
+    const searchParams = useSearchParams();
+    const urlEmail = searchParams.get('email');
 
     // Initialize state from server-provided data
     const [state, setState] = useState(initialData.isRestored ? 'viewing' : (initialData.requireEmail || initialData.hasPasscode ? 'gate' : 'loading'));
@@ -20,7 +23,7 @@ export default function ViewerClient({ initialData }) {
     const [error, setError] = useState('');
 
     // Gate form
-    const [email, setEmail] = useState(initialData.viewerEmail || '');
+    const [email, setEmail] = useState(urlEmail || initialData.viewerEmail || currentUserEmail || '');
     const [name, setName] = useState(initialData.viewerName || '');
     const [passcode, setPasscode] = useState('');
     const [submitting, setSubmitting] = useState(false);
@@ -41,6 +44,10 @@ export default function ViewerClient({ initialData }) {
 
     // Signature state
     const [signatureRequest, setSignatureRequest] = useState(null);
+    const [signatureFields, setSignatureFields] = useState([]);
+    const [signatureDataState, setSignatureDataState] = useState(null);
+    const [activeAffirmField, setActiveAffirmField] = useState(null);
+    const [isAffirming, setIsAffirming] = useState(false);
     const [showSignaturePad, setShowSignaturePad] = useState(false);
     const [isSigned, setIsSigned] = useState(false);
 
@@ -51,10 +58,29 @@ export default function ViewerClient({ initialData }) {
 
     // Immediate access if possible
     useEffect(() => {
-        if (!initialData.isRestored && !initialData.requireEmail && !initialData.hasPasscode) {
-            accessDocument({});
+        const effectiveEmail = urlEmail || email || currentUserEmail;
+        
+        // If we have signature requests in initialData, set the one for the current user
+        if (initialData.signatureRequests && effectiveEmail) {
+            const targetEmail = effectiveEmail.toLowerCase();
+            const pendingRequest = initialData.signatureRequests.find(
+                req => req.signerEmail.toLowerCase() === targetEmail && req.status === 'pending'
+            );
+            if (pendingRequest) {
+                setSignatureRequest(pendingRequest);
+                setSignatureFields(pendingRequest.fields || []);
+            }
         }
-    }, [initialData]);
+
+        if (urlEmail && !initialData.isRestored && !initialData.hasPasscode) {
+             accessDocument({ email: urlEmail, name: name });
+        } else if (!initialData.isRestored && !initialData.requireEmail && !initialData.hasPasscode) {
+            accessDocument({ email: effectiveEmail });
+        } else if (!initialData.isRestored && currentUserEmail && !initialData.hasPasscode) {
+            // Bypass gate if they are logged in and no passcode required
+            accessDocument({ email: currentUserEmail, name: name });
+        }
+    }, [initialData, currentUserEmail, urlEmail]);
 
     // Fetch questions if link is valid
     useEffect(() => {
@@ -139,6 +165,7 @@ export default function ViewerClient({ initialData }) {
                 );
                 if (pendingRequest) {
                     setSignatureRequest(pendingRequest);
+                    setSignatureFields(pendingRequest.fields || []);
                 }
             }
 
@@ -157,29 +184,78 @@ export default function ViewerClient({ initialData }) {
     };
 
     const handleSignatureSubmit = async (signatureData) => {
+        setSignatureDataState(signatureData);
+        setShowSignaturePad(false);
+        
+        // If they were in the middle of affirming a field, complete it now
+        if (activeAffirmField) {
+            await affirmField(activeAffirmField.id, signatureData);
+            setActiveAffirmField(null);
+        } else if (signatureFields.length === 0) {
+            // Legacy/No-field mode: old single-signature behavior
+            try {
+                const res = await fetch(`/api/view/${slug}/sign`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        signatureData,
+                        email: email,
+                        requestId: signatureRequest.id
+                    }),
+                });
+
+                if (res.ok) {
+                    setIsSigned(true);
+                    setSignatureRequest(prev => ({ ...prev, status: 'signed' }));
+                    alert('Document signed successfully!');
+                } else {
+                    const data = await res.json();
+                    alert(data.error || 'Failed to submit signature');
+                }
+            } catch (err) {
+                console.error('Signing error:', err);
+                alert('Connection error. Please try again.');
+            }
+        }
+    };
+
+    const handleFieldAffirm = async (field) => {
+        if (!signatureDataState) {
+            setActiveAffirmField(field);
+            setShowSignaturePad(true);
+            return;
+        }
+        await affirmField(field.id, signatureDataState);
+    };
+
+    const affirmField = async (fieldId, sigData) => {
+        setIsAffirming(true);
         try {
-            const res = await fetch(`/api/view/${slug}/sign`, {
+            const res = await fetch(`/api/view/${slug}/sign/affirm-field`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    signatureData,
-                    email: email,
-                    requestId: signatureRequest.id
+                    fieldId,
+                    requestId: signatureRequest.id,
+                    signatureData: sigData,
+                    email,
+                    name
                 }),
             });
 
+            const data = await res.json();
             if (res.ok) {
-                setIsSigned(true);
-                setShowSignaturePad(false);
-                setSignatureRequest(prev => ({ ...prev, status: 'signed' }));
-                alert('Document signed successfully!');
-            } else {
-                const data = await res.json();
-                alert(data.error || 'Failed to submit signature');
+                setSignatureFields(prev => prev.map(f => f.id === fieldId ? { ...f, status: 'affirmed', affirmedAt: new Date() } : f));
+                if (data.allAffirmed) {
+                    setIsSigned(true);
+                    setSignatureRequest(prev => ({ ...prev, status: 'signed' }));
+                    alert('All spots signed! Document completed.');
+                }
             }
         } catch (err) {
-            console.error('Signing error:', err);
-            alert('Connection error. Please try again.');
+            console.error('Affirmation error:', err);
+        } finally {
+            setIsAffirming(false);
         }
     };
 
@@ -341,8 +417,11 @@ export default function ViewerClient({ initialData }) {
                             numPages={numPages}
                             pageRefs={pageRefs}
                             email={email}
+                            name={name}
                             requireWatermark={linkInfo?.requireWatermark}
                             rotate={rotate}
+                            signatureFields={signatureFields}
+                            onFieldClick={handleFieldAffirm}
                         />
                     </div>
                 </div>
@@ -434,24 +513,30 @@ export default function ViewerClient({ initialData }) {
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ fontSize: '1.2rem' }}>✍️</span>
-                        <span style={{ fontWeight: 600 }}>Your signature is required for this document</span>
+                        <span>
+                            {signatureFields.length > 0 
+                                ? `Please click on the designated areas to sign (${signatureFields.filter(f => f.status === 'affirmed').length} / ${signatureFields.length} completed)`
+                                : 'You have a pending signature request for this document.'
+                            }
+                        </span>
                     </div>
-                    <button 
-                        className="btn" 
-                        onClick={() => setShowSignaturePad(true)}
-                        style={{ 
-                            background: 'white', 
-                            color: '#d97706',
-                            fontWeight: 700,
-                            padding: '6px 16px',
-                            borderRadius: '20px',
-                            border: 'none',
-                            fontSize: '0.85rem',
-                            cursor: 'pointer'
-                        }}
-                    >
-                        Sign Document
-                    </button>
+                    {signatureFields.length === 0 && (
+                        <button 
+                            className="btn" 
+                            style={{ 
+                                background: 'white', 
+                                color: '#f59e0b', 
+                                fontWeight: 'bold',
+                                padding: '6px 16px',
+                                borderRadius: '20px',
+                                border: 'none',
+                                cursor: 'pointer'
+                            }}
+                            onClick={() => setShowSignaturePad(true)}
+                        >
+                            Sign Document
+                        </button>
+                    )}
                     <style>{`
                         .has-signature-banner .viewer-toolbar { top: 44px !important; }
                         .has-signature-banner .viewer-content { margin-top: 44px !important; }
@@ -521,8 +606,11 @@ export default function ViewerClient({ initialData }) {
                         numPages={numPages}
                         pageRefs={pageRefs}
                         email={email}
+                        name={name}
                         requireWatermark={linkInfo?.requireWatermark}
                         rotate={rotate}
+                        signatureFields={signatureFields}
+                        onFieldClick={handleFieldAffirm}
                     />
                 </div>
 

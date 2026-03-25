@@ -1,6 +1,8 @@
 import prisma from '@/lib/db';
 import ViewerClient from './ViewerClient';
 import { notFound } from 'next/navigation';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 export async function generateMetadata({ params }) {
     const { slug } = await params;
@@ -21,6 +23,8 @@ export default async function ViewPage({ params, searchParams }) {
     const { slug } = await params;
     const resolvedSearchParams = await searchParams;
     const viewId = resolvedSearchParams?.viewId;
+    const session = await getServerSession(authOptions);
+    const currentUserEmail = session?.user?.email || null;
 
     try {
         // Server-side validation
@@ -91,7 +95,7 @@ export default async function ViewPage({ params, searchParams }) {
             }
         }
 
-        return <ViewerClient initialData={initialData} />;
+        return <ViewerClient initialData={initialData} currentUserEmail={currentUserEmail} />;
 
     } catch (error) {
         console.error('Server-side view load error:', error);

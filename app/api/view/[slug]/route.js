@@ -54,6 +54,24 @@ export async function GET(request, { params }) {
                     return NextResponse.json({ error: 'This link has expired' }, { status: 410 });
                 }
 
+                // Fetch signature requests for this viewer's email
+                const signatureRequests = await prisma.signatureRequest.findMany({
+                    where: {
+                        documentId: link.documentId,
+                        signerEmail: { equals: view.viewerEmail, mode: 'insensitive' },
+                    },
+                    select: {
+                        id: true,
+                        signerEmail: true,
+                        signerName: true,
+                        status: true,
+                        role: true,
+                        message: true,
+                        createdAt: true,
+                        signedAt: true,
+                    },
+                });
+
                 return NextResponse.json({
                     viewId: view.id,
                     viewerEmail: view.viewerEmail,
@@ -67,6 +85,7 @@ export async function GET(request, { params }) {
                     allowDownload: link.allowDownload,
                     requireWatermark: link.requireWatermark,
                     enableAI: link.enableAI,
+                    signatureRequests,
                     isRestored: true
                 });
             }
@@ -143,6 +162,41 @@ export async function POST(request, { params }) {
             },
         });
 
+        // Fetch signature requests for this viewer's email
+        let signatureRequests = [];
+        if (body.email) {
+            signatureRequests = await prisma.signatureRequest.findMany({
+                where: {
+                    documentId: link.document.id,
+                    signerEmail: { equals: body.email, mode: 'insensitive' },
+                },
+                select: {
+                    id: true,
+                    signerEmail: true,
+                    signerName: true,
+                    status: true,
+                    role: true,
+                    message: true,
+                    createdAt: true,
+                    signedAt: true,
+                },
+            });
+
+            // Update viewCount and lastViewedAt for pending requests
+            const pendingIds = signatureRequests
+                .filter(r => r.status === 'pending')
+                .map(r => r.id);
+            if (pendingIds.length > 0) {
+                await prisma.signatureRequest.updateMany({
+                    where: { id: { in: pendingIds } },
+                    data: {
+                        viewCount: { increment: 1 },
+                        lastViewedAt: new Date(),
+                    },
+                });
+            }
+        }
+
         return NextResponse.json({
             viewId: view.id,
             document: {
@@ -154,6 +208,7 @@ export async function POST(request, { params }) {
             allowDownload: link.allowDownload,
             requireWatermark: link.requireWatermark,
             enableAI: link.enableAI,
+            signatureRequests,
         });
     } catch (error) {
         console.error('Error accessing document:', error);

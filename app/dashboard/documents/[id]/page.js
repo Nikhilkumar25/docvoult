@@ -411,6 +411,16 @@ export default function DocumentDetailPage({ params }) {
         1
     );
 
+    const isOwnerOrMember = document.userId === session?.user?.id || 
+        (document.workspaceId && (
+            document.workspace.ownerId === session?.user?.id || 
+            document.workspace.members?.some(m => m.userId === session?.user?.id)
+        ));
+    
+    const myPendingRequest = document.signatureRequests?.find(
+        req => req.signerEmail.toLowerCase() === session?.user?.email?.toLowerCase() && req.status === 'pending'
+    );
+
     return (
         <div className="doc-detail">
             {/* Header */}
@@ -428,7 +438,7 @@ export default function DocumentDetailPage({ params }) {
                     <button className="btn btn-secondary" onClick={() => router.push('/dashboard')} disabled={updatingFile}>
                         ← Back
                     </button>
-                    {(document.userId === session?.user?.id || document.workspace?.ownerId === session?.user?.id) && (
+                    {isOwnerOrMember && (
                         <>
                             <button
                                 className="btn btn-secondary"
@@ -445,41 +455,40 @@ export default function DocumentDetailPage({ params }) {
                                 onChange={(e) => handleFileUpdate(e.target.files[0])}
                                 style={{ display: 'none' }}
                             />
+                            <button className="btn btn-primary" onClick={() => setShowLinkModal(true)} disabled={updatingFile}>
+                                🔗 Create Link
+                            </button>
                         </>
                     )}
-                    <button className="btn btn-primary" onClick={() => setShowLinkModal(true)} disabled={updatingFile}>
-                        🔗 Create Link
-                    </button>
-                    <button className="btn btn-accent" onClick={() => setShowSignModal(true)} disabled={updatingFile}>
-                        ✍️ Request Signature
-                    </button>
                 </div>
             </div>
 
-            {/* Analytics Overview */}
-            <div className="analytics-overview">
-                <div className="analytics-card">
-                    <div className="analytics-label">Total Views</div>
-                    <div className="analytics-value accent">{analytics.totalViews}</div>
-                </div>
-                <div className="analytics-card">
-                    <div className="analytics-label">Unique Viewers</div>
-                    <div className="analytics-value accent">{analytics.uniqueViewers}</div>
-                </div>
-                <div className="analytics-card">
-                    <div className="analytics-label">Avg. View Time</div>
-                    <div className="analytics-value accent">{formatDuration(analytics.avgDuration)}</div>
-                </div>
-                <div className="analytics-card">
-                    <div className="analytics-label">Active Links</div>
-                    <div className="analytics-value accent">
-                        {document.links.filter((l) => l.isActive).length}
+            {/* Analytics Overview (Owner Only) */}
+            {isOwnerOrMember && (
+                <div className="analytics-overview">
+                    <div className="analytics-card">
+                        <div className="analytics-label">Total Views</div>
+                        <div className="analytics-value accent">{analytics.totalViews}</div>
+                    </div>
+                    <div className="analytics-card">
+                        <div className="analytics-label">Unique Viewers</div>
+                        <div className="analytics-value accent">{analytics.uniqueViewers}</div>
+                    </div>
+                    <div className="analytics-card">
+                        <div className="analytics-label">Avg. View Time</div>
+                        <div className="analytics-value accent">{formatDuration(analytics.avgDuration)}</div>
+                    </div>
+                    <div className="analytics-card">
+                        <div className="analytics-label">Active Links</div>
+                        <div className="analytics-value accent">
+                            {document.links.filter((l) => l.isActive).length}
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
-            {/* Page-Level Heatmap */}
-            {document.pageCount > 0 && (
+            {/* Page-Level Heatmap (Owner Only) */}
+            {isOwnerOrMember && document.pageCount > 0 && (
                 <div className="section-panel">
                     <div className="section-panel-header">
                         <h2>📊 Page Engagement</h2>
@@ -512,93 +521,100 @@ export default function DocumentDetailPage({ params }) {
                 </div>
             )}
 
-            {/* Links */}
-            <div className="section-panel">
-                <div className="section-panel-header">
-                    <h2>🔗 Shared Links</h2>
-                    <button className="btn btn-primary btn-sm" onClick={() => setShowLinkModal(true)}>
-                        + New Link
-                    </button>
-                </div>
-                <div className="section-panel-body">
-                    {document.links.length === 0 ? (
-                        <div className="empty-state" style={{ padding: 'var(--space-xl)' }}>
-                            <p>No links created yet. Create a link to start sharing.</p>
-                        </div>
-                    ) : (
-                        <table className="links-table">
-                            <thead>
-                                <tr>
-                                    <th>Link</th>
-                                    <th>Settings</th>
-                                    <th>Views</th>
-                                    <th>Created</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {document.links.map((link) => (
-                                    <tr key={link.id}>
-                                        <td>
-                                            <div className="link-url">
-                                                <code>/view/{link.slug}</code>
-                                            </div>
-                                        </td>
-                                        <td>
-                                            {link.requireEmail && <span className="badge badge-info">📧 Email</span>}{' '}
-                                            {link.passcode && <span className="badge badge-warning">🔒 Passcode</span>}{' '}
-                                            {link.expiresAt && <span className="badge badge-danger">⏱ Expires</span>}{' '}
-                                            {link.allowDownload && <span className="badge badge-success">📥 Download</span>}{' '}
-                                            {link.requireWatermark && <span className="badge badge-primary">🛡️ Watermark</span>}{' '}
-                                            {link.enableAI && <span className="badge badge-accent">🤖 AI</span>}
-                                        </td>
-                                        <td>{link._count.views}</td>
-                                        <td>{formatDate(link.createdAt)}</td>
-                                        <td>
-                                            <button
-                                                className="btn btn-secondary btn-sm"
-                                                onClick={() => copyLink(link.slug)}
-                                            >
-                                                {copied === link.slug ? '✓ Copied!' : '📋 Copy'}
-                                            </button>
-                                        </td>
+            {/* Links (Owner Only) */}
+            {isOwnerOrMember && (
+                <div className="section-panel">
+                    <div className="section-panel-header">
+                        <h2>🔗 Shared Links</h2>
+                        <button className="btn btn-primary btn-sm" onClick={() => setShowLinkModal(true)}>
+                            + New Link
+                        </button>
+                    </div>
+                    <div className="section-panel-body">
+                        {document.links.length === 0 ? (
+                            <div className="empty-state" style={{ padding: 'var(--space-xl)' }}>
+                                <p>No links created yet. Create a link to start sharing.</p>
+                            </div>
+                        ) : (
+                            <table className="links-table">
+                                <thead>
+                                    <tr>
+                                        <th>Link</th>
+                                        <th>Settings</th>
+                                        <th>Views</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    )}
+                                </thead>
+                                <tbody>
+                                    {document.links.map((link) => (
+                                        <tr key={link.id}>
+                                            <td>
+                                                <div className="link-url">
+                                                    <code>/view/{link.slug}</code>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                {link.requireEmail && <span className="badge badge-info">📧 Email</span>}{' '}
+                                                {link.passcode && <span className="badge badge-warning">🔒 Passcode</span>}{' '}
+                                                {link.expiresAt && <span className="badge badge-danger">⏱ Expires</span>}{' '}
+                                                {link.allowDownload && <span className="badge badge-success">📥 Download</span>}{' '}
+                                                {link.requireWatermark && <span className="badge badge-primary">🛡️ Watermark</span>}{' '}
+                                                {link.enableAI && <span className="badge badge-accent">🤖 AI</span>}
+                                            </td>
+                                            <td>{link._count.views}</td>
+                                            <td>{formatDate(link.createdAt)}</td>
+                                            <td>
+                                                <button
+                                                    className="btn btn-secondary btn-sm"
+                                                    onClick={() => copyLink(link.slug)}
+                                                >
+                                                    {copied === link.slug ? '✓ Copied!' : '📋 Copy'}
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
             {/* Signature Requests */}
             <div className="section-panel" style={{ borderLeft: '4px solid #f59e0b', marginBottom: '2rem' }}>
                 <div className="section-panel-header">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{ fontSize: '1.25rem' }}>✍️</span>
-                        <h2 style={{ margin: 0 }}>Signature Requests</h2>
+                        <h2 style={{ margin: 0 }}>{isOwnerOrMember ? 'Signature Requests' : 'Your Signature Details'}</h2>
                     </div>
+                    {isOwnerOrMember && (
+                        <a href="/dashboard/signatures" className="btn btn-secondary btn-sm" style={{ textDecoration: 'none' }}>
+                            Manage in Signatures →
+                        </a>
+                    )}
                 </div>
                 <div className="section-panel-body">
                     {!document.signatureRequests || document.signatureRequests.length === 0 ? (
                         <div className="empty-state" style={{ padding: 'var(--space-xl)', textAlign: 'center' }}>
-                            <p style={{ color: 'var(--text-tertiary)' }}>No signature requests yet. Request a signature to execute a contract.</p>
+                            <p style={{ color: 'var(--text-tertiary)' }}>No signature requests found.</p>
                         </div>
                     ) : (
                         <table className="links-table">
                             <thead>
                                 <tr>
-                                    <th>Signer</th>
+                                    <th>{isOwnerOrMember ? 'Signer' : 'Requester'}</th>
                                     <th>Status</th>
-                                    <th>Requested</th>
+                                    <th>{isOwnerOrMember ? 'Requested' : 'Received'}</th>
                                     <th>Signed At</th>
-                                    <th>Action</th>
+                                    {isOwnerOrMember && <th>Action</th>}
                                 </tr>
                             </thead>
                             <tbody>
                                 {document.signatureRequests.map((req) => (
                                     <tr key={req.id}>
                                         <td>
-                                            <div style={{ fontWeight: 600 }}>{req.signerName || 'Unnamed Signer'}</div>
-                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>{req.signerEmail}</div>
+                                            <div style={{ fontWeight: 600 }}>{isOwnerOrMember ? (req.signerName || 'Unnamed Signer') : (document.user?.name || 'Document Owner')}</div>
+                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-tertiary)' }}>{isOwnerOrMember ? req.signerEmail : (document.user?.email)}</div>
                                         </td>
                                         <td>
                                             <span className={`badge ${req.status === 'signed' ? 'badge-success' : 'badge-warning'}`}>
@@ -607,27 +623,29 @@ export default function DocumentDetailPage({ params }) {
                                         </td>
                                         <td>{formatDate(req.createdAt)}</td>
                                         <td>{req.signedAt ? formatDate(req.signedAt) : '—'}</td>
-                                        <td>
-                                            {!req.signedAt ? (
-                                                <button 
-                                                    className="btn btn-secondary btn-sm"
-                                                    onClick={() => {
-                                                        const firstLink = document.links?.[0];
-                                                        if (firstLink) {
-                                                            copyLink(firstLink.slug);
-                                                        } else {
-                                                            alert('No sharing links found. Please create a link first.');
-                                                        }
-                                                    }}
-                                                >
-                                                    {document.links?.[0] && copied === document.links[0].slug ? '✓ Copied!' : '📋 Copy Link'}
-                                                </button>
-                                            ) : (
-                                                <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
-                                                    IP: {req.signatures?.[0]?.ipAddress || '—'}
-                                                </div>
-                                            )}
-                                        </td>
+                                        {isOwnerOrMember && (
+                                            <td>
+                                                {!req.signedAt ? (
+                                                    <button 
+                                                        className="btn btn-secondary btn-sm"
+                                                        onClick={() => {
+                                                            const firstLink = document.links?.[0];
+                                                            if (firstLink) {
+                                                                copyLink(firstLink.slug);
+                                                            } else {
+                                                                alert('No sharing links found. Please create a link first.');
+                                                            }
+                                                        }}
+                                                    >
+                                                        {document.links?.[0] && copied === document.links[0].slug ? '✓ Copied!' : '📋 Copy Link'}
+                                                    </button>
+                                                ) : (
+                                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-tertiary)' }}>
+                                                        IP: {req.signatures?.[0]?.ipAddress || '—'}
+                                                    </div>
+                                                )}
+                                            </td>
+                                        )}
                                     </tr>
                                 ))}
                             </tbody>
@@ -636,11 +654,12 @@ export default function DocumentDetailPage({ params }) {
                 </div>
             </div>
 
-            {/* Page Engagement Stats */}
-            <div className="section-panel">
-                <div className="section-panel-header">
-                    <h2>📊 Page Engagement</h2>
-                </div>
+            {/* Page Engagement Stats (Owner Only) */}
+            {isOwnerOrMember && (
+                <div className="section-panel">
+                    <div className="section-panel-header">
+                        <h2>📊 Detailed Engagement</h2>
+                    </div>
                 <div className="section-panel-body">
                     <table className="viewers-table">
                         <thead>
@@ -667,10 +686,12 @@ export default function DocumentDetailPage({ params }) {
                         </tbody>
                     </table>
                 </div>
-            </div>
+                </div>
+            )}
 
-            {/* Viewers */}
-            <div className="section-panel">
+            {/* Viewers (Owner Only) */}
+            {isOwnerOrMember && (
+                <div className="section-panel">
                 <div className="section-panel-header">
                     <h2>👥 Recent Viewers</h2>
                 </div>
@@ -718,12 +739,14 @@ export default function DocumentDetailPage({ params }) {
                     )}
                 </div>
             </div>
+        )}
 
-            {/* Questions Section */}
-            <div className="section-panel">
-                <div className="section-panel-header">
-                    <h2>💬 Questions & Inquiries</h2>
-                </div>
+            {/* Questions Section (Owner Only) */}
+            {isOwnerOrMember && (
+                <div className="section-panel">
+                    <div className="section-panel-header">
+                        <h2>💬 Questions & Inquiries</h2>
+                    </div>
                 <div className="section-panel-body">
                     {document.comments.length === 0 ? (
                         <div className="empty-state" style={{ padding: 'var(--space-xl)' }}>
@@ -811,166 +834,200 @@ export default function DocumentDetailPage({ params }) {
                     )}
                 </div>
             </div>
+        )}
 
-            {/* AI Knowledge Base Management */}
-            <div className="section-panel kb-section">
-                <div className="section-panel-header">
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <h2>🤖 AI Knowledge Base</h2>
-                        {document.knowledgeBase && <span className={`kb-status-badge ${document.knowledgeBase.status}`}>{document.knowledgeBase.status.toUpperCase()}</span>}
-                    </div>
-                    <div style={{ display: 'flex', gap: '8px' }}>
-                        {document.knowledgeBase && (
-                            <button className="btn btn-secondary btn-sm" onClick={toggleKB}>
-                                {isKBExpanded ? 'Collapse' : 'View & Edit'}
-                            </button>
-                        )}
-                        <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={generateKB}
-                            disabled={isGeneratingKB}
-                        >
-                            {isGeneratingKB ? '✨ Generating...' : document.knowledgeBase ? '🔄 Regenerate' : '✨ Generate with AI'}
-                        </button>
-                        {isKBExpanded && kb && kb.entries.some(e => !e.isApproved) && (
-                            <button
-                                className="btn btn-primary btn-sm"
-                                onClick={approveAllKB}
-                                disabled={approvingAll}
-                            >
-                                {approvingAll ? '⌛ Approving...' : '✅ Approve All'}
-                            </button>
-                        )}
-                    </div>
-                </div>
-                <div className="section-panel-body">
-                    {!document.knowledgeBase ? (
-                        <div className="empty-state">
-                            <p>Train an AI on this document to give viewers instant answers.</p>
-                            <button className="btn btn-primary" onClick={generateKB} disabled={isGeneratingKB} style={{ marginTop: 12 }}>
-                                {isGeneratingKB ? 'Extracting Text & Generating...' : 'Start AI Training'}
-                            </button>
-                        </div>
-                    ) : document.knowledgeBase.status === 'generating' ? (
-                        <div className="kb-loading-state">
-                            <div className="ai-pulse"></div>
-                            <p>AI is reading your document and generating questions... This usually takes 10-15 seconds.</p>
-                        </div>
-                    ) : !isKBExpanded ? (
-                        <div className="kb-summary-state" style={{ padding: 'var(--space-lg)', textAlign: 'center', background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)' }}>
-                            <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
-                                Knowledge Base contains <strong>{document.knowledgeBase._count.entries}</strong> total questions.
+            {/* Signature Banner for Signers */}
+            {myPendingRequest && (
+                <div style={{ 
+                    backgroundColor: '#fffbeb', 
+                    border: '1px solid #fef3c7', 
+                    borderRadius: '12px', 
+                    padding: '1.5rem', 
+                    marginBottom: '2rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ fontSize: '2rem' }}>✍️</div>
+                        <div>
+                            <h3 style={{ margin: 0, fontWeight: 700, color: '#92400e' }}>Signature Required</h3>
+                            <p style={{ margin: '4px 0 0 0', color: '#b45309', fontSize: '0.9rem' }}>
+                                You have been requested to sign this document. Please review and provide your signature.
                             </p>
-                            <button className="btn btn-ghost" onClick={toggleKB} style={{ marginTop: '8px', color: 'var(--accent-primary)' }}>
-                                Click here to view and edit answers
-                            </button>
                         </div>
-                    ) : !kb ? (
-                        <div className="loading-spinner" style={{ padding: '20px' }}>
-                            <div className="spinner" />
-                        </div>
-                    ) : (
-                        <div className="kb-manager">
-                            {/* Analytics Mini-Dashboard */}
-                            <div className="kb-analytics-grid">
-                                <div className="kb-stat-card">
-                                    <div className="kb-stat-label">Total Q&A</div>
-                                    <div className="kb-stat-value">{kb.entries.length}</div>
-                                </div>
-                                <div className="kb-stat-card">
-                                    <div className="kb-stat-label">Approved</div>
-                                    <div className="kb-stat-value">{kb.entries.filter(e => e.isApproved).length}</div>
-                                </div>
-                                <div className="kb-stat-card">
-                                    <div className="kb-stat-label">Pending Review</div>
-                                    <div className="kb-stat-value warning">{kb.entries.filter(e => !e.isApproved).length}</div>
-                                </div>
-                            </div>
-
-                            {/* Unanswered Suggestions */}
-                            {kb.unanswered && kb.unanswered.length > 0 && (
-                                <div className="suggested-questions-box">
-                                    <h3>📬 Suggested Questions (from Viewers)</h3>
-                                    <div className="suggested-list">
-                                        {kb.unanswered.map(u => (
-                                            <div key={u.id} className="suggested-item">
-                                                <div className="suggested-info">
-                                                    <div className="suggested-text">"{u.question}"</div>
-                                                    <div className="suggested-count">Asked {u.count} times</div>
-                                                </div>
-                                                <div className="suggested-actions">
-                                                    <button className="btn btn-ghost btn-xs" onClick={() => {
-                                                        const ans = prompt(`Answer for: ${u.question}`);
-                                                        if (ans) {
-                                                            // For simplicity in this demo, we'll just alert. 
-                                                            // In real app, we'd call an API to add a new KB entry.
-                                                            alert('Great! Adding to KB and dismissing suggestion...');
-                                                            dismissUnanswered(u.id);
-                                                        }
-                                                    }}>Add Answer</button>
-                                                    <button className="btn btn-ghost btn-xs text-danger" onClick={() => dismissUnanswered(u.id)}>Dismiss</button>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* KB Entries List */}
-                            <div className="kb-entries-list">
-                                {kb.entries.map(entry => (
-                                    <div key={entry.id} className={`kb-entry-card ${entry.isApproved ? 'approved' : 'pending'}`}>
-                                        <div className="kb-entry-main">
-                                            <input
-                                                className="kb-input-q"
-                                                value={entry.question}
-                                                onChange={(e) => updateKBEntry(entry.id, { question: e.target.value })}
-                                                onFocus={() => { isEditingKBRef.current = true; }}
-                                                onBlur={() => { isEditingKBRef.current = false; }}
-                                                placeholder="Strategic Question"
-                                            />
-                                            <textarea
-                                                className="kb-input-a"
-                                                value={entry.answer}
-                                                onChange={(e) => updateKBEntry(entry.id, { answer: e.target.value })}
-                                                onFocus={() => { isEditingKBRef.current = true; }}
-                                                onBlur={() => { isEditingKBRef.current = false; }}
-                                                rows={3}
-                                                style={{ border: !entry.answer ? '1px dashed var(--accent-primary)' : '' }}
-                                                placeholder="Provide an answer for this question... (Required before approval)"
-                                            />
-                                        </div>
-                                        <div className="kb-entry-meta">
-                                            <select
-                                                className="kb-select-cat"
-                                                value={entry.category}
-                                                onChange={(e) => updateKBEntry(entry.id, { category: e.target.value })}
-                                            >
-                                                <option value="general">General</option>
-                                                <option value="sensitive">Sensitive (Request Contact)</option>
-                                                <option value="out-of-scope">Out of Scope</option>
-                                            </select>
-                                            <div className="kb-card-actions">
-                                                <button
-                                                    className={`kb-approve-toggle ${entry.isApproved ? 'active' : ''}`}
-                                                    disabled={!entry.answer || !entry.answer.trim()}
-                                                    onClick={() => updateKBEntry(entry.id, { isApproved: !entry.isApproved })}
-                                                >
-                                                    {entry.isApproved ? '✅ Approved' : (!entry.answer || !entry.answer.trim() ? 'Answer Required' : 'Approve')}
-                                                </button>
-                                                <button className="kb-delete-btn" onClick={() => deleteKBEntry(entry.id)}>🗑️</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
+                    </div>
+                    <button 
+                        className="btn btn-accent" 
+                        onClick={() => {
+                            const firstLink = document.links?.[0];
+                            if (firstLink) {
+                                window.open(`/view/${firstLink.slug}`, '_blank');
+                            } else {
+                                alert("No public link available for signing. Please contact the document owner.");
+                            }
+                        }}
+                    >
+                        Review & Sign Document
+                    </button>
                 </div>
-            </div>
+            )}
 
-            {/* Create Link Modal */}
-            {showLinkModal && (
+            {/* AI Knowledge Base Management (Owner Only) */}
+            {isOwnerOrMember && (
+                <div className="section-panel kb-section">
+                    <div className="section-panel-header">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <h2>🤖 AI Knowledge Base</h2>
+                            {document.knowledgeBase && <span className={`kb-status-badge ${document.knowledgeBase.status}`}>{document.knowledgeBase.status.toUpperCase()}</span>}
+                        </div>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <button
+                                className="btn btn-secondary btn-sm"
+                                onClick={generateKB}
+                                disabled={isGeneratingKB}
+                            >
+                                {isGeneratingKB ? '✨ Generating...' : document.knowledgeBase ? '🔄 Regenerate' : '✨ Generate with AI'}
+                            </button>
+                            {isKBExpanded && kb && kb.entries.some(e => !e.isApproved) && (
+                                <button
+                                    className="btn btn-primary btn-sm"
+                                    onClick={approveAllKB}
+                                    disabled={approvingAll}
+                                >
+                                    {approvingAll ? '⌛ Approving...' : '✅ Approve All'}
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                    <div className="section-panel-body">
+                        {!document.knowledgeBase ? (
+                            <div className="empty-state">
+                                <p>Train an AI on this document to give viewers instant answers.</p>
+                                <button className="btn btn-primary" onClick={generateKB} disabled={isGeneratingKB} style={{ marginTop: 12 }}>
+                                    {isGeneratingKB ? 'Extracting Text & Generating...' : 'Start AI Training'}
+                                </button>
+                            </div>
+                        ) : document.knowledgeBase.status === 'generating' ? (
+                            <div className="kb-loading-state">
+                                <div className="ai-pulse"></div>
+                                <p>AI is reading your document and generating questions... This usually takes 10-15 seconds.</p>
+                            </div>
+                        ) : !isKBExpanded ? (
+                            <div className="kb-summary-state" style={{ padding: 'var(--space-lg)', textAlign: 'center', background: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)' }}>
+                                <p style={{ margin: 0, color: 'var(--text-secondary)' }}>
+                                    Knowledge Base contains <strong>{document.knowledgeBase._count.entries}</strong> total questions.
+                                </p>
+                                <button className="btn btn-ghost" onClick={toggleKB} style={{ marginTop: '8px', color: 'var(--accent-primary)' }}>
+                                    Click here to view and edit answers
+                                </button>
+                            </div>
+                        ) : !kb ? (
+                            <div className="loading-spinner" style={{ padding: '20px' }}>
+                                <div className="spinner" />
+                            </div>
+                        ) : (
+                            <div className="kb-manager">
+                                {/* Analytics Mini-Dashboard */}
+                                <div className="kb-analytics-grid">
+                                    <div className="kb-stat-card">
+                                        <div className="kb-stat-label">Total Q&A</div>
+                                        <div className="kb-stat-value">{kb.entries.length}</div>
+                                    </div>
+                                    <div className="kb-stat-card">
+                                        <div className="kb-stat-label">Approved</div>
+                                        <div className="kb-stat-value">{kb.entries.filter(e => e.isApproved).length}</div>
+                                    </div>
+                                    <div className="kb-stat-card">
+                                        <div className="kb-stat-label">Pending Review</div>
+                                        <div className="kb-stat-value warning">{kb.entries.filter(e => !e.isApproved).length}</div>
+                                    </div>
+                                </div>
+
+                                {/* Unanswered Suggestions */}
+                                {kb.unanswered && kb.unanswered.length > 0 && (
+                                    <div className="suggested-questions-box">
+                                        <h3>📬 Suggested Questions (from Viewers)</h3>
+                                        <div className="suggested-list">
+                                            {kb.unanswered.map(u => (
+                                                <div key={u.id} className="suggested-item">
+                                                    <div className="suggested-info">
+                                                        <div className="suggested-text">"{u.question}"</div>
+                                                        <div className="suggested-count">Asked {u.count} times</div>
+                                                    </div>
+                                                    <div className="suggested-actions">
+                                                        <button className="btn btn-ghost btn-xs" onClick={() => {
+                                                            const ans = prompt(`Answer for: ${u.question}`);
+                                                            if (ans) {
+                                                                alert('Great! Adding to KB and dismissing suggestion...');
+                                                                dismissUnanswered(u.id);
+                                                            }
+                                                        }}>Add Answer</button>
+                                                        <button className="btn btn-ghost btn-xs text-danger" onClick={() => dismissUnanswered(u.id)}>Dismiss</button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* KB Entries List */}
+                                <div className="kb-entries-list">
+                                    {kb.entries.map(entry => (
+                                        <div key={entry.id} className={`kb-entry-card ${entry.isApproved ? 'approved' : 'pending'}`}>
+                                            <div className="kb-entry-main">
+                                                <input
+                                                    className="kb-input-q"
+                                                    value={entry.question}
+                                                    onChange={(e) => updateKBEntry(entry.id, { question: e.target.value })}
+                                                    onFocus={() => { isEditingKBRef.current = true; }}
+                                                    onBlur={() => { isEditingKBRef.current = false; }}
+                                                    placeholder="Strategic Question"
+                                                />
+                                                <textarea
+                                                    className="kb-input-a"
+                                                    value={entry.answer}
+                                                    onChange={(e) => updateKBEntry(entry.id, { answer: e.target.value })}
+                                                    onFocus={() => { isEditingKBRef.current = true; }}
+                                                    onBlur={() => { isEditingKBRef.current = false; }}
+                                                    rows={3}
+                                                    style={{ border: !entry.answer ? '1px dashed var(--accent-primary)' : '' }}
+                                                    placeholder="Provide an answer for this question... (Required before approval)"
+                                                />
+                                            </div>
+                                            <div className="kb-entry-meta">
+                                                <select
+                                                    className="kb-select-cat"
+                                                    value={entry.category}
+                                                    onChange={(e) => updateKBEntry(entry.id, { category: e.target.value })}
+                                                >
+                                                    <option value="general">General</option>
+                                                    <option value="sensitive">Sensitive (Request Contact)</option>
+                                                    <option value="out-of-scope">Out of Scope</option>
+                                                </select>
+                                                <div className="kb-card-actions">
+                                                    <button
+                                                        className={`kb-approve-toggle ${entry.isApproved ? 'active' : ''}`}
+                                                        disabled={!entry.answer || !entry.answer.trim()}
+                                                        onClick={() => updateKBEntry(entry.id, { isApproved: !entry.isApproved })}
+                                                    >
+                                                        {entry.isApproved ? '✅ Approved' : (!entry.answer || !entry.answer.trim() ? 'Answer Required' : 'Approve')}
+                                                    </button>
+                                                    <button className="kb-delete-btn" onClick={() => deleteKBEntry(entry.id)}>🗑️</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Create Link Modal (Owner Only) */}
+            {isOwnerOrMember && showLinkModal && (
                 <div className="modal-overlay" onClick={() => setShowLinkModal(false)}>
                     <div className="modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
@@ -1109,8 +1166,8 @@ export default function DocumentDetailPage({ params }) {
 
             {copied && <div className="copied-toast">✓ Link copied to clipboard!</div>}
 
-            {/* Reply Modal */}
-            {replyingTo && (
+            {/* Reply Modal (Owner Only) */}
+            {isOwnerOrMember && replyingTo && (
                 <div className="modal-overlay" onClick={() => setReplyingTo(null)}>
                     <div className="modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
@@ -1168,8 +1225,8 @@ export default function DocumentDetailPage({ params }) {
                 </div>
             )}
 
-            {/* Signature Request Modal */}
-            {showSignModal && (
+            {/* Signature Request Modal (Owner Only) */}
+            {isOwnerOrMember && showSignModal && (
                 <div className="modal-overlay" onClick={() => setShowSignModal(false)}>
                     <div className="modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">

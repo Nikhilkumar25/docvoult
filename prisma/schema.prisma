@@ -69,25 +69,25 @@ model Folder {
 }
 
 model Document {
-  id            String         @id @default(cuid())
-  title         String
-  fileName      String
-  fileUrl       String
-  fileSize      Int
-  pageCount     Int            @default(1)
-  userId        String
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  folderId      String?
-  workspaceId   String?
-  comments      Comment[]
-  folder        Folder?        @relation(fields: [folderId], references: [id])
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workspace     Workspace?     @relation(fields: [workspaceId], references: [id])
-  knowledgeBase KnowledgeBase?
-  links         Link[]
-  views         View[]
+  id                String             @id @default(cuid())
+  title             String
+  fileName          String
+  fileUrl           String
+  fileSize          Int
+  pageCount         Int                @default(1)
+  userId            String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  folderId          String?
+  workspaceId       String?
+  comments          Comment[]
+  folder            Folder?            @relation(fields: [folderId], references: [id])
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace         Workspace?         @relation(fields: [workspaceId], references: [id])
+  knowledgeBase     KnowledgeBase?
+  links             Link[]
   signatureRequests SignatureRequest[]
+  views             View[]
 
   @@index([userId])
   @@index([workspaceId])
@@ -201,30 +201,70 @@ model UnansweredQuestion {
 }
 
 model SignatureRequest {
-  id          String   @id @default(cuid())
-  documentId  String
-  signerEmail String
-  signerName  String?
-  status      String   @default("pending") // pending, signed, declined
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  signedAt    DateTime?
-  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
-  signatures  Signature[]
+  id            String              @id @default(cuid())
+  documentId    String
+  signerEmail   String
+  signerName    String?
+  status        String              @default("pending")
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  signedAt      DateTime?
+  accessCode    String?
+  declineReason String?
+  declinedAt    DateTime?
+  expiresAt     DateTime?
+  lastViewedAt  DateTime?
+  message       String?
+  order         Int                 @default(0)
+  role          String              @default("signer")
+  viewCount     Int                 @default(0)
+  signatures    Signature[]
+  fields        SignatureField[]
+  activities    SignatureActivity[]
+  document      Document            @relation(fields: [documentId], references: [id], onDelete: Cascade)
 
   @@index([documentId])
   @@index([signerEmail])
 }
 
+model SignatureField {
+  id               String           @id @default(cuid())
+  requestId        String
+  pageNumber       Int
+  x                Float
+  y                Float
+  width            Float?         @default(120)
+  height           Float?         @default(60)
+  type             String           @default("signature") // signature, name, date, email
+  status           String           @default("pending") // pending, affirmed
+  affirmedAt       DateTime?
+  signatureRequest SignatureRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([requestId])
+}
+
 model Signature {
-  id                 String           @id @default(cuid())
-  requestId          String
-  signatureData      String           // SVG or Base64 data
-  ipAddress          String?
-  userAgent          String?
-  documentHash       String?          // Hash of the document at time of signing
-  signedAt           DateTime         @default(now())
-  signatureRequest   SignatureRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  id               String           @id @default(cuid())
+  requestId        String
+  signatureData    String
+  ipAddress        String?
+  userAgent        String?
+  documentHash     String?
+  signedAt         DateTime         @default(now())
+  signatureRequest SignatureRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@index([requestId])
+}
+
+model SignatureActivity {
+  id        String           @id @default(cuid())
+  requestId String
+  action    String
+  actor     String
+  details   String?
+  ipAddress String?
+  createdAt DateTime         @default(now())
+  request   SignatureRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
 
   @@index([requestId])
 }

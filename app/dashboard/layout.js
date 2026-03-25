@@ -108,6 +108,7 @@ function DashboardShell({ children }) {
     const navItems = [
         { href: '/dashboard/analytics', label: 'Dashboard', icon: '📊' },
         { href: '/dashboard', label: 'Documents', icon: '📄' },
+        { href: '/dashboard/signatures', label: 'Signatures', icon: '✍️' },
         { href: '/dashboard/upload', label: 'Upload', icon: '📤' },
     ];
 

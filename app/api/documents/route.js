@@ -19,21 +19,24 @@ export async function GET(request) {
 
         let whereClause;
         if (workspaceId) {
-            // Workspace mode: show docs in this workspace (if user is owner or member)
             whereClause = {
                 workspaceId,
                 folderId: folderId || null,
                 OR: [
                     { workspace: { ownerId: session.user.id } },
-                    { workspace: { members: { some: { userId: session.user.id } } } }
+                    { workspace: { members: { some: { userId: session.user.id } } } },
+                    { signatureRequests: { some: { signerEmail: session.user.email } } }
                 ]
             };
         } else {
-            // Personal mode: show only user's own docs without a workspace
+            // Show user's own docs OR docs where they are a signature recipient
             whereClause = {
-                userId: session.user.id,
                 workspaceId: null,
                 folderId: folderId || null,
+                OR: [
+                    { userId: session.user.id },
+                    { signatureRequests: { some: { signerEmail: session.user.email } } }
+                ]
             };
         }
 
@@ -43,6 +46,10 @@ export async function GET(request) {
                 where: whereClause,
                 include: {
                     user: { select: { name: true, email: true } },
+                    signatureRequests: {
+                        where: { signerEmail: session.user.email },
+                        select: { status: true, signerEmail: true }
+                    },
                     _count: {
                         select: { views: true, links: true },
                     },
@@ -55,19 +62,24 @@ export async function GET(request) {
                 orderBy: { createdAt: 'desc' },
             });
 
-            return documents.map((doc) => ({
-                id: doc.id,
-                title: doc.title,
-                fileName: doc.fileName,
-                fileSize: doc.fileSize,
-                pageCount: doc.pageCount,
-                createdAt: doc.createdAt,
-                totalViews: doc._count.views,
-                totalLinks: doc._count.links,
-                lastViewedAt: doc.views[0]?.startedAt || null,
-                uploadedBy: doc.user?.name || 'Unknown',
-                isOwner: doc.userId === session.user.id,
-            }));
+            return documents.map((doc) => {
+                const myRequest = doc.signatureRequests?.find(r => r.signerEmail === session.user.email);
+                return {
+                    id: doc.id,
+                    title: doc.title,
+                    fileName: doc.fileName,
+                    fileSize: doc.fileSize,
+                    pageCount: doc.pageCount,
+                    createdAt: doc.createdAt,
+                    totalViews: doc._count.views,
+                    totalLinks: doc._count.links,
+                    lastViewedAt: doc.views[0]?.startedAt || null,
+                    uploadedBy: doc.user?.name || 'Unknown',
+                    isOwner: doc.userId === session.user.id,
+                    isSignatureRequired: myRequest?.status === 'pending',
+                    signatureStatus: myRequest?.status || null,
+                };
+            });
         }, 2500);
 
         return NextResponse.json(formatted);
