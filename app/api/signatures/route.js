@@ -13,7 +13,8 @@ export async function GET(request) {
         }
 
         const { searchParams } = new URL(request.url);
-        const tab = searchParams.get('tab') || 'inbox'; // inbox or sent
+        const tab = searchParams.get('tab') || 'inbox';
+        const workspaceId = searchParams.get('workspaceId');
 
         if (tab === 'inbox') {
             // Signature requests where I am the signer
@@ -55,16 +56,28 @@ export async function GET(request) {
         }
 
         if (tab === 'sent') {
-            // Signature requests on documents I own
+            let documentWhere = {};
+            if (workspaceId) {
+                documentWhere = {
+                    workspaceId,
+                    OR: [
+                        { workspace: { ownerId: session.user.id } },
+                        { workspace: { members: { some: { userId: session.user.id } } } },
+                    ]
+                };
+            } else {
+                documentWhere = {
+                    workspaceId: null,
+                    OR: [
+                        { userId: session.user.id }
+                    ]
+                };
+            }
+
+            // Signature requests on documents I own/have access to in this scope
             const requests = await prisma.signatureRequest.findMany({
                 where: {
-                    document: {
-                        OR: [
-                            { userId: session.user.id },
-                            { workspace: { ownerId: session.user.id } },
-                            { workspace: { members: { some: { userId: session.user.id } } } },
-                        ],
-                    },
+                    document: documentWhere,
                 },
                 include: {
                     document: {

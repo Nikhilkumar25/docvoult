@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSession } from 'next-auth/react';
 import { useData } from '@/lib/hooks/useData';
+import { useWorkspace } from '@/context/WorkspaceContext';
 import SignaturePreparer from '@/components/Signatures/SignaturePreparer';
 
 function formatDate(date) {
@@ -53,7 +54,10 @@ export default function SignaturesPage() {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [expandedRequest, setExpandedRequest] = useState(null);
 
-    const { data: requests = [], isLoading, mutate } = useData(`/api/signatures?tab=${activeTab}`);
+    const { activeWorkspace } = useWorkspace();
+    const wsParam = activeWorkspace ? `&workspaceId=${activeWorkspace}` : '';
+
+    const { data: requests = [], isLoading, mutate } = useData(`/api/signatures?tab=${activeTab}${wsParam}`);
 
     // Create form state
     const [createForm, setCreateForm] = useState({
@@ -71,7 +75,7 @@ export default function SignaturesPage() {
     const [signatureFields, setSignatureFields] = useState([]);
 
     // Documents for picker
-    const { data: myDocuments = [] } = useData('/api/documents');
+    const { data: myDocuments = [] } = useData(`/api/documents?foo=bar${wsParam}`);
 
     const handleCreate = async (e) => {
         e.preventDefault();
