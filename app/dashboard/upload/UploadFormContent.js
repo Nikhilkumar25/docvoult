@@ -17,6 +17,8 @@ if (typeof window !== 'undefined') {
     pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 }
 
+import { upload } from '@vercel/blob/client';
+
 export default function UploadFormContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -38,6 +40,14 @@ export default function UploadFormContent() {
             setError('Only PDF files are supported');
             return;
         }
+
+        // 12MB Size Limit
+        const MAX_SIZE = 12 * 1024 * 1024;
+        if (selectedFile.size > MAX_SIZE) {
+            setError('File size exceeds the 12MB limit. Please choose a smaller file.');
+            return;
+        }
+
         setError('');
         setFile(selectedFile);
         if (!title) {
@@ -81,10 +91,25 @@ export default function UploadFormContent() {
         setError('');
 
         try {
-            setProgress(30);
+            setProgress(20);
 
+            // 1. Upload to Vercel Blob directly from Client
+            // This bypasses the 4.5MB Serverless Function payload limit
+            const blob = await upload(file.name, file, {
+                access: 'public',
+                handleUploadUrl: '/api/documents/blob',
+                onUploadProgress: (progressEvent) => {
+                    setProgress(20 + (progressEvent.percentage * 0.6)); // Progress from 20 to 80
+                },
+            });
+
+            setProgress(85);
+
+            // 2. Save metadata to database
             const formData = new FormData();
-            formData.append('file', file);
+            formData.append('fileUrl', blob.url);
+            formData.append('fileSize', file.size.toString());
+            formData.append('fileName', file.name);
             formData.append('title', title);
             formData.append('pageCount', pageCount.toString());
             if (folderId) {
@@ -94,18 +119,16 @@ export default function UploadFormContent() {
                 formData.append('workspaceId', activeWorkspace);
             }
 
-            setProgress(60);
-
             const res = await fetch('/api/documents', {
                 method: 'POST',
                 body: formData,
             });
 
-            setProgress(90);
+            setProgress(95);
 
             if (!res.ok) {
                 const data = await res.json();
-                throw new Error(data.error || 'Upload failed');
+                throw new Error(data.error || 'Failed to save document metadata');
             }
 
             const doc = await res.json();

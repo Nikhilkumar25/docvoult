@@ -100,16 +100,18 @@ export async function POST(request) {
 
         const formData = await request.formData();
         const file = formData.get('file');
-        const title = formData.get('title') || file.name.replace(/\.pdf$/i, '');
+        const fileUrl = formData.get('fileUrl');
+        const fileSize = parseInt(formData.get('fileSize')) || (file ? file.size : 0);
+        const title = formData.get('title') || (file ? file.name.replace(/\.pdf$/i, '') : 'Untitled');
         const pageCount = parseInt(formData.get('pageCount')) || 1;
         const folderId = formData.get('folderId');
         const workspaceId = formData.get('workspaceId');
 
-        if (!file) {
+        if (!file && !fileUrl) {
             return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
         }
 
-        if (!file.name.toLowerCase().endsWith('.pdf')) {
+        if (file && !file.name.toLowerCase().endsWith('.pdf')) {
             return NextResponse.json({ error: 'Only PDF files are supported' }, { status: 400 });
         }
 
@@ -129,17 +131,23 @@ export async function POST(request) {
             }
         }
 
-        const blob = await put(`documents/${session.user.id}/${Date.now()}-${file.name}`, file, {
-            access: 'public',
-            contentType: 'application/pdf',
-        });
+        let finalFileUrl = fileUrl;
+        let finalFileName = file ? file.name : (formData.get('fileName') || 'document.pdf');
+
+        if (!finalFileUrl && file) {
+            const blob = await put(`documents/${session.user.id}/${Date.now()}-${file.name}`, file, {
+                access: 'public',
+                contentType: 'application/pdf',
+            });
+            finalFileUrl = blob.url;
+        }
 
         const document = await prisma.document.create({
             data: {
                 title,
-                fileName: file.name,
-                fileUrl: blob.url,
-                fileSize: file.size,
+                fileName: finalFileName,
+                fileUrl: finalFileUrl,
+                fileSize,
                 pageCount,
                 userId: session.user.id,
                 folderId: folderId || null,
