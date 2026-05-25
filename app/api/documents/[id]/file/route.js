@@ -31,13 +31,16 @@ export async function PATCH(request, { params }) {
 
         const formData = await request.formData();
         const file = formData.get('file');
+        const fileUrl = formData.get('fileUrl');
+        const fileName = formData.get('fileName') || (file ? file.name : '');
+        const fileSize = parseInt(formData.get('fileSize')) || (file ? file.size : 0);
         const pageCount = parseInt(formData.get('pageCount')) || document.pageCount;
 
-        if (!file) {
+        if (!file && !fileUrl) {
             return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
         }
 
-        if (!file.name.toLowerCase().endsWith('.pdf')) {
+        if (!fileName.toLowerCase().endsWith('.pdf')) {
             return NextResponse.json({ error: 'Only PDF files are supported' }, { status: 400 });
         }
 
@@ -48,19 +51,24 @@ export async function PATCH(request, { params }) {
             console.error('Failed to delete old blob, proceeding anyway:', e);
         }
 
-        // 2. Upload the new file to Vercel Blob
-        const blob = await put(`documents/${session.user.id}/${Date.now()}-${file.name}`, file, {
-            access: 'public',
-            contentType: 'application/pdf',
-        });
+        let finalFileUrl = fileUrl;
+
+        // 2. Upload the new file to Vercel Blob if provided directly
+        if (file && !fileUrl) {
+            const blob = await put(`documents/${session.user.id}/${Date.now()}-${file.name}`, file, {
+                access: 'public',
+                contentType: 'application/pdf',
+            });
+            finalFileUrl = blob.url;
+        }
 
         // 3. Update the Document record
         const updatedDoc = await prisma.document.update({
             where: { id },
             data: {
-                fileName: file.name,
-                fileUrl: blob.url,
-                fileSize: file.size,
+                fileName: fileName,
+                fileUrl: finalFileUrl,
+                fileSize: fileSize,
                 pageCount: pageCount,
             },
         });

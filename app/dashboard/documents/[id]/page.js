@@ -9,6 +9,8 @@ if (typeof window !== 'undefined') {
     pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 }
 
+import { upload } from '@vercel/blob/client';
+
 function formatDate(date) {
     return new Date(date).toLocaleDateString('en-US', {
         month: 'short',
@@ -90,6 +92,13 @@ export default function DocumentDetailPage({ params }) {
             return;
         }
 
+        // 12MB Size Limit
+        const MAX_SIZE = 12 * 1024 * 1024;
+        if (selectedFile.size > MAX_SIZE) {
+            alert('File size exceeds the 12MB limit. Please choose a smaller file.');
+            return;
+        }
+
         setUpdatingFile(true);
         setUpdateProgress(10); // Start progress
 
@@ -108,11 +117,23 @@ export default function DocumentDetailPage({ params }) {
             }
 
             setUpdateProgress(40);
+
+            // Upload directly to Vercel Blob from Client
+            const blob = await upload(selectedFile.name, selectedFile, {
+                access: 'public',
+                handleUploadUrl: '/api/documents/blob',
+                onUploadProgress: (progressEvent) => {
+                    setUpdateProgress(40 + (progressEvent.percentage * 0.4)); // 40 to 80
+                },
+            });
+
             const formData = new FormData();
-            formData.append('file', selectedFile);
+            formData.append('fileUrl', blob.url);
+            formData.append('fileName', selectedFile.name);
+            formData.append('fileSize', selectedFile.size.toString());
             formData.append('pageCount', newPageCount.toString());
 
-            setUpdateProgress(60);
+            setUpdateProgress(85);
             const res = await fetch(`/api/documents/${id}/file`, {
                 method: 'PATCH',
                 body: formData,
