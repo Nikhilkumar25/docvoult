@@ -73,6 +73,7 @@ export default function DocumentDetailPage({ params }) {
         enableAI: false,
     });
     const [creatingLink, setCreatingLink] = useState(false);
+    const [isEditingLink, setIsEditingLink] = useState(false);
     const [linkError, setLinkError] = useState('');
 
     // Signature Request state
@@ -351,8 +352,11 @@ export default function DocumentDetailPage({ params }) {
         setCreatingLink(true);
         setLinkError('');
         try {
-            const res = await fetch(`/api/documents/${id}/links`, {
-                method: 'POST',
+            const url = isEditingLink ? `/api/documents/${id}/links/${linkForm.id}` : `/api/documents/${id}/links`;
+            const method = isEditingLink ? 'PATCH' : 'POST';
+
+            const res = await fetch(url, {
+                method: method,
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     ...linkForm,
@@ -363,22 +367,66 @@ export default function DocumentDetailPage({ params }) {
             const data = await res.json();
 
             if (res.ok) {
-                // Instantly update the UI with the newly created link
-                const newLink = { ...data, _count: { views: 0 } };
-                setDocument(prev => ({
-                    ...prev,
-                    links: [newLink, ...prev.links]
-                }));
+                // Instantly update the UI
+                if (isEditingLink) {
+                    setDocument(prev => ({
+                        ...prev,
+                        links: prev.links.map(l => l.id === data.id ? { ...l, ...data } : l)
+                    }));
+                } else {
+                    const newLink = { ...data, _count: { views: 0 } };
+                    setDocument(prev => ({
+                        ...prev,
+                        links: [newLink, ...prev.links]
+                    }));
+                }
                 setShowLinkModal(false);
+                setIsEditingLink(false);
                 setLinkForm({ customSlug: '', requireEmail: false, passcode: '', expiresAt: '', allowDownload: false, requireWatermark: false, enableAI: false });
             } else {
-                setLinkError(data.error || 'Failed to create link');
+                setLinkError(data.error || 'Failed to save link');
             }
         } catch (err) {
-            console.error('Error creating link:', err);
+            console.error('Error saving link:', err);
             setLinkError('Network error occurred.');
         } finally {
             setCreatingLink(false);
+        }
+    };
+
+    const handleEditLink = (link) => {
+        setLinkForm({
+            id: link.id,
+            customSlug: link.slug,
+            requireEmail: link.requireEmail,
+            passcode: link.passcode || '',
+            expiresAt: link.expiresAt ? new Date(link.expiresAt).toISOString().slice(0, 16) : '',
+            allowDownload: link.allowDownload,
+            requireWatermark: link.requireWatermark,
+            enableAI: link.enableAI,
+        });
+        setIsEditingLink(true);
+        setShowLinkModal(true);
+    };
+
+    const handleDeleteLink = async (linkId) => {
+        if (!confirm('Are you sure you want to delete this link? This action cannot be undone.')) return;
+        
+        try {
+            const res = await fetch(`/api/documents/${id}/links/${linkId}`, {
+                method: 'DELETE',
+            });
+            if (res.ok) {
+                setDocument(prev => ({
+                    ...prev,
+                    links: prev.links.filter(l => l.id !== linkId)
+                }));
+            } else {
+                alert('Failed to delete link');
+            }
+        } catch (err) {
+            console.error('Error deleting link:', err);
+            alert('Network error occurred while deleting link.');
         }
     };
 
@@ -547,7 +595,11 @@ export default function DocumentDetailPage({ params }) {
                 <div className="section-panel">
                     <div className="section-panel-header">
                         <h2>🔗 Shared Links</h2>
-                        <button className="btn btn-primary btn-sm" onClick={() => setShowLinkModal(true)}>
+                        <button className="btn btn-primary btn-sm" onClick={() => {
+                            setIsEditingLink(false);
+                            setLinkForm({ customSlug: '', requireEmail: false, passcode: '', expiresAt: '', allowDownload: false, requireWatermark: false, enableAI: false });
+                            setShowLinkModal(true);
+                        }}>
                             + New Link
                         </button>
                     </div>
@@ -586,12 +638,26 @@ export default function DocumentDetailPage({ params }) {
                                             <td>{link._count.views}</td>
                                             <td>{formatDate(link.createdAt)}</td>
                                             <td>
-                                                <button
-                                                    className="btn btn-secondary btn-sm"
-                                                    onClick={() => copyLink(link.slug)}
-                                                >
-                                                    {copied === link.slug ? '✓ Copied!' : '📋 Copy'}
-                                                </button>
+                                                <div style={{ display: 'flex', gap: '8px' }}>
+                                                    <button
+                                                        className="btn btn-secondary btn-sm"
+                                                        onClick={() => copyLink(link.slug)}
+                                                    >
+                                                        {copied === link.slug ? '✓ Copied!' : '📋 Copy'}
+                                                    </button>
+                                                    <button
+                                                        className="btn btn-ghost btn-sm"
+                                                        onClick={() => handleEditLink(link)}
+                                                    >
+                                                        ✏️ Edit
+                                                    </button>
+                                                    <button
+                                                        className="btn btn-danger btn-sm"
+                                                        onClick={() => handleDeleteLink(link.id)}
+                                                    >
+                                                        🗑️
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
@@ -1052,7 +1118,7 @@ export default function DocumentDetailPage({ params }) {
                 <div className="modal-overlay" onClick={() => setShowLinkModal(false)}>
                     <div className="modal" onClick={(e) => e.stopPropagation()}>
                         <div className="modal-header">
-                            <h2>Create Shareable Link</h2>
+                            <h2>{isEditingLink ? 'Edit Shareable Link' : 'Create Shareable Link'}</h2>
                             <button className="modal-close" onClick={() => setShowLinkModal(false)}>
                                 ✕
                             </button>
@@ -1177,7 +1243,7 @@ export default function DocumentDetailPage({ params }) {
                                     Cancel
                                 </button>
                                 <button type="submit" className="btn btn-primary" disabled={creatingLink}>
-                                    {creatingLink ? 'Creating...' : 'Create Link'}
+                                    {creatingLink ? 'Saving...' : (isEditingLink ? 'Update Link' : 'Create Link')}
                                 </button>
                             </div>
                         </form>
