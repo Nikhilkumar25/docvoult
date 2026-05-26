@@ -259,32 +259,52 @@ export default function ViewerClient({ initialData, currentUserEmail }) {
         }
     };
 
-    const trackPageView = useCallback(async (page, duration, totalDuration) => {
+    const flushTracking = useCallback(() => {
         if (!viewId) return;
-        try {
-            await fetch(`/api/view/${slug}/track`, {
+        const now = Date.now();
+        const duration = Math.round((now - pageStartTime.current) / 1000);
+        const totalDuration = Math.round((now - totalStartTime.current) / 1000);
+        
+        if (duration > 0) {
+            fetch(`/api/view/${slug}/track`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     viewId,
-                    pageNumber: page,
+                    pageNumber,
                     duration,
                     totalDuration,
                 }),
-            });
-        } catch (err) {
-            // Silently fail tracking
+                keepalive: true
+            }).catch(() => {});
         }
-    }, [slug, viewId]);
+        pageStartTime.current = now;
+    }, [pageNumber, slug, viewId]);
+
+    useEffect(() => {
+        if (state !== 'viewing') return;
+
+        trackingInterval.current = setInterval(() => {
+            flushTracking();
+        }, 15000);
+
+        const handleUnload = () => {
+            flushTracking();
+        };
+
+        window.addEventListener('beforeunload', handleUnload);
+        return () => {
+            if (trackingInterval.current) clearInterval(trackingInterval.current);
+            window.removeEventListener('beforeunload', handleUnload);
+            handleUnload();
+        };
+    }, [state, flushTracking]);
 
     const goToPage = (newPage) => {
-        const duration = Math.round((Date.now() - pageStartTime.current) / 1000);
-        const totalDuration = Math.round((Date.now() - totalStartTime.current) / 1000);
-        if (duration > 0) {
-            trackPageView(pageNumber, duration, totalDuration);
+        if (pageNumber !== newPage) {
+            flushTracking();
+            setPageNumber(newPage);
         }
-        setPageNumber(newPage);
-        pageStartTime.current = Date.now();
     };
 
     const onDocumentLoadSuccess = ({ numPages: pages }) => {
@@ -322,8 +342,8 @@ export default function ViewerClient({ initialData, currentUserEmail }) {
                 if (entry.isIntersecting) {
                     const page = parseInt(entry.target.getAttribute('data-page'));
                     if (page !== pageNumber) {
+                        flushTracking();
                         setPageNumber(page);
-                        pageStartTime.current = Date.now();
                     }
                 }
             });
@@ -331,7 +351,7 @@ export default function ViewerClient({ initialData, currentUserEmail }) {
 
         Object.values(pageRefs.current).forEach(ref => ref && observer.observe(ref));
         return () => observer.disconnect();
-    }, [layoutMode, state, numPages, pageNumber]);
+    }, [layoutMode, state, numPages, pageNumber, flushTracking]);
 
     if (state === 'loading') {
         return <div className="loading-spinner"><div className="spinner" /></div>;
