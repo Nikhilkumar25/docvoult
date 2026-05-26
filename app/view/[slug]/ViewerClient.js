@@ -56,31 +56,75 @@ export default function ViewerClient({ initialData, currentUserEmail }) {
     const totalStartTime = useRef(Date.now());
     const trackingInterval = useRef(null);
 
-    // Immediate access if possible
+    // Immediate access or Session Restoration
     useEffect(() => {
-        const effectiveEmail = urlEmail || email || currentUserEmail;
-        
-        // If we have signature requests in initialData, set the one for the current user
-        if (initialData.signatureRequests && effectiveEmail) {
-            const targetEmail = effectiveEmail.toLowerCase();
-            const pendingRequest = initialData.signatureRequests.find(
-                req => req.signerEmail.toLowerCase() === targetEmail && req.status === 'pending'
-            );
-            if (pendingRequest) {
-                setSignatureRequest(pendingRequest);
-                setSignatureFields(pendingRequest.fields || []);
+        if (initialData.isRestored) {
+            const effectiveEmail = urlEmail || email || currentUserEmail;
+            if (initialData.signatureRequests && effectiveEmail) {
+                const targetEmail = effectiveEmail.toLowerCase();
+                const pendingRequest = initialData.signatureRequests.find(
+                    req => req.signerEmail.toLowerCase() === targetEmail && req.status === 'pending'
+                );
+                if (pendingRequest) {
+                    setSignatureRequest(pendingRequest);
+                    setSignatureFields(pendingRequest.fields || []);
+                }
             }
+            return;
         }
 
-        if (urlEmail && !initialData.isRestored && !initialData.hasPasscode) {
-             accessDocument({ email: urlEmail, name: name });
-        } else if (!initialData.isRestored && !initialData.requireEmail && !initialData.hasPasscode) {
-            accessDocument({ email: effectiveEmail });
-        } else if (!initialData.isRestored && currentUserEmail && !initialData.hasPasscode) {
-            // Bypass gate if they are logged in and no passcode required
-            accessDocument({ email: currentUserEmail, name: name });
-        }
-    }, [initialData, currentUserEmail, urlEmail]);
+        const storedViewId = typeof window !== 'undefined' ? sessionStorage.getItem(`viewId_${slug}`) : null;
+        
+        const tryRestore = async () => {
+            if (storedViewId) {
+                setState('loading');
+                try {
+                    const res = await fetch(`/api/view/${slug}?viewId=${storedViewId}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.isRestored) {
+                            setDocumentData(data);
+                            setLinkInfo(prev => ({ ...prev, ...data }));
+                            setViewId(data.viewId);
+                            if (data.viewerEmail) setEmail(data.viewerEmail);
+                            if (data.viewerName) setName(data.viewerName);
+                            
+                            if (data.signatureRequests && data.viewerEmail) {
+                                const pendingRequest = data.signatureRequests.find(
+                                    req => req.signerEmail.toLowerCase() === data.viewerEmail.toLowerCase() && req.status === 'pending'
+                                );
+                                if (pendingRequest) {
+                                    setSignatureRequest(pendingRequest);
+                                    setSignatureFields(pendingRequest.fields || []);
+                                }
+                            }
+                            setState('viewing');
+                            return true;
+                        }
+                    }
+                } catch (e) {}
+            }
+            return false;
+        };
+
+        tryRestore().then((restored) => {
+            if (restored) return;
+            
+            const effectiveEmail = urlEmail || email || currentUserEmail;
+            
+            if (urlEmail && !initialData.hasPasscode) {
+                 accessDocument({ email: urlEmail, name: name });
+            } else if (!initialData.requireEmail && !initialData.hasPasscode) {
+                accessDocument({ email: effectiveEmail });
+            } else if (currentUserEmail && !initialData.hasPasscode) {
+                accessDocument({ email: currentUserEmail, name: name });
+            } else {
+                setState(initialData.requireEmail || initialData.hasPasscode ? 'gate' : 'loading');
+            }
+        });
+        
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [initialData, currentUserEmail, urlEmail, slug]);
 
     // Fetch questions if link is valid
     useEffect(() => {

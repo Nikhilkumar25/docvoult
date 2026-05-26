@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
@@ -104,16 +105,26 @@ export default function PDFRenderer({
     signatureFields = [],
     onFieldClick
 }) {
+    const [loadProgress, setLoadProgress] = useState(0);
+
     return (
         <Document
             file={file}
             options={options}
             onLoadSuccess={onDocumentLoadSuccess}
             onLoadError={onDocumentLoadError}
+            onLoadProgress={({ loaded, total }) => {
+                if (total > 0) setLoadProgress(Math.round((loaded / total) * 100));
+            }}
             loading={
-                <div className="loading-spinner">
-                    <div className="spinner" />
-                    <p style={{ marginTop: '1rem', color: 'var(--text-secondary)' }}>Loading Document...</p>
+                <div className="loading-spinner" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '240px' }}>
+                    <div className="spinner" style={{ marginBottom: '20px' }} />
+                    <div style={{ width: '100%', background: 'var(--border)', height: '6px', borderRadius: '3px', overflow: 'hidden' }}>
+                        <div style={{ width: `${loadProgress}%`, background: 'var(--primary)', height: '100%', transition: 'width 0.3s ease' }} />
+                    </div>
+                    <p style={{ marginTop: '1rem', color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 500 }}>
+                        {loadProgress > 0 ? `Loading... ${loadProgress}%` : 'Connecting...'}
+                    </p>
                 </div>
             }
             error={
