@@ -6,7 +6,7 @@ import 'react-pdf/dist/Page/TextLayer.css';
 import { useInView } from 'react-intersection-observer';
 
 // Optimize: Use a more reliable worker source, ideally local but for now a fast CDN with version locking
-pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
 function BetterPage({ pageNumber, signatureFields = [], onFieldClick, ...props }) {
     const { ref, inView } = useInView({

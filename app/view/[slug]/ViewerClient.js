@@ -428,7 +428,7 @@ export default function ViewerClient({ initialData, currentUserEmail }) {
                 <div className="viewer-content">
                     <div ref={canvasRef} className="viewer-canvas scroll-mode">
                         <PDFRenderer
-                            file={`/api/view/${slug}/file?viewId=${viewId || ''}`}
+                            file={documentData?.document?.fileUrl}
                             pageNumber={pageNumber}
                             pageWidth={pageWidth}
                             zoom={1.0} // Mobile handles zoom natively or via width
@@ -617,7 +617,7 @@ export default function ViewerClient({ initialData, currentUserEmail }) {
 
                 <div ref={canvasRef} className={`viewer-canvas ${layoutMode === 'scroll' ? 'scroll-mode' : ''}`}>
                     <PDFRenderer
-                        file={`/api/view/${slug}/file?viewId=${viewId || ''}`}
+                        file={documentData?.document?.fileUrl}
                         pageNumber={pageNumber}
                         pageWidth={pageWidth}
                         zoom={zoom}
