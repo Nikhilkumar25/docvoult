@@ -34,6 +34,7 @@ export default function ViewerClient({ initialData, currentUserEmail }) {
     const [pageWidth, setPageWidth] = useState(800);
     const [zoom, setZoom] = useState(0.8);
     const [userHasManuallyZoomed, setUserHasManuallyZoomed] = useState(false);
+    const [pageAspect, setPageAspect] = useState(800 / 1131); // Default A4 portrait aspect
     const [layoutMode, setLayoutMode] = useState('paged');
     const [isQuestionsOpen, setIsQuestionsOpen] = useState(false);
     const [questions, setQuestions] = useState([]);
@@ -370,8 +371,18 @@ export default function ViewerClient({ initialData, currentUserEmail }) {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [state, layoutMode, numPages, pageNumber, goToPage]);
 
-    const onDocumentLoadSuccess = ({ numPages: pages }) => {
+    const onDocumentLoadSuccess = async (pdf) => {
+        if (!pdf) return;
+        const pages = pdf.numPages;
         setNumPages(pages);
+        try {
+            const firstPage = await pdf.getPage(1);
+            const width = firstPage.width || (firstPage.view && firstPage.view[2]) || 800;
+            const height = firstPage.height || (firstPage.view && firstPage.view[3]) || 1131;
+            setPageAspect(width / height);
+        } catch (e) {
+            console.error("Error getting page aspect ratio:", e);
+        }
     };
 
     const toggleFullscreen = () => {
@@ -403,9 +414,9 @@ export default function ViewerClient({ initialData, currentUserEmail }) {
                 const availableWidth = isQuestionsOpen ? width - 400 : width - 100;
                 const availableHeight = window.innerHeight - 120; // Account for toolbar and padding
                 
-                // Base dimensions for A4 document
+                // Base dimensions for dynamic document aspect ratio
                 const baseWidth = 800;
-                const baseHeight = 1131; // 800 * 1.414
+                const baseHeight = 800 / pageAspect;
                 
                 // Calculate zoom to fit width or height depending on layout mode
                 const widthBasedZoom = availableWidth / baseWidth;
@@ -434,7 +445,7 @@ export default function ViewerClient({ initialData, currentUserEmail }) {
         handleResize(); // Run immediately on mount or dependency change
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, [isQuestionsOpen, layoutMode, userHasManuallyZoomed]);
+    }, [isQuestionsOpen, layoutMode, userHasManuallyZoomed, pageAspect]);
 
     // Intersection Observer for scroll
     const pageRefs = useRef({});
