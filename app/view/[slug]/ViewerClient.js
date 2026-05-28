@@ -344,12 +344,30 @@ export default function ViewerClient({ initialData, currentUserEmail }) {
         };
     }, [state, flushTracking]);
 
-    const goToPage = (newPage) => {
+    const goToPage = useCallback((newPage) => {
         if (pageNumber !== newPage) {
             flushTracking();
             setPageNumber(newPage);
         }
-    };
+    }, [pageNumber, flushTracking]);
+
+    // Keyboard controls
+    useEffect(() => {
+        if (state !== 'viewing' || layoutMode !== 'paged') return;
+
+        const handleKeyDown = (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+                if (pageNumber < (numPages || 1)) goToPage(pageNumber + 1);
+            } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                if (pageNumber > 1) goToPage(pageNumber - 1);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [state, layoutMode, numPages, pageNumber, goToPage]);
 
     const onDocumentLoadSuccess = ({ numPages: pages }) => {
         setNumPages(pages);
@@ -364,18 +382,44 @@ export default function ViewerClient({ initialData, currentUserEmail }) {
         }
     };
 
-    // Resizing and Mobile Detection
+    // Resizing and Auto-Zoom
     useEffect(() => {
         const handleResize = () => {
             const width = window.innerWidth;
             setIsMobile(width <= 768);
-            // On mobile, force 100vw. On desktop, keep 800px max or scale.
-            setPageWidth(width <= 768 ? width : 800);
+            
+            if (width > 768) {
+                // Calculate available width and height
+                const availableWidth = isQuestionsOpen ? width - 400 : width - 100;
+                const availableHeight = window.innerHeight - 120; // Account for toolbar and padding
+                
+                // Base dimensions for A4 document
+                const baseWidth = 800;
+                const baseHeight = 1131; // 800 * 1.414
+                
+                // Calculate zoom to fit either width or height
+                const widthBasedZoom = availableWidth / baseWidth;
+                const heightBasedZoom = availableHeight / baseHeight;
+                
+                // Use the most restrictive zoom to ensure it fits completely, clamped to sane values
+                let optimalZoom = Math.min(widthBasedZoom, heightBasedZoom);
+                optimalZoom = Math.max(0.4, Math.min(1.5, optimalZoom));
+                
+                // Round to nearest 0.05 for cleaner percentage display
+                optimalZoom = Math.round(optimalZoom * 20) / 20;
+                
+                setZoom(optimalZoom);
+                setPageWidth(800);
+            } else {
+                setPageWidth(width);
+                setZoom(1.0);
+            }
         };
-        handleResize(); // Safe, runs on client
+        
+        handleResize(); // Run immediately on mount or dependency change
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, []);
+    }, [isQuestionsOpen]);
 
     // Intersection Observer for scroll
     const pageRefs = useRef({});
