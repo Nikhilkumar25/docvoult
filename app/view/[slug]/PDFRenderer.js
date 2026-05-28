@@ -9,7 +9,7 @@ import { useInView } from 'react-intersection-observer';
 // Optimize: Use a more reliable worker source, ideally local but for now a fast CDN with version locking
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
-function BetterPage({ pageNumber, signatureFields = [], onFieldClick, ...props }) {
+function BetterPage({ pageNumber, signatureFields = [], onFieldClick, scale, pageAspect = 0.707, ...props }) {
     const { ref, inView } = useInView({
         triggerOnce: true,
         threshold: 0,
@@ -19,7 +19,7 @@ function BetterPage({ pageNumber, signatureFields = [], onFieldClick, ...props }
     const pageFields = signatureFields.filter(f => f.pageNumber === pageNumber);
 
     return (
-        <div ref={ref} className="watermarked-page-container" data-page={pageNumber} style={{ '--watermark-scale': props.scale || 1, position: 'relative' }}>
+        <div ref={ref} className="watermarked-page-container" data-page={pageNumber} style={{ '--watermark-scale': scale || 1, position: 'relative' }}>
             {inView ? (
                 <Page pageNumber={pageNumber} {...props} />
             ) : (
@@ -27,7 +27,7 @@ function BetterPage({ pageNumber, signatureFields = [], onFieldClick, ...props }
                     className="skeleton"
                     style={{
                         width: props.width,
-                        height: props.width * 1.414,
+                        height: props.width / pageAspect,
                         marginBottom: 20
                     }}
                 />
@@ -93,6 +93,7 @@ export default function PDFRenderer({
     pageNumber,
     pageWidth,
     zoom,
+    pageAspect,
     layoutMode,
     onDocumentLoadSuccess,
     onDocumentLoadError,
@@ -141,6 +142,7 @@ export default function PDFRenderer({
                         pageNumber={pageNumber}
                         width={pageWidth * zoom}
                         scale={zoom}
+                        pageAspect={pageAspect}
                         rotate={rotate}
                         email={email}
                         name={name}
@@ -157,6 +159,7 @@ export default function PDFRenderer({
                             pageNumber={i + 1}
                             width={pageWidth * zoom}
                             scale={zoom}
+                            pageAspect={pageAspect}
                             rotate={rotate}
                             className="scroll-page"
                             email={email}

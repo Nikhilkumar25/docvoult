@@ -546,6 +546,7 @@ export default function ViewerClient({ initialData, currentUserEmail }) {
                             pageNumber={pageNumber}
                             pageWidth={pageWidth}
                             zoom={1.0} // Mobile handles zoom natively or via width
+                            pageAspect={pageAspect}
                             layoutMode="scroll" // Force scroll on mobile for natural feel
                             onDocumentLoadSuccess={onDocumentLoadSuccess}
                             numPages={numPages}
@@ -735,6 +736,7 @@ export default function ViewerClient({ initialData, currentUserEmail }) {
                         pageNumber={pageNumber}
                         pageWidth={pageWidth}
                         zoom={zoom}
+                        pageAspect={pageAspect}
                         layoutMode={layoutMode}
                         onDocumentLoadSuccess={onDocumentLoadSuccess}
                         numPages={numPages}
