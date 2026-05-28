@@ -33,6 +33,7 @@ export default function ViewerClient({ initialData, currentUserEmail }) {
     const [pageNumber, setPageNumber] = useState(1);
     const [pageWidth, setPageWidth] = useState(800);
     const [zoom, setZoom] = useState(0.8);
+    const [userHasManuallyZoomed, setUserHasManuallyZoomed] = useState(false);
     const [layoutMode, setLayoutMode] = useState('paged');
     const [isQuestionsOpen, setIsQuestionsOpen] = useState(false);
     const [questions, setQuestions] = useState([]);
@@ -386,9 +387,18 @@ export default function ViewerClient({ initialData, currentUserEmail }) {
     useEffect(() => {
         const handleResize = () => {
             const width = window.innerWidth;
-            setIsMobile(width <= 768);
+            const mobile = width <= 768;
+            setIsMobile(mobile);
             
-            if (width > 768) {
+            if (mobile) {
+                setPageWidth(width);
+                setZoom(1.0);
+            } else {
+                setPageWidth(800);
+                
+                // If user has manually adjusted zoom, respect their setting on desktop
+                if (userHasManuallyZoomed) return;
+                
                 // Calculate available width and height
                 const availableWidth = isQuestionsOpen ? width - 400 : width - 100;
                 const availableHeight = window.innerHeight - 120; // Account for toolbar and padding
@@ -397,29 +407,34 @@ export default function ViewerClient({ initialData, currentUserEmail }) {
                 const baseWidth = 800;
                 const baseHeight = 1131; // 800 * 1.414
                 
-                // Calculate zoom to fit either width or height
+                // Calculate zoom to fit width or height depending on layout mode
                 const widthBasedZoom = availableWidth / baseWidth;
                 const heightBasedZoom = availableHeight / baseHeight;
                 
-                // Use the most restrictive zoom to ensure it fits completely, clamped to sane values
-                let optimalZoom = Math.min(widthBasedZoom, heightBasedZoom);
-                optimalZoom = Math.max(0.4, Math.min(1.5, optimalZoom));
+                let optimalZoom;
+                if (layoutMode === 'scroll') {
+                    // In scroll mode, vertical scrolling is expected, so optimize zoom for full width readability
+                    optimalZoom = widthBasedZoom;
+                } else {
+                    // In paged mode, fit the page into viewport, but if height is very restricted,
+                    // keep a reasonable minimum zoom so text is readable
+                    optimalZoom = Math.min(widthBasedZoom, heightBasedZoom);
+                }
+                
+                // Never shrink zoom below 0.75 on desktop so document text remains readable
+                optimalZoom = Math.max(0.75, Math.min(1.5, optimalZoom));
                 
                 // Round to nearest 0.05 for cleaner percentage display
                 optimalZoom = Math.round(optimalZoom * 20) / 20;
                 
                 setZoom(optimalZoom);
-                setPageWidth(800);
-            } else {
-                setPageWidth(width);
-                setZoom(1.0);
             }
         };
         
         handleResize(); // Run immediately on mount or dependency change
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
-    }, [isQuestionsOpen]);
+    }, [isQuestionsOpen, layoutMode, userHasManuallyZoomed]);
 
     // Intersection Observer for scroll
     const pageRefs = useRef({});
@@ -677,13 +692,13 @@ export default function ViewerClient({ initialData, currentUserEmail }) {
 
                 <div className="viewer-actions">
                     <div className="btn-group">
-                        <button className={`viewer-action-btn ${layoutMode === 'paged' ? 'active' : ''}`} onClick={() => setLayoutMode('paged')}>Paged</button>
-                        <button className={`viewer-action-btn ${layoutMode === 'scroll' ? 'active' : ''}`} onClick={() => setLayoutMode('scroll')}>Scroll</button>
+                        <button className={`viewer-action-btn ${layoutMode === 'paged' ? 'active' : ''}`} onClick={() => { setLayoutMode('paged'); setUserHasManuallyZoomed(false); }}>Paged</button>
+                        <button className={`viewer-action-btn ${layoutMode === 'scroll' ? 'active' : ''}`} onClick={() => { setLayoutMode('scroll'); setUserHasManuallyZoomed(false); }}>Scroll</button>
                     </div>
                     <div className="zoom-controls">
-                        <button className="viewer-action-btn" onClick={() => setZoom(prev => Math.max(0.3, prev - 0.1))}>−</button>
+                        <button className="viewer-action-btn" onClick={() => { setZoom(prev => Math.max(0.3, prev - 0.1)); setUserHasManuallyZoomed(true); }}>−</button>
                         <span className="zoom-level">{Math.round(zoom * 100)}%</span>
-                        <button className="viewer-action-btn" onClick={() => setZoom(prev => Math.min(2, prev + 0.1))}>+</button>
+                        <button className="viewer-action-btn" onClick={() => { setZoom(prev => Math.min(2, prev + 0.1)); setUserHasManuallyZoomed(true); }}>+</button>
                     </div>
                     <button className="viewer-action-btn" onClick={() => setRotate(prev => (prev + 90) % 360)}>Rotate</button>
                     <button className="viewer-action-btn" onClick={toggleFullscreen}>Present</button>
