@@ -9,7 +9,7 @@ import { useInView } from 'react-intersection-observer';
 // Optimize: Use a more reliable worker source, ideally local but for now a fast CDN with version locking
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
 
-function BetterPage({ pageNumber, signatureFields = [], onFieldClick, scale, pageAspect = 0.707, ...props }) {
+function BetterPage({ pageNumber, signatureFields = [], onFieldClick, scale, pageAspect = 0.707, forceRender = false, ...props }) {
     const { ref, inView } = useInView({
         triggerOnce: true,
         threshold: 0,
@@ -17,10 +17,11 @@ function BetterPage({ pageNumber, signatureFields = [], onFieldClick, scale, pag
     });
 
     const pageFields = signatureFields.filter(f => f.pageNumber === pageNumber);
+    const shouldRender = forceRender || inView;
 
     return (
         <div ref={ref} className="watermarked-page-container" data-page={pageNumber} style={{ '--watermark-scale': scale || 1, position: 'relative' }}>
-            {inView ? (
+            {shouldRender ? (
                 <Page pageNumber={pageNumber} {...props} />
             ) : (
                 <div
@@ -137,19 +138,39 @@ export default function PDFRenderer({
             }
         >
             {layoutMode === 'paged' ? (
-                <div className="watermarked-page-container" style={{ '--watermark-scale': zoom }}>
-                    <BetterPage
-                        pageNumber={pageNumber}
-                        width={pageWidth * zoom}
-                        scale={zoom}
-                        pageAspect={pageAspect}
-                        rotate={rotate}
-                        email={email}
-                        name={name}
-                        requireWatermark={requireWatermark}
-                        signatureFields={signatureFields}
-                        onFieldClick={onFieldClick}
-                    />
+                <div className="paged-mode-container" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+                    {Array.from({ length: numPages || 0 }).map((_, i) => {
+                        const pgNum = i + 1;
+                        const isVisible = pgNum === pageNumber;
+                        const isNear = Math.abs(pgNum - pageNumber) <= 1;
+                        
+                        if (!isNear) return null;
+                        
+                        return (
+                            <div 
+                                key={`page_wrapper_${pgNum}`} 
+                                className="watermarked-page-container" 
+                                style={{ 
+                                    '--watermark-scale': zoom,
+                                    display: isVisible ? 'block' : 'none' 
+                                }}
+                            >
+                                <BetterPage
+                                    pageNumber={pgNum}
+                                    width={pageWidth * zoom}
+                                    scale={zoom}
+                                    pageAspect={pageAspect}
+                                    rotate={rotate}
+                                    email={email}
+                                    name={name}
+                                    requireWatermark={requireWatermark}
+                                    signatureFields={signatureFields}
+                                    onFieldClick={onFieldClick}
+                                    forceRender={true}
+                                />
+                            </div>
+                        );
+                    })}
                 </div>
             ) : (
                 <div className="scroll-mode-container">
